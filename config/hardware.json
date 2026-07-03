@@ -1,0 +1,29 @@
+{
+  "_comment": "SID Hardware Monitor - Optimized for old hardware (HP Pavilion-like)",
+  "temp_warn": 70,
+  "temp_critical": 85,
+  "ram_warn_percent": 75,
+  "ram_critical_percent": 88,
+  "optimization_interval": 60,
+  "monitor_interval": 10,
+  "auto_optimize": true,
+  "conservative_when_hot": true,
+  "min_ai_ram_mb": 256,
+  "enable_swap_optimization": true,
+  "enable_cpu_governor_tuning": true,
+  "enable_disk_cleanup": true,
+  "enable_memory_compaction": true,
+  "ai_memory_reserve_mb": 128,
+  "compatibility": {
+    "old_kernels": true,
+    "fallback_drivers": true,
+    "disable_gpu_accel": true,
+    "use_polling_instead_of_interrupts": false
+  },
+  "hardware_profile": {
+    "typical_cpu_tdp_watts": 35,
+    "typical_fan_curve": "passive",
+    "hdd_support": true,
+    "ssd_detection": true
+  }
+}

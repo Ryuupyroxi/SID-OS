@@ -1,0 +1,32 @@
+{
+  "openai": {
+    "name": "OpenAI",
+    "endpoint": "https://api.openai.com/v1",
+    "models": ["gpt-4o-mini", "gpt-4o", "gpt-4-turbo"],
+    "docs_url": "https://platform.openai.com/api-keys"
+  },
+  "anthropic": {
+    "name": "Anthropic",
+    "endpoint": "https://api.anthropic.com/v1",
+    "models": ["claude-3-haiku", "claude-3-sonnet", "claude-3-opus"],
+    "docs_url": "https://console.anthropic.com/keys"
+  },
+  "google": {
+    "name": "Google AI",
+    "endpoint": "https://generativelanguage.googleapis.com/v1beta",
+    "models": ["gemini-1.5-flash", "gemini-1.5-pro"],
+    "docs_url": "https://makersuite.google.com/app/apikey"
+  },
+  "groq": {
+    "name": "Groq",
+    "endpoint": "https://api.groq.com/openai/v1",
+    "models": ["llama-3.1-8b-instant", "mixtral-8x7b-32768"],
+    "docs_url": "https://console.groq.com/keys"
+  },
+  "local": {
+    "name": "Local (llama.cpp)",
+    "endpoint": "http://127.0.0.1:8787",
+    "models": ["*"],
+    "docs_url": ""
+  }
+}

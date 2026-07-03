@@ -1,0 +1,36 @@
+# Build outputs
+*.iso
+*.iso.*
+*.img
+*.img.*
+build/output/
+build/iso/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+*.egg
+
+# Model files (too large for git)
+*.gguf
+*.bin
+models/
+
+# System files
+.vagrant/
+*.swp
+*.swo
+*~
+
+# Environment
+.env
+.env.local
+*.token
+
+# OS build artifacts
+build/squashfs-root/
+build/rootfs/
+build/chroot/

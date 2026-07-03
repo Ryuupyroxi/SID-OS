@@ -1,0 +1,14 @@
+{
+  "theme": "green",
+  "font_scale": 1.0,
+  "show_boot_logo": true,
+  "show_hardware_bar": false,
+  "animation_enabled": true,
+  "terminal_font": "monospace",
+  "cursor_style": "block",
+  "scrollback_lines": 5000,
+  "ai_prompt_prefix": "sid⏣",
+  "show_model_name": true,
+  "show_ram_tier": true,
+  "color_scheme": "phosphor"
+}
