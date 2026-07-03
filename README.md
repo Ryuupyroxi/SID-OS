@@ -40,6 +40,64 @@ cd build
 # Output: sid-1.0.0-x86_64.iso
 ```
 
+
+## 🧪 Testing Guide (for Xander)
+
+### Quick Smoke Test
+```bash
+# Clone and run in dev mode — no build needed
+git clone https://github.com/Ryuupyroxi/SID-OS.git
+cd SID-OS
+python3 test_sid.py --verbose
+```
+
+### Run the Full Test Suite
+```bash
+python3 test_sid.py --online --verbose
+```
+
+Tests cover:
+- AI Engine initialization & model management
+- Context compression engine
+- Memory system (working, episodic, semantic)
+- Voice system (STT, TTS, VAD detection)
+- Hardware monitor & system optimizer
+- All AI tools (code assistant, file manager, search, system analyzer)
+- Media player, offline storage, browser file explorer
+- Theme manager, soul system, settings manager
+- Agent skill framework & tool registry
+
+### Dev Mode (interactive)
+```bash
+# Launch SID OS directly (no VM needed)
+python3 src/main.py --theme green
+
+# With debug logging
+python3 src/main.py --theme green --verbose
+
+# Commands to try inside SID:
+ai              # Launch AI assistant
+sys info        # System information
+sys mem         # Memory usage
+sys temp        # CPU temperature
+sys optimize    # Run performance optimization
+models list     # Available AI models
+voice           # Voice control mode
+```
+
+### Building an ISO (for VM or bare metal)
+```bash
+./build/scripts/build-sid.sh
+# Output: sid-1.0.0-x86_64.iso
+```
+
+### Tips for Xander 🎯
+1. **Start with** `test_sid.py` — it validates every component without needing a VM
+2. **Dev mode is your friend** — no need to build the ISO for functional testing
+3. **Log issues clearly** — paste the test output + which component failed
+4. **Check AGENTS.md** for the full architecture overview before diving into code
+5. **PRs welcome** — bug fixes, new tools, theme tweaks, anything
+
 ## 📋 Requirements
 
 | Component | Minimum | Recommended |
