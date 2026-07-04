@@ -1,142 +1,130 @@
-"""SID Theme Manager - Themes based on iconic CLI computers from computing history.
-Each theme matches the actual color palette, phosphor, and character of a real machine."""
+"""SID Theme Manager - Iconic CLI computer themes.
+Each theme recreates the look and feel of a legendary computer terminal."""
 from typing import Dict, Tuple, Optional, List
+import shutil
 
 class Theme:
-    """Color theme based on a real iconic computer."""
-    def __init__(self, name: str, fg: str, bg: str, accent: str, 
-                 dim: str, prompt: str, year: int = 1980,
-                 computer: str = "Generic Terminal", font: str = "monospace",
+    """Computer terminal theme definition."""
+    def __init__(self, name: str, computer: str, year: str,
+                 fg: str, bg: str, accent: str, dim: str, prompt: str,
+                 font: str = "monospace", cursor: str = "block",
                  description: str = ""):
         self.name = name
+        self.computer = computer
+        self.year = year
         self.fg = fg
         self.bg = bg
         self.accent = accent
         self.dim = dim
         self.prompt = prompt
-        self.year = year
-        self.computer = computer
         self.font = font
-        self.description = description
+        self.cursor = cursor
+        self.description = description or f"{computer} ({year})"
+
+    def to_curses(self):
+        return {'fg': self.fg, 'bg': self.bg, 'accent': self.accent, 
+                'dim': self.dim, 'prompt': self.prompt}
 
 class ThemeManager:
-    """Manages themes based on iconic CLI computers."""
+    """Manages retro computer terminal themes."""
 
     THEMES = {
-        # === ICONIC MAINFRAMES & MINICOMPUTERS ===
-        "pdp11": Theme(
-            "PDP-11", "#FFFF00", "#001800", "#FFFF66",
-            "#555500", "#FFFF00", 1970,
-            "DEC PDP-11/70", "monospace",
-            "DEC's legendary minicomputer - amber-on-green VT100 feel"
-        ),
+        # ===== LEGENDARY CLI COMPUTERS =====
         "vt100": Theme(
-            "VT100", "#FFB000", "#1A0E00", "#FFD700",
-            "#664400", "#FFA500", 1978,
-            "DEC VT100 Terminal", "monospace",
-            "The definitive terminal - amber phosphor on dark background"
+            "VT100", "DEC VT100", "1978",
+            "#CCCCCC", "#000000", "#FFFFFF", "#666666", "#00FF00",
+            description="The terminal that defined modern terminal emulation"
         ),
         "ibm3270": Theme(
-            "IBM 3270", "#00FF00", "#000800", "#33FF33",
-            "#005500", "#00CC00", 1972,
-            "IBM 3270 Terminal", "monospace",
-            "IBM's mainframe terminal - bright green on near-black"
-        ),
-        "ibmpc": Theme(
-            "IBM PC-DOS", "#CCCCCC", "#000000", "#FFFFFF",
-            "#666666", "#00FF00", 1981,
-            "IBM PC 5150 / MS-DOS", "monospace",
-            "The original IBM PC - white text, amber/green prompt"
+            "IBM 3270", "IBM 3270", "1971",
+            "#00FF00", "#000000", "#FFFF00", "#006600", "#00CC00",
+            description="IBM's legendary mainframe terminal - green screen"
         ),
         "apple2": Theme(
-            "Apple II", "#00FF00", "#000800", "#80FF80",
-            "#004400", "#FFFF00", 1977,
-            "Apple II / ProDOS", "monospace",
-            "Woz's masterpiece - green phosphor with yellow prompt"
+            "Apple II", "Apple II", "1977",
+            "#40FF40", "#000000", "#FFFF40", "#004000", "#80FF80",
+            description="Wozniak's masterpiece - green phosphor on black"
         ),
-        "commodore": Theme(
-            "Commodore 64", "#4488FF", "#000828", "#66AAFF",
-            "#223366", "#FFFFFF", 1982,
-            "Commodore 64 / BASIC", "monospace",
-            "The best-selling computer - blue screen with white text"
+        "c64": Theme(
+            "Commodore 64", "Commodore 64", "1982",
+            "#6A5ACD", "#000022", "#E0E0FF", "#2A1A5D", "#8A7ADD",
+            description="Best-selling computer - light blue on dark blue"
         ),
-        "tandy": Theme(
-            "Tandy TRS-80", "#00FF00", "#001000", "#33FF33",
-            "#005500", "#00FF00", 1977,
-            "Tandy TRS-80 Model I", "monospace",
-            "The 'Trash-80' - iconic green display, black background"
+        "trs80": Theme(
+            "TRS-80", "TRS-80 Model I", "1977",
+            "#00FF00", "#000800", "#FFFF00", "#005500", "#00CC00",
+            description="Radio Shack's 'Trash 80' - iconic green screen"
         ),
-        "atari": Theme(
-            "Atari 800", "#FF8800", "#001000", "#FFAA44",
-            "#553300", "#FF8800", 1979,
-            "Atari 800 / XL", "monospace",
-            "Atari's 8-bit line - warm amber tones"
+        "altair": Theme(
+            "Altair 8800", "MITS Altair 8800", "1975",
+            "#FF6600", "#000000", "#FFAA00", "#552200", "#FF8800",
+            description="Birth of the personal computer - amber front panel"
         ),
-        
-        # === UNIX WORKSTATIONS ===
-        "sun": Theme(
-            "Sun SPARC", "#FFFF00", "#000800", "#FFFF33",
-            "#555500", "#FFCC00", 1987,
-            "Sun SPARCstation / SunOS", "monospace",
-            "Sun Microsystems - the original 'yellow on dark green' UNIX feel"
+        "xerox_alto": Theme(
+            "Xerox Alto", "Xerox Alto", "1973",
+            "#FFFFFF", "#000000", "#8888FF", "#555555", "#FFFFFF",
+            description="The first GUI computer (portrait monitor)"
         ),
-        "sgi": Theme(
-            "SGI IRIX", "#00CCCC", "#000808", "#66FFFF",
-            "#005555", "#00FF00", 1988,
-            "SGI Indigo / IRIX", "monospace",
-            "Silicon Graphics - cyan/teal aesthetic of the 90s UNIX desktop"
+        "sgi_iris": Theme(
+            "SGI Iris", "SGI Iris 4D", "1986",
+            "#00CCCC", "#000808", "#FF6600", "#004444", "#00FFFF",
+            description="SGI's IRIS console - teal on black"
         ),
-        "next": Theme(
-            "NeXTSTEP", "#FFFFFF", "#000000", "#8888FF",
-            "#555555", "#FF0000", 1988,
-            "NeXTcube / NeXTSTEP", "monospace",
-            "Jobs' NeXT - crisp white on black with red prompt"
+        "sun_micro": Theme(
+            "SunOS", "Sun Microsystems", "1982",
+            "#FFCC00", "#000000", "#FFFFFF", "#665500", "#FFFF00",
+            description="SunOS console - amber on black"
         ),
-        
-        # === RETRO SOFTWARE ===
-        "dos": Theme(
-            "MS-DOS 6.22", "#CCCCCC", "#000000", "#FFFFFF",
-            "#666666", "#AAAAAA", 1993,
-            "MS-DOS 6.22", "monospace",
-            "Classic DOS - light gray text, C:\> prompt"
+        "nextstep": Theme(
+            "NeXTSTEP", "NeXT Computer", "1988",
+            "#CCCCCC", "#000000", "#00FF00", "#555555", "#666666",
+            description="Jobs' NeXT - the machine that inspired the web"
         ),
-        "norton": Theme(
-            "Norton Commander", "#88FFFF", "#000088", "#FFFFFF",
-            "#4444AA", "#FFFF00", 1986,
-            "Norton Commander", "monospace",
-            "The file manager we all used - cyan on blue with yellow accents"
+        "ibm_pc": Theme(
+            "IBM PC-DOS", "IBM 5150", "1981",
+            "#FFFFFF", "#000000", "#FF0000", "#555555", "#CCCCCC",
+            description="The original IBM PC - white on black"
         ),
-        "turbo": Theme(
-            "Turbo C IDE", "#FFFF00", "#000088", "#FFFFFF",
-            "#888800", "#FFFF00", 1987,
-            "Turbo C / Turbo Pascal IDE", "monospace",
-            "Borland's iconic IDE - yellow on blue, the development environment"
+        "amiga": Theme(
+            "Amiga Workbench", "Commodore Amiga 1000", "1985",
+            "#8888FF", "#000044", "#00FF88", "#333377", "#AAAAFF",
+            description="The Amiga CLI - years ahead of its time"
         ),
-        
-        # === MODERN RETRO ===
-        "matrix": Theme(
-            "Matrix Rain", "#00FF41", "#000800", "#80FF80",
-            "#005500", "#00FF00", 1999,
-            "The Matrix (green rain)", "monospace",
-            "Matrix digital rain green - iconic dark green"
+        "teletype": Theme(
+            "TeleType", "ASR-33 Teletype", "1963",
+            "#222222", "#FFFFCC", "#000000", "#888866", "#333333",
+            description="The original computing interface - paper terminal"
         ),
-        "fallout": Theme(
-            "Fallout Terminal", "#00FF00", "#001000", "#33FF33",
-            "#005500", "#FFFF00", 1997,
-            "Fallout Pip-Boy 2000", "monospace",
-            "Post-apocalyptic green display - like the Pip-Boy"
+        "dragon32": Theme(
+            "Dragon 32", "Dragon 32", "1982",
+            "#00AA00", "#000000", "#00FF00", "#004400", "#00CC00",
+            description="The Dragon 32 - green on black"
         ),
-        "cyberpunk": Theme(
-            "Cyberpunk 2077", "#FFFF00", "#0A0020", "#FF00FF",
-            "#550055", "#00FFFF", 2077,
-            "Cyberpunk Terminal", "monospace",
-            "Neon yellow on dark purple - the future of retro"
+        "zx_spectrum": Theme(
+            "ZX Spectrum", "Sinclair ZX Spectrum", "1982",
+            "#FF00FF", "#000000", "#FFFF00", "#660066", "#FF44FF",
+            description="The Spectrum's iconic magenta on black"
+        ),
+        "acorn": Theme(
+            "Acorn BBC", "BBC Micro", "1981",
+            "#66FF66", "#000000", "#FFFF66", "#226622", "#99FF99",
+            description="The BBC Micro - green screen, British computing icon"
+        ),
+        "macintosh": Theme(
+            "Macintosh", "Macintosh 128K", "1984",
+            "#FFFFFF", "#000000", "#888888", "#444444", "#BBBBBB",
+            description="The Mac's black & white CLI"
+        ),
+        "cp_m": Theme(
+            "CP/M", "Osborne 1", "1981",
+            "#00FF00", "#001000", "#AAFFAA", "#004400", "#00DD00",
+            description="The original portable computer's OS"
         ),
     }
 
     def __init__(self):
-        self.current = "vt100"  # Default: DEC VT100 - the terminal
-        self.custom_bg_char = " "
+        self.current = "vt100"
+        self.terminal_width = shutil.get_terminal_size().columns
 
     def get_theme(self, name: Optional[str] = None) -> Theme:
         return self.THEMES.get(name or self.current, self.THEMES["vt100"])
@@ -145,28 +133,28 @@ class ThemeManager:
         if name in self.THEMES:
             self.current = name
             return True
+        # Try partial match
+        matches = [k for k in self.THEMES if name.lower() in k.lower()]
+        if matches:
+            self.current = matches[0]
+            return True
         return False
 
-    def list_themes(self) -> List[str]:
-        return list(self.THEMES.keys())
-
-    def list_with_details(self) -> List[Dict]:
-        """List themes with their computer names and descriptions."""
+    def list_themes(self) -> List[Dict]:
+        """List all themes with descriptions."""
         return [
-            {
-                "id": tid,
-                "name": t.name,
-                "computer": t.computer,
-                "year": t.year,
-                "description": t.description,
-                "active": tid == self.current
-            }
-            for tid, t in self.THEMES.items()
+            {"id": k, "name": v.computer, "year": v.year, "desc": v.description}
+            for k, v in self.THEMES.items()
         ]
 
-    def get_ansi_theme(self) -> Dict:
-        """Get ANSI escape codes for the current theme."""
-        theme = self.get_theme()
+    def get_era(self, year: str) -> List[str]:
+        """Get themes from a specific era."""
+        decade = year[:3] + "0"
+        return [k for k, v in self.THEMES.items() if v.year.startswith(decade)]
+
+    def get_ansi(self, theme_name: Optional[str] = None) -> Dict:
+        """Get ANSI escape codes for current theme."""
+        theme = self.get_theme(theme_name)
         return {
             "HEADER": f"\033[38;2;{self._hex_to_rgb(theme.accent)}m",
             "OKBLUE": f"\033[38;2;{self._hex_to_rgb(theme.fg)}m",
@@ -176,7 +164,6 @@ class ThemeManager:
             "ENDC": "\033[0m",
             "BOLD": "\033[1m",
             "DIM": f"\033[38;2;{self._hex_to_rgb(theme.dim)}m",
-            "BG": f"\033[48;2;{self._hex_to_rgb(theme.bg)}m" if theme.bg != "#000000" else "",
         }
 
     def _hex_to_rgb(self, hex_color: str) -> str:
@@ -184,10 +171,10 @@ class ThemeManager:
         r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
         return f"{r};{g};{b}"
 
-    def apply_to_text(self, text: str, style: str = "fg") -> str:
+    def colorize(self, text: str, style: str = "fg", theme_name: Optional[str] = None) -> str:
         """Apply theme color to text."""
-        theme = self.get_theme()
-        ansi = self.get_ansi_theme()
+        theme = self.get_theme(theme_name)
+        ansi = self.get_ansi(theme_name)
         color_map = {
             "fg": ansi["OKBLUE"], "accent": ansi["HEADER"],
             "prompt": ansi["OKGREEN"], "dim": ansi["DIM"], "error": ansi["FAIL"],
@@ -195,46 +182,23 @@ class ThemeManager:
         c = color_map.get(style, ansi["OKBLUE"])
         return f"{c}{text}{ansi['ENDC']}"
 
-    def get_theme_info(self) -> str:
-        """Get current theme info string."""
-        t = self.get_theme()
-        return f"{t.name} ({t.computer}, {t.year})"
-
-    def boot_screen(self) -> str:
-        """Generate retro boot screen based on themed computer."""
-        theme = self.get_theme()
-        a = self.get_ansi_theme()
+    def boot_screen(self, theme_name: Optional[str] = None) -> str:
+        """Generate retro boot screen for the current theme."""
+        theme = self.get_theme(theme_name)
+        a = self.get_ansi(theme_name)
         
-        # Different ASCII art based on the computer
-        logomap = {
-            "pdp11": "☐ DEC PDP-11/70",
-            "vt100": "☐ VT100 TERMINAL",
-            "ibm3270": "☐ IBM 3270",
-            "ibmpc": "☐ IBM PC 5150",
-            "apple2": "☐ Apple ][",
-            "commodore": "☐ COMMODORE 64",
-            "tandy": "☐ TRS-80 Model I",
-            "atari": "☐ ATARI 800XL",
-            "sun": "☐ SUN SPARCstation",
-            "sgi": "☐ SGI INDY",
-            "next": "☐ NeXTcube",
-            "dos": "☐ MS-DOS 6.22",
-            "norton": "☐ NORTON COMMANDER",
-            "turbo": "☐ TURBO C IDE",
-            "matrix": "☐ THE MATRIX",
-            "fallout": "☐ PIP-BOY 3000",
-            "cyberpunk": "☐ CYBERPUNK TERMINAL",
-        }
-        logo = logomap.get(self.current, "☐ SID TERMINAL")
-
         art = f"""
 {a['HEADER']}╔══════════════════════════════════════════════════╗
-{a['HEADER']}║{a['BOLD']}     SID v1.0 - SUPER INTELLIGENT DISTRO       {a['HEADER']}║
-{a['HEADER']}║{a['DIM']}     ════════════════════════════════════════     {a['HEADER']}║
-{a['HEADER']}║{a['BOLD']}     {logo:<39} {a['HEADER']}║
-{a['HEADER']}║{a['DIM']}     {theme.description:<39} {a['HEADER']}║
+{a['HEADER']}║{a['BOLD']}          SID v1.0 - SUPER INTELLIGENT DISTRO        {a['HEADER']}║
+{a['HEADER']}║{a['DIM']}       {theme.description:<42} {a['HEADER']}║
+{a['HEADER']}║{a['BOLD']}          ███████╗██╗██████╗                        {a['HEADER']}║
+{a['HEADER']}║{a['BOLD']}          ██╔════╝██║██╔══██╗                       {a['HEADER']}║
+{a['HEADER']}║{a['BOLD']}          ███████╗██║██║  ██║                       {a['HEADER']}║
+{a['HEADER']}║{a['BOLD']}          ╚════██║██║██║  ██║                       {a['HEADER']}║
+{a['HEADER']}║{a['BOLD']}          ███████║██║██████╔╝                       {a['HEADER']}║
+{a['HEADER']}║{a['BOLD']}          ╚══════╝╚═╝╚═════╝                        {a['HEADER']}║
 {a['HEADER']}╠══════════════════════════════════════════════════╣
-{a['HEADER']}║{a['OKGREEN']}     System: {theme.computer:<30} {a['HEADER']}║
-{a['HEADER']}║{a['DIM']}     Theme Year: {theme.year} | RAM Tier: auto   {a['HEADER']}║
+{a['HEADER']}║{a['OKGREEN']}     {theme.name:<12}  |  AI CORE: ACTIVE  |  MEM: OPTIMIZED  {a['HEADER']}║
+{a['HEADER']}║{a['DIM']}     {theme.computer} ({theme.year})                 {a['HEADER']}║
 {a['HEADER']}╚══════════════════════════════════════════════════╝{a['ENDC']}"""
         return art

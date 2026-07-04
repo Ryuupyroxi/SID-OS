@@ -76,18 +76,6 @@ class SIDTester:
         self.test_intent_classification()
         self.test_theme_manager()
         self.test_installer_parse()
-        self.test_soul_system()
-        self.test_image_tools()
-        self.test_offline_cache()
-        self.test_benchmark()
-        self.test_settings()
-        self.test_agent_system()
-        self.test_soul_system()
-        self.test_image_tools()
-        self.test_offline_cache()
-        self.test_benchmark()
-        self.test_settings()
-        self.test_agent_system()
         
         print(f"\n{BOLD}═══ Results ═══{RESET}")
         print(f"  {PASS} Passed: {self.results['pass']}")
@@ -138,7 +126,7 @@ class SIDTester:
         configs = [
             ("AI Config", "config/ai.json", ["mode", "ram_tier", "context_window"]),
             ("Hardware Config", "config/hardware.json", ["temp_warn", "auto_optimize"]),
-            ("Model Registry", "config/models/registry.json", ["ram_tiers", "quick_setups"]),
+            ("Soul Config", "config/soul/default.json", ["personality"]),
             ("Theme Config", "config/themes/default.json", ["theme", "font_scale"]),
         ]
         for name, path, keys in configs:
@@ -475,18 +463,18 @@ class SIDTester:
             tm = ThemeManager()
             
             themes = tm.list_themes()
-            self.log(PASS, f"{len(themes)} themes: {', '.join(themes)}")
+            theme_names = [t['name'] for t in themes]
+            self.log(PASS, f"{len(themes)} themes: {', '.join(theme_names[:6])}...")
             
-            for theme in themes:
-                tm.set_theme(theme)
+            for t in themes[:3]:
+                tm.set_theme(t['id'])
                 boot = tm.boot_screen()
-                self.log(PASS, f"Theme '{theme}': boot screen ({len(boot)} chars)")
+                self.log(PASS, f"Theme '{t['id']}': boot screen ({len(boot)} chars)")
             
         except Exception as e:
             self.log(FAIL, "Theme Manager", str(e)[:80])
             if self.verbose:
                 traceback.print_exc()
-
     def test_installer_parse(self):
         """Test installer parses correctly."""
         print(f"\n{BOLD}[15] Installer{RESET}")

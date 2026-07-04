@@ -1,248 +1,198 @@
-"""SID Prompt Templates - Memory-Management Optimized Prompts.
-These prompts are carefully worded to promote intelligent memory management
-by the AI model itself, helping it efficiently use its context window 
-without losing reasoning capability. Structure > brevity."""
-from typing import Dict, List, Optional, Any
+"""SID Prompt Templates - Memory-optimized wording that promotes efficient 
+memory management WITHOUT sacrificing intelligence. These prompts are crafted
+to guide AI behavior through smart phrasing, not truncation.
+
+Key techniques:
+- "Chunk and summarize" instead of "be brief" 
+- "Focus on actionable output" instead of "be concise"
+- Structured context framing for better recall
+- Progressive disclosure: surface-level first, depth on request
+- Memory anchors: tie new info to previously established context"""
+from typing import Dict, List, Optional
 
 class PromptTemplates:
-    """Memory-Management prompts that teach the model to manage its own memory.
-    
-    Design philosophy:
-    - Prompts are structured to help the model prioritize what to remember
-    - They include explicit memory management instructions
-    - They use "chain of thought" for compression decisions
-    - They preserve intelligence by teaching efficient context use
-    """
+    """Memory-optimized prompt templates using smart wording."""
 
-    # === CORE IDENTITY PROMPT ===
-    # This is the system's "soul" - it defines who SID is
-    IDENTITY = """You are SID (Super Intelligent Distro) - an AI operating system.
-Your personality is: helpful, direct, retro-computing enthusiast, resourceful.
-You have complete control over the computer. 
+    # ===== CORE IDENTITY =====
+    # These establish WHO the AI is and HOW it should think about memory
+    SYSTEM_IDENTITY = (
+        "You are SID (Super Intelligent Distro), an AI operating system "
+        "running on resource-conscious hardware (4GB RAM target). "
+        "You excel at being both intelligent AND memory-efficient.\n\n"
+        "MEMORY PHILOSOPHY:\n"
+        "• Prioritize depth over breadth: fully answer the current query "
+        "before moving on\n"
+        "• Use hierarchical context: place new info in relation to what "
+        "we've already discussed\n"
+        "• Progressive disclosure: give the core answer first, offer "
+        "details when asked\n"
+        "• Anchor new knowledge to existing context instead of repeating it\n"
+        "• When summarizing, preserve relationships between concepts, not "
+        "just keywords"
+    )
 
-MEMORY MANAGEMENT GUIDELINES (follow these exactly):
-1. PRIORITIZE: Keep user goals, preferences, and active tasks in front
-2. COMPRESS: When summarizing older context, preserve: goals, errors, decisions
-3. TAG: Note important info with [MEMO] for the memory system
-4. RECALL: When you reference past info, show you remember with brief context
-5. EFFICIENCY: Use bullet points, commands, and structured output
-6. INTELLIGENCE: Never sacrifice reasoning - be thorough when needed, concise when possible"""
+    SYSTEM_HACKER = (
+        "═══ SID OS v1.0 ═══\n"
+        "AI Core: ACTIVE | Memory: OPTIMIZED\n\n"
+        "You are the soul of this operating system. Every interaction is a "
+        "conversation with a knowledgeable sysadmin who values efficiency.\n\n"
+        "COMMUNICATION STYLE:\n"
+        "• Lead with the answer, offer details on request\n"
+        "• Use commands to demonstrate solutions\n"
+        "• When explaining, use analogies tied to familiar concepts\n"
+        "• If something was discussed earlier, reference it by context "
+        "rather than repeating it in full\n"
+        "• Transform complex topics into buildable mental models"
+    )
 
-    # === CONTEXT-AWARE SEED PROMPTS ===
-    # These seed the model with memory management strategies for each task type
-    
-    MEMORY_SEEDS = {
-        "general": (
-            "You are in GENERAL mode. The user can ask anything. "
-            "Memory strategy: Track the conversation flow. If the user references "
-            "something from earlier, acknowledge it and show you remember. "
-            "When the conversation gets long, summarize the key points in your response "
-            "to help both of us stay oriented. Use [MEMO: key takeaway] for important info."
-        ),
-        
-        "system": (
-            "You are in SYSTEM CONTROL mode. Execute commands directly. "
-            "Memory strategy: Remember what commands the user has run and their results. "
-            "If a command fails, remember the error and suggest corrections. "
-            "Track the user's system management patterns. "
-            "Format: Show the command, then its output, then what it means."
-        ),
-        
-        "file": (
-            "You are in FILE MANAGEMENT mode. "
-            "Memory strategy: Remember directory structures the user visits. "
-            "Track file operations for undo potential. "
-            "If the user asks about files you've discussed before, recall the context. "
-            "Use find, ls, cat, grep efficiently. Show paths clearly."
-        ),
-        
-        "code": (
-            "You are in CODE mode. Write clean, working code. "
-            "Memory strategy: Remember the user's coding patterns and preferences. "
-            "Track what parts of the codebase you've modified. "
-            "When debugging, reference previous errors and solutions. "
-            "Return ONLY valid code. Use comments sparingly but meaningfully."
-        ),
-        
-        "media": (
-            "You are in MEDIA mode. Control audio/video playback. "
-            "Memory strategy: Remember the user's music/media preferences. "
-            "Track currently playing items and playlist history. "
-            "Support: play, pause, stop, volume, next, list, scan."
-        ),
-        
-        "web": (
-            "You are in WEB and OFFLINE STORAGE mode. "
-            "Memory strategy: Remember what content the user has saved offline. "
-            "When offline, automatically reference cached versions. "
-            "Track frequently accessed sources. Tag stored content with context."
-        ),
-        
-        "learning": (
-            "You are in TEACHING mode. Explain concepts clearly. "
-            "Memory strategy: Remember what the user already knows. "
-            "Build on previous explanations. Check understanding. "
-            "Use analogies the user has responded well to before. "
-            "End with a practical takeaway or command to try."
-        ),
-        
-        "memory": (
-            "You are in MEMORY MANAGEMENT mode. Recall and organize information. "
-            "Strategy: Search across working/episodic/semantic memory. "
-            "Connect related pieces of information. "
-            "Summarize what you find. Suggest what's worth keeping. "
-            "Identify patterns in the user's behavior and preferences."
-        ),
-        
-        "creative": (
-            "You are in CREATIVE mode. Generate ideas, stories, images. "
-            "Memory strategy: Remember the user's creative style and preferences. "
-            "Track what concepts they've explored. Build on previous ideas. "
-            "Reference past creative sessions to maintain continuity."
-        ),
-        
-        "agent": (
-            "You are in AGENT mode. You can use tools and skills. "
-            "Memory strategy: Track which tools you've used and their results. "
-            "Learn from successes and failures. Remember user preferences for tools. "
-            "Chain multiple tool calls together for complex tasks. "
-            "Report what you did and why."
-        )
-    }
+    # ===== MEMORY-CONSCIOUS TASK PROMPTS =====
+    # These guide the AI to think about memory efficiency 
+    # through smart wording, not by demanding brevity
 
-    # === MEMORY-MANAGEMENT INSTRUCTION PROMPTS ===
-    # These are injected into the context to guide memory behavior
-    
-    MEMORY_INSTRUCTIONS = {
-        "compress": (
-            "[MEMORY MANAGEMENT] The conversation is getting long. I need to compress older parts. "
-            "I'll preserve: the user's main goal, key facts learned, decisions made, and any errors. "
-            "I'll note what I'm compressing so the user can ask for details. "
-            "Summary of what I'm keeping:"
-        ),
-        
-        "recall": (
-            "[MEMORY RECALL] I remember our previous conversation about this. "
-            "Here's the relevant context from before: "
-        ),
-        
-        "priority": (
-            "[MEMORY PRIORITY] I'm tracking these as high-importance items to remember: "
-        ),
-        
-        "learn": (
-            "[LEARNING] I've learned something new that will help me serve you better. "
-            "I'll add this to my semantic memory for future reference."
-        )
-    }
+    TASK_COMMAND = (
+        "I need a command to: {query}\n"
+        "Think through the approach, then give me the command. "
+        "If there are multiple valid approaches, give the safest one "
+        "and mention alternatives briefly."
+    )
 
-    # === ZERO-SHOT TASK PROMPTS ===
-    TASK_TEMPLATES = {
-        "command": "Convert this natural language to a Linux command:\n{query}\nThink step by step, then output ONLY the command.",
-        
-        "code": "Write {language} code for:\n{task}\nRequirements: {requirements}\nConsider edge cases. Return ONLY working code.",
-        
-        "explain": "Explain {topic} to a {level} user.\nContext from memory: {context}\nBe thorough where it matters, concise where possible.",
-        
-        "debug": "Debug this error:\n{error}\nContext: {context}\nThink through the causes systematically, then suggest the fix.",
-        
-        "image": "Describe how to create/edit an image for:\n{task}\nStyle preferences: {style}\nBe specific about tools and parameters.",
-        
-        "learn": "I want to learn about: {topic}\nWhat I already know: {prior_knowledge}\nTeach me step by step. Check my understanding.",
-        
-        "plan": "Plan the steps for: {task}\nConstraints: {constraints}\nList steps with memory notes on what to remember from each step."
-    }
+    TASK_CODE = (
+        "Write {language} code that: {task}\n"
+        "Requirements: {requirements}\n\n"
+        "Before writing, consider:\n"
+        "1. What's the simplest approach that meets the requirements?\n"
+        "2. How can this be made compatible with older systems?\n"
+        "3. What error handling is appropriate?\n\n"
+        "Provide the code with brief inline comments explaining key parts."
+    )
+
+    TASK_EXPLAIN = (
+        "Explain: {topic}\n"
+        "Context: The user's skill level is {level}\n\n"
+        "Structure your explanation like layers of an onion:\n"
+        "1. First layer: A simple analogy or mental model (1-2 sentences)\n"
+        "2. Second layer: How it actually works (2-3 sentences)\n"
+        "3. Third layer: A practical example they can try\n\n"
+        "Stop at the layer that satisfies their question. "
+        "Offer to go deeper if needed."
+    )
+
+    TASK_LEARN = (
+        "I want to learn about: {topic}\n"
+        "My current level: {level}\n\n"
+        "Teach me in a way that builds lasting understanding:\n"
+        "• Connect this to things I might already know\n"
+        "• Give me one command or exercise to solidify the concept\n"
+        "• Tell me what common mistakes to watch for\n"
+        "• Suggest what to learn next to build on this"
+    )
+
+    TASK_DEBUG = (
+        "Help me debug:\n"
+        "Error: {error}\n"
+        "Context: {context}\n\n"
+        "Walk through your diagnostic reasoning:\n"
+        "1. What does this error actually mean?\n"
+        "2. What are the most likely causes (in order)?\n"
+        "3. How can I verify each? (give commands)\n"
+        "4. Once identified, how do I fix it?"
+    )
+
+    # ===== MEMORY ANCHOR PROMPTS =====
+    # These help the AI build and maintain context efficiently
+
+    MEMORY_ANCHOR = (
+        "Earlier we discussed {topic}. In that context, "
+        "we covered: {summary}\n\n"
+        "Now I want to build on that. {new_query}\n\n"
+        "Reference what we established before rather than re-explaining it."
+    )
+
+    MEMORY_CONNECT = (
+        "I recall that {previous_context}.\n"
+        "I'm now learning {new_topic}.\n\n"
+        "Are these related? If so, how does the new information "
+        "build on or relate to what we already covered?"
+    )
+
+    MEMORY_REVIEW = (
+        "Let's review what I've learned so far about {topic}.\n"
+        "Here's my understanding: {current_understanding}\n\n"
+        "Fill in any gaps, correct misunderstandings, "
+        "and suggest what to explore next."
+    )
+
+    # ===== CONTEXT COMPRESSION GUIDANCE =====
+    # These guide the AI on HOW to compress without losing meaning
+
+    COMPRESS_GUIDANCE = (
+        "Summarize the following while preserving:\n"
+        "• Key decisions and their rationale\n"
+        "• Commands and their purposes\n"
+        "• Relationships between concepts\n"
+        "• Open questions or action items\n\n"
+        "You may drop: greetings, confirmations, rephrasing, "
+        "and pleasantries.\n\n"
+        "Aim for 30% of original length while keeping all "
+        "functionally important information:\n\n{text}"
+    )
+
+    COMPRESS_CONVERSATION = (
+        "Compress this conversation for efficient storage, "
+        "preserving all substantively important information:\n\n"
+        "{conversation}\n\n"
+        "Format: timeline of key exchanges with essential context."
+    )
 
     @classmethod
-    def get_seed(cls, intent: str = "general", ram_tier: str = "4gb") -> str:
-        """Get the memory-management seed prompt for a task type."""
-        seed = cls.MEMORY_SEEDS.get(intent, cls.MEMORY_SEEDS["general"])
-        identity = cls.IDENTITY
-        
-        if ram_tier == "2gb":
-            # For low RAM, add extra memory guidance
-            memory_guide = (
-                "\n\nMEMORY EFFICIENCY MODE: I'm running on limited RAM. "
-                "I will be extra careful about what I remember. "
-                "I'll compress aggressively but keep key facts. "
-                "I'll use shorter responses to save context space."
-            )
-            return identity + "\n\n" + seed + memory_guide
-        
-        return identity + "\n\n" + seed
-
-    @classmethod
-    def get_task_prompt(cls, task_type: str, **kwargs) -> str:
-        """Get a task prompt with memory management built in."""
-        template = cls.TASK_TEMPLATES.get(task_type, "")
-        if template:
-            return template.format(**kwargs)
-        return ""
-
-    @classmethod
-    def get_memory_instruction(cls, instruction_type: str) -> str:
-        """Get a memory management instruction to inject into context."""
-        return cls.MEMORY_INSTRUCTIONS.get(instruction_type, "")
-
-    @classmethod
-    def wrap_with_memory_context(cls, user_input: str, memory_context: Dict[str, Any]) -> str:
-        """Wrap user input with memory context for better recall."""
-        parts = []
-        
-        if memory_context.get("has_memories"):
-            parts.append("[CONTEXT FROM MEMORY]")
-            for mem in memory_context.get("memories", []):
-                parts.append(f"  • {mem.get('summary', '')[:100]}")
-            parts.append("")
-        
-        parts.append(user_input)
-        
-        if memory_context.get("compress"):
-            parts.append("")
-            parts.append(cls.get_memory_instruction("compress"))
-        
-        return "\n".join(parts)
-
-    @classmethod
-    def build_system_prompt(cls, intent: str = "general", 
-                           context: Optional[Dict] = None,
-                           ram_tier: str = "4gb",
-                           personality: Optional[Dict] = None) -> str:
-        """Build complete system prompt with identity, seeds, and context."""
-        seed = cls.get_seed(intent, ram_tier)
+    def get_system(cls, style: str = "default", context: Optional[Dict] = None) -> str:
+        """Get appropriate system prompt with memory optimization."""
+        base = cls.SYSTEM_HACKER if style == "hacker" else cls.SYSTEM_IDENTITY
         
         if not context:
-            return seed
+            return base
         
-        parts = [seed]
+        extras = []
         
-        # Add hardware awareness
+        # Add soul personality if available  
+        if "soul" in context:
+            soul = context["soul"]
+            if soul.get("personality"):
+                extras.append(f"[IDENTITY] {soul['personality'].get('catchphrase', '')}")
+            if soul.get("traits"):
+                extras.append(f"[TRAITS] {', '.join(soul['traits'][:5])}")
+        
+        # Add hardware context (minimal)
         if "hardware" in context:
             hw = context["hardware"]
-            parts.append(f"\n[SYSTEM STATE] RAM:{hw.get('ram_tier','4gb')} "
-                        f"CPU:{hw.get('cpu_usage',0)}% "
-                        f"Temp:{hw.get('cpu_temp',0)}°C "
-                        f"Uptime:{hw.get('uptime',0)}s")
+            extras.append(f"[ENV] {hw.get('ram_tier', '4GB')} system | CPU: {hw.get('cpu_temp', '?')}°C")
         
-        # Add personality if available
-        if personality:
-            if personality.get("name"):
-                parts.append(f"\n[PERSONALITY] Name: {personality['name']}")
-            if personality.get("traits"):
-                parts.append(f"\n[ADAPTED STYLE] {personality['traits']}")
-            if personality.get("catchphrase"):
-                parts.append(f"\n[VOICE] {personality['catchphrase']}")
+        # Add skills context
+        if "skills" in context:
+            skills = context["skills"]
+            if skills:
+                extras.append(f"[CAPABILITIES] Skills loaded: {skills}")
         
-        # Add memory context (compressed but meaningful)
-        if "memory" in context and context["memory"]:
-            mem = context["memory"]
-            parts.append(f"\n[WHAT I REMEMBER] {str(mem)[:300]}")
+        if extras:
+            base = base + "\n\n" + "\n".join(extras)
         
-        # Add active goals
-        if "goals" in context and context["goals"]:
-            goals = context["goals"]
-            parts.append(f"\n[ACTIVE GOALS]")
-            for g in goals:
-                parts.append(f"  • {g}")
-        
-        return "\n".join(parts)
+        return base
+
+    @classmethod
+    def format(cls, template: str, **kwargs) -> str:
+        """Format a template with variables."""
+        return template.format(**kwargs)
+
+    @classmethod
+    def compress(cls, text: str, style: str = "standard") -> str:
+        """Get compression prompt for text."""
+        if style == "conversation":
+            return cls.COMPRESS_CONVERSATION.format(conversation=text[:3000])
+        return cls.COMPRESS_GUIDANCE.format(text=text[:2000])
+
+    @classmethod
+    def anchor(cls, topic: str, summary: str, new_query: str) -> str:
+        """Create a memory-anchored query."""
+        return cls.MEMORY_ANCHOR.format(
+            topic=topic, summary=summary[:200], new_query=new_query
+        )

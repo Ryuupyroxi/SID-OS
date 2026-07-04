@@ -799,6 +799,8 @@ class SIDShell(cmd.Cmd):
     "what files are here?" - List directory contents
     "install AI model"     - Set up AI capabilities
     "search memory for ..." - Recall past interactions
+    "generate an image"    - AI image generation
+    "learn a new skill"    - Dynamic skill acquisition
 
 {C['C']}COMMANDS (type 'ai' for full AI mode):{C['RESET']}
   {C['G']}ai{C['RESET']}              - Enter full AI chat mode
@@ -813,6 +815,12 @@ class SIDShell(cmd.Cmd):
   {C['G']}web{C['RESET']}             - Download and store web content
   {C['G']}voice{C['RESET']}           - Voice input mode
   {C['G']}!command{C['RESET']}         - Force shell command execution
+  {C['G']}skills{C['RESET']}          - Manage AI skills (list/learn/execute)
+  {C['G']}image{C['RESET']}           - Generate and edit images
+  {C['G']}soul{C['RESET']}            - View/configure SID personality
+  {C['G']}settings{C['RESET']}        - Advanced system settings
+  {C['G']}cache{C['RESET']}           - Manage offline cache
+  {C['G']}benchmark{C['RESET']}       - Run hardware benchmark
   {C['G']}exit{C['RESET']}            - Exit SID
 """)
 
@@ -979,6 +987,209 @@ class SIDShell(cmd.Cmd):
             print(f"\n{C['A']}Voice cancelled{C['RESET']}")
         except Exception as e:
             print(f"{C['RED']}Voice error: {e}{C['RESET']}")
+
+    def do_skills(self, arg):
+        """Manage AI skills: skills <list|learn|execute|search> [name]
+        Skills are AI capabilities that can be learned dynamically.
+        Usage: skills list | learn <name> | execute <name> [params] | search <query>"""
+        if not self.agent_system:
+            print(f"{C['A']}Agent system not available{C['RESET']}")
+            return
+        
+        args = shlex.split(arg) if arg else []
+        if not args or args[0] == "list":
+            caps = self.agent_system.get_capabilities()
+            print(f"\n{C['C']}═══ Skills & Tools ═══{C['RESET']}")
+            for c in caps:
+                print(f"  {C['G']}•{C['RESET']} {c}")
+            print(f"\n{C['D']}Total: {len(caps)} capabilities{C['RESET']}")
+        
+        elif args[0] == "learn" and len(args) > 1:
+            result = self.agent_system.learn_skill(args[1])
+            if result:
+                print(f"{C['G']}✓ Learned skill: {args[1]}{C['RESET']}")
+            else:
+                print(f"{C['A']}Could not learn skill: {args[1]}{C['RESET']}")
+        
+        elif args[0] == "execute" and len(args) > 1:
+            result = self.agent_system.execute_skill(args[1])
+            print(f"{C['G']}{result}{C['RESET']}")
+        
+        elif args[0] == "search" and len(args) > 1:
+            query = " ".join(args[1:])
+            print(f"{C['A']}Searching for skills matching: {query}{C['RESET']}")
+            from config.skills_registry import BUILTIN_SKILLS
+            matches = {k: v for k, v in BUILTIN_SKILLS.items() 
+                      if query.lower() in k.lower() or query.lower() in v.get('description','').lower()}
+            if matches:
+                for name, info in matches.items():
+                    print(f"  {C['G']}•{C['RESET']} {name}: {info.get('description','')}")
+            else:
+                print(f"{C['A']}No matching skills found. Try: skills list{C['RESET']}")
+        else:
+            print(f"{C['A']}Usage: skills <list|learn|execute|search> [args]{C['RESET']}")
+
+    def do_image(self, arg):
+        """Generate or edit images: image <generate|edit|describe> [prompt]
+        Usage: image generate <prompt> | edit <file> <instruction> | describe <file>
+        Requires: API key or local stable-diffusion"""
+        if not self.image_tools:
+            print(f"{C['A']}Image tools not available (needs API key){C['RESET']}")
+            return
+        
+        args = shlex.split(arg) if arg else []
+        if not args:
+            backends = self.image_tools.generation_backends if hasattr(self.image_tools, 'generation_backends') else {}
+            print(f"\n{C['C']}═══ Image Tools ═══{C['RESET']}")
+            for name, available in backends.items():
+                if available:
+                    print(f"  {C['G']}✓{C['RESET']} {name}")
+                else:
+                    print(f"  {C['A']}○{C['RESET']} {name} (not configured)")
+            print(f"\n{C['D']}Usage: image generate <prompt> | describe <file>{C['RESET']}")
+            return
+        
+        if args[0] == "generate" and len(args) > 1:
+            prompt = " ".join(args[1:])
+            print(f"{C['A']}Generating image: {prompt}{C['RESET']}")
+            result = self.image_tools.generate(prompt)
+            print(f"{C['G']}{result}{C['RESET']}")
+        
+        elif args[0] == "describe" and len(args) > 1:
+            result = self.image_tools.describe(args[1])
+            print(f"{C['G']}{result}{C['RESET']}")
+        
+        elif args[0] == "edit" and len(args) > 2:
+            result = self.image_tools.edit(args[1], " ".join(args[2:]))
+            print(f"{C['G']}{result}{C['RESET']}")
+        else:
+            print(f"{C['A']}Usage: image <generate|describe|edit> [args]{C['RESET']}")
+
+    def do_soul(self, arg):
+        """View or configure SID's personality: soul <show|set|user> [args]
+        Usage: soul show | soul set <trait> <value> | soul user <name>
+        The soul file is /etc/sid/soul.json"""
+        if not self.soul:
+            print(f"{C['A']}Soul system not available{C['RESET']}")
+            return
+        
+        args = shlex.split(arg) if arg else ["show"]
+        
+        if args[0] == "show":
+            pd = self.soul.get_personality_text()
+            print(f"\n{C['C']}═══ SID Soul ═══{C['RESET']}")
+            print(f"  {pd}")
+            user = self.soul.get_user()
+            if user:
+                print(f"\n{C['D']}Current user: {user.username}")
+                print(f"  Interactions: {user.interaction_count}")
+                print(f"  Skill level: {user.skill_level}")
+                print(f"  Achievements: {len(user.achievements)}{C['RESET']}")
+        
+        elif args[0] == "set" and len(args) > 2:
+            success = self.soul.set_personality(**{args[1]: args[2]})
+            if success:
+                print(f"{C['G']}✓ Soul updated: {args[1]} = {args[2]}{C['RESET']}")
+            else:
+                print(f"{C['A']}Invalid soul setting: {args[1]}{C['RESET']}")
+        
+        elif args[0] == "user" and len(args) > 1:
+            user = self.soul.get_user(args[1])
+            print(f"{C['G']}✓ Switched to user: {user.username}{C['RESET']}")
+        
+        else:
+            print(f"{C['A']}Usage: soul <show|set|user> [args]{C['RESET']}")
+
+    def do_settings(self, arg):
+        """Advanced settings control: settings <show|set|reset|category>
+        Full control over: memory, tools, skills, models, context, caching
+        Usage: settings show | set <key> <value> | reset | <category>"""
+        if not self.settings_mgr:
+            print(f"{C['A']}Settings manager not available{C['RESET']}")
+            return
+        
+        args = shlex.split(arg) if arg else ["show"]
+        
+        if args[0] == "show":
+            settings = self.settings_mgr.get_all() if hasattr(self.settings_mgr, 'get_all') else self.settings_mgr.data
+            print(f"\n{C['C']}═══ Advanced Settings ═══{C['RESET']}")
+            if isinstance(settings, dict):
+                for category, items in settings.items():
+                    print(f"\n{C['BOLD']}[{category.upper()}]{C['RESET']}")
+                    if isinstance(items, dict):
+                        for k, v in items.items():
+                            print(f"  {k}: {v}")
+                    else:
+                        print(f"  {category}: {items}")
+        
+        elif args[0] == "set" and len(args) > 2:
+            self.settings_mgr.set(args[1], " ".join(args[2:]))
+            self.settings_mgr.save()
+            print(f"{C['G']}✓ Setting updated: {args[1]}{C['RESET']}")
+        
+        elif args[0] == "reset":
+            self.settings_mgr.reset()
+            print(f"{C['G']}✓ Settings reset to defaults{C['RESET']}")
+        
+        else:
+            print(f"{C['A']}Usage: settings <show|set|reset> [args]{C['RESET']}")
+
+    def do_cache(self, arg):
+        """Manage offline cache: cache <status|clear|list|stats>
+        The cache automatically stores web pages and media for offline use.
+        Usage: cache <status|clear|list|stats>"""
+        if not self.offline_cache:
+            print(f"{C['A']}Offline cache not available{C['RESET']}")
+            return
+        
+        args = shlex.split(arg) if arg else ["status"]
+        
+        if args[0] in ("status", "stats"):
+            stats = self.offline_cache.get_stats() if hasattr(self.offline_cache, 'get_stats') else {}
+            if not stats:
+                stats = {"hits": 0, "misses": 0, "items": 0, "online": False}
+            print(f"\n{C['C']}═══ Offline Cache ═══{C['RESET']}")
+            print(f"  Online: {'✓' if stats.get('online', False) else '✗'}")
+            print(f"  Cache hits: {stats.get('hits', 0)}")
+            print(f"  Cache misses: {stats.get('misses', 0)}")
+            print(f"  Cached items: {stats.get('items', 0)}")
+        
+        elif args[0] == "clear":
+            days = int(args[1]) if len(args) > 1 else 0
+            self.offline_cache.clear()
+            print(f"{C['G']}✓ Cache cleared{C['RESET']}")
+        
+        elif args[0] == "list":
+            items = self.offline_cache.list_cached() if hasattr(self.offline_cache, 'list_cached') else []
+            if items:
+                print(f"\n{C['C']}Cached items:{C['RESET']}")
+                for item in items[:20]:
+                    print(f"  📄 {item}")
+            else:
+                print(f"{C['A']}No cached items{C['RESET']}")
+        
+        else:
+            print(f"{C['A']}Usage: cache <status|clear|list|stats>{C['RESET']}")
+
+    def do_benchmark(self, arg):
+        """Run hardware benchmark for AI model recommendations.
+        Tests CPU, RAM, and disk to recommend optimal configuration.
+        Usage: benchmark [quick|full]"""
+        print(f"{C['A']}Running hardware benchmark...{C['RESET']}")
+        try:
+            from tools.benchmark import HardwareBenchmark
+            bench = HardwareBenchmark()
+            results = bench.run_all()
+            print(f"\n{C['C']}═══ Benchmark Results ═══{C['RESET']}")
+            for k, v in results.items():
+                if isinstance(v, dict):
+                    print(f"\n{C['BOLD']}[{k}]{C['RESET']}")
+                    for sk, sv in v.items():
+                        print(f"  {sk}: {sv}")
+                else:
+                    print(f"  {k}: {v}")
+        except Exception as e:
+            print(f"{C['RED']}Benchmark error: {e}{C['RESET']}")
 
     def do_speak(self, arg):
         """Convert text to speech: speak <text>"""

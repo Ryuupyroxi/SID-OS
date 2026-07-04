@@ -26,7 +26,18 @@ def main():
                        help="RAM tier for model selection")
     parser.add_argument("--quick-setup", type=str, choices=["2gb", "4gb", "6gb"],
                        help="Quick setup for RAM tier")
+    parser.add_argument("--benchmark", action="store_true", help="Run hardware benchmark")
+    parser.add_argument("--soul", type=str, help="Soul/personality file path")
+    parser.add_argument("--skills", type=str, help="Skills directory path")
     args = parser.parse_args()
+
+    # Handle benchmark mode
+    if args.benchmark:
+        from tools.benchmark import HardwareBenchmark
+        bench = HardwareBenchmark()
+        results = bench.run_all()
+        print(json.dumps(results, indent=2))
+        return
 
     # Handle installer mode
     if args.install:
@@ -104,6 +115,41 @@ def main():
             from tools.browser_fs import BrowserFileExplorer
             browser_fs = BrowserFileExplorer(port=2025, root="/")
             ai.browser_fs = browser_fs
+        except Exception as e:
+            pass
+
+        # Initialize offline cache (auto-switching)
+        offline_cache = None
+        try:
+            from tools.offline_cache import OfflineCache
+            offline_cache = OfflineCache()
+            print("\033[2m  [SID] Offline cache ready\033[0m")
+        except Exception as e:
+            pass
+
+        # Initialize image tools
+        image_tools = None
+        try:
+            from tools.image_tools import ImageTools
+            image_tools = ImageTools(ai)
+            print("\033[2m  [SID] Image tools ready\033[0m")
+        except Exception as e:
+            pass
+
+        # Initialize settings manager
+        settings_mgr = None
+        try:
+            from tools.settings import SettingsManager
+            settings_mgr = SettingsManager()
+        except Exception as e:
+            pass
+
+        # Initialize agent system (Hermes-inspired)
+        agent_system = None
+        try:
+            from agent import AgentSystem
+            agent_system = AgentSystem(ai)
+            ai.agent_system = agent_system
         except Exception as e:
             pass
 
@@ -206,6 +252,11 @@ def main():
         browser_fs=browser_fs,
     )
     shell.theme_manager = theme_manager
+    shell.soul = ai.soul if ai and hasattr(ai, 'soul') else None
+    shell.offline_cache = offline_cache if 'offline_cache' in dir() else None
+    shell.image_tools = image_tools if 'image_tools' in dir() else None
+    shell.settings_mgr = settings_mgr if 'settings_mgr' in dir() else None
+    shell.agent_system = agent_system if 'agent_system' in dir() else None
     shell.cmdloop()
 
 if __name__ == "__main__":

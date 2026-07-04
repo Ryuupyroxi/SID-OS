@@ -53,7 +53,7 @@ class IntentResult:
     specialist_model: str = ""
     tokens_saved: int = 0
 
-from ..soul import Soul
+from soul import Soul
 
 
 class AIOrchestrator:
@@ -123,8 +123,8 @@ class AIOrchestrator:
 
     def _init_components(self):
         """Initialize AI subcomponents lazily with memory optimization."""
-        from .model_manager import ModelManager
-        from ..context.compressor import ContextCompressor
+        from ai.engine.model_manager import ModelManager
+        from ai.context.compressor import ContextCompressor
 
         self.model_manager = ModelManager(self.config)
         self.context_compressor = ContextCompressor(
@@ -132,11 +132,12 @@ class AIOrchestrator:
             compression_ratio=0.5
         )
         self.current_session_id = self._gen_session_id()
+        self._init_soul()
 
-        def _init_soul(self):
+    def _init_soul(self):
         """Initialize soul/personality system."""
         try:
-            from ..soul import Soul
+            from soul import Soul
             self.soul = Soul("/etc/sid/soul.json")
         except Exception as e:
             print(f"[SID] Soul init: {e}")

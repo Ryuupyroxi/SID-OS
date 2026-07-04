@@ -1,101 +1,128 @@
-# SID OS - Super Intelligent Distro
+# SID OS - Super Intelligent Distro (v1.0)
 
 ## Architecture Overview
 
-SID is a lightweight CLI-based Linux distribution designed for old hardware (4GB RAM) with embedded AI capabilities. The system is built around a modular Python-based AI engine that supports both local LLMs (via llama.cpp GGUF models) and cloud API providers.
+SID is a lightweight CLI-based Linux distribution for old hardware (4GB RAM) 
+with a deeply integrated AI system that functions as the primary OS interface.
 
-## Directory Structure
+## Core Architecture
 
 ```
 sid/
-├── src/                    # All source code
-│   ├── main.py            # Entry point
-│   ├── ai/                # AI engine
-│   │   ├── engine/        # Orchestrator, Model Manager
-│   │   ├── context/       # Context compression
-│   │   └── prompts/       # Optimized prompt templates
-│   ├── voice/             # Voice system
-│   │   ├── stt/           # Speech-to-text (whisper.cpp)
-│   │   ├── tts/           # Text-to-speech (espeak/piper)
-│   │   └── vad/           # Voice activity detection
-│   ├── terminal/          # CLI interface
-│   │   ├── shell/         # SID Shell (cmd.Cmd-based)
-│   │   ├── theme/         # 80s retro themes
-│   │   └── ui/            # Voice button overlay
-│   ├── system/            # System management
-│   │   ├── hardware/      # Hardware monitoring
-│   │   ├── optimizer/     # Performance optimization
-│   │   └── init/          # Boot sequence
-│   ├── memory/            # Memory system
-│   │   ├── short/         # Working memory (FIFO)
-│   │   ├── long/          # Episodic + Semantic memory (SQLite)
-│   │   └── compression/   # Memory compression engine
-│   └── tools/             # AI-powered tools
-│       ├── code/          # Code assistant
-│       ├── files/         # File manager
-│       ├── search/        # Search engine
-│       └── system/        # System analyzer
-├── build/                 # Build system
-│   ├── scripts/build-sid.sh  # Complete build script
-│   └── docker/Dockerfile  # Build container
-├── config/                # Configuration files
-│   ├── ai.json           # AI engine config
-│   ├── hardware.json     # Hardware monitoring config
-│   ├── models/           # Model registry
-│   └── themes/           # Theme settings
-├── installer/            # Installation system
-│   └── scripts/install.py # Interactive installer
-├── isoprofile/           # ISO build profile
-└── docs/                 # Documentation
+├── src/
+│   ├── ai/engine/          # AI Orchestrator, Model Manager, Agentic Framework
+│   ├── ai/context/         # Context Compression Engine
+│   ├── ai/prompts/         # Memory-Optimized Prompt Templates
+│   ├── agent/              # Hermes-Inspired Agentic Framework
+│   │   ├── skill_manager.py  # Dynamic skill learning & execution
+│   │   ├── skill_base.py     # Base skill class
+│   │   └── tool_registry.py  # Tool registration for AI
+│   ├── soul/               # Personality/Memory Core ("Soul File")
+│   ├── voice/              # Offline STT, TTS, VAD
+│   ├── terminal/           # AI-First CLI Shell, Retro Computer Themes
+│   ├── memory/             # 3-Tier Memory (Working/Episodic/Semantic)
+│   ├── system/             # Hardware Monitor, Optimizer, Boot
+│   └── tools/              # 10+ AI-Powered Tools
+├── config/
+│   ├── soul/default.json   # Default personality configuration
+│   ├── skills_registry.py  # Built-in skills catalog
+│   └── ...                  # AI, hardware, theme configs
+├── installer/              # Plug-and-play installation wizard
+├── build/                  # ISO builder (Docker + scripts)
+└── test_sid.py             # 84-test validation suite
+```
+
+## Key Features (v1.0)
+
+### AI & Intelligence
+- AI-First OS navigation - every command routes through AI
+- 20+ AI models across 3 RAM tiers (2GB/4GB/6GB)
+- Abliterated/uncensored models for unrestricted use
+- Specialty models (code, medical, creative, reasoning)
+- Router model for intelligent intent classification
+- Hardware benchmark for optimal model recommendations
+
+### Memory & Context
+- Memory-Optimized Prompts - wording that preserves intelligence while managing context
+- Context Compression (4 strategies: sliding window, summarization, dedup, trimming)
+- 3-Tier Memory: Working → Episodic (SQLite) → Semantic (SQLite)
+- Soul File - persistent personality and user profiles
+- Achievements system for learning progress
+
+### Tools & Capabilities
+- CLI Media Player (mpv/ffplay/mplayer with offline cache)
+- CLI Web Viewer (w3m/lynx with auto-offline cache switching)
+- Browser-based File Explorer (HTTP server on localhost:2025)
+- Offline Web/Wiki Storage (zlib/gzip compression)
+- Image Generation & Editing (DALL-E/Stability/pillow)
+- Code Assistant (generate, explain, debug, refactor)
+- System Analyzer & Security Auditor
+- Skills System (learn, add, execute skills dynamically)
+- Agentic Framework (plan-execute-observe-adapt loop)
+
+### Voice
+- Offline STT via whisper.cpp
+- TTS via espeak/piper/pyttsx3
+- Voice Activity Detection (WebRTC)
+- System tray voice button
+
+### Hardware Optimization
+- Auto-detects RAM tier (2GB/4GB/6GB)
+- CPU governor auto-tuning
+- Memory cache management
+- Temperature monitoring
+- Swap optimization
+- Compatibility mode for old hardware (HP Pavilion etc.)
+
+### Themes
+- 19 Iconic CLI Computer Themes:
+  DEC VT100, IBM 3270, Apple II, Commodore 64, TRS-80,
+  Altair 8800, Xerox Alto, SGI Iris, Sun Micro, NeXTSTEP,
+  IBM PC-DOS, Amiga Workbench, TeleType ASR-33, Dragon 32,
+  ZX Spectrum, BBC Micro, Macintosh 128K, CP/M Osborne 1
+
+## Quick Start
+
+```bash
+# Development mode
+python3 src/main.py --theme vt100
+
+# Full test suite
+python3 test_sid.py
+
+# RAM-tier quick setup (inside SID shell)
+sid⏣ install quick 4gb
+
+# Hardware benchmark
+sid⏣ benchmark
+
+# View personality
+sid⏣ soul show
+
+# Generate image
+sid⏣ image generate "a retro computer terminal"
+
+# Learn a skill
+sid⏣ skills learn system_doctor
+
+# Browse web offline
+sid⏣ browse
+
+# Full ISO build
+cd build && ./scripts/build-sid.sh
 ```
 
 ## Coding Conventions
 
-- **Python 3.12+** with type hints throughout
-- **80s hacking terminal aesthetic**: green/amber phosphor themes, retro boot screen, matrix-style elements
-- **Offline-first**: All AI features must work with local models first, API as enhancement
-- **Memory-aware**: Never exceed `memory_limit_mb` from config; use context compression aggressively
-- **Error-tolerant**: Graceful degradation when models not available
+- Python 3.12+ with type hints
+- Offline-first architecture
+- Memory-conscious design
+- Graceful degradation when models/tools unavailable
+- All imports should be absolute (from <module> import <Class>)
 
-## AI Engine Rules
+## Performance Targets (4GB RAM)
 
-1. **Model Priority**: Local > API > Python fallback
-2. **Context Management**: Always compress conversations >5 messages using sliding window + summarization
-3. **Memory System**: Store every interaction; compress weekly; prioritize recent
-4. **Prompt Optimization**: Use short, structured prompts optimized for small models (<3B params)
-5. **Token Budgeting**: Never exceed context_window; warn user if approaching limit
-
-## Key Design Decisions
-
-- **Python for AI layer**: Maximizes flexibility and ease of modification
-- **C/C++ for performance**: llama.cpp and whisper.cpp handle inference
-- **SQLite for persistence**: No heavy database dependencies
-- **cmd.Cmd for shell**: Built-in Python library, easy to extend
-- **No GPU requirement**: Optimized for CPU inference on old hardware
-
-## Performance Targets
-
-- **Boot time**: <15 seconds on 4GB RAM hardware
-- **AI response time**: <5 seconds for tiny models, <15s for medium
-- **Memory usage**: <512MB for base system, <1GB for AI with tiny model
-- **Disk space**: <2GB for base install, <4GB with one AI model
-
-## Extension Guidelines
-
-- Place new AI tools in `src/tools/` with a `process()` method
-- Register new models in `config/models/registry.json`
-- Add themes to `ThemeManager.THEMES` dict
-- Voice backends auto-detected; add new ones to `STTEngine`/`TTSEngine`
-
-## Build Instructions
-
-```bash
-# Quick development run
-python3 src/main.py --theme green
-
-# Full ISO build (requires Docker or Alpine build environment)
-cd build && ./scripts/build-sid.sh
-
-# Installation
-python3 installer/scripts/install.py
-```
+- Boot: <15 seconds
+- AI Response: <5s (tiny models), <15s (medium)
+- OS Memory: <512MB base, +1GB with AI model
+- Disk: <2GB base install, +2GB with one model
