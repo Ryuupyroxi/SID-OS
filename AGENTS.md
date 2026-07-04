@@ -126,3 +126,29 @@ cd build && ./scripts/build-sid.sh
 - AI Response: <5s (tiny models), <15s (medium)
 - OS Memory: <512MB base, +1GB with AI model
 - Disk: <2GB base install, +2GB with one model
+
+## Versioning & Tagging Convention
+
+### Semantic Versioning
+SID OS follows `vMAJOR.MINOR.BUGFIX` — nothing fancy.
+
+| Bump | When | Example |
+|------|------|---------|
+| **BUGFIX** | Bug fixes, small tweaks, docs | `v0.0.1` → `v0.0.2` |
+| **MINOR** | New features, non-breaking changes | `v0.0.2` → `v0.1.0` |
+| **MAJOR** | Breaking changes, stable releases | `v0.1.0` → `v1.0.0` |
+
+### Pushing a new version
+```bash
+git tag -a v0.0.3 -m "Description of changes"
+git push origin v0.0.3
+```
+
+### Release naming
+- **Pre-release**: `v0.x.x` — testing, unstable, experimental
+- **Stable**: `v1.0.0` and up — production-ready
+- **Beta/Candidate**: Use the message body to note status, not the tag itself
+
+### Current versions
+- `v0.0.1` — Initial scaffold
+- `v0.0.2` — Beta: agentic framework, soul, retro themes, offline tools
