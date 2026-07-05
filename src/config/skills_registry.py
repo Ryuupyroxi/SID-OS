@@ -2,7 +2,7 @@
 BUILTIN_SKILLS = {
     "web_search": {
         "name": "Web Search",
-        "version": "1.0.0",
+        "version": "0.0.2",
         "description": "Search the internet and retrieve web content",
         "url": "",
         "requires": ["network"],
@@ -10,7 +10,7 @@ BUILTIN_SKILLS = {
     },
     "image_generation": {
         "name": "Image Generation",
-        "version": "1.0.0",
+        "version": "0.0.2",
         "description": "Generate images using stable diffusion or API",
         "url": "",
         "requires": ["model:stable-diffusion"],
@@ -18,7 +18,7 @@ BUILTIN_SKILLS = {
     },
     "data_analysis": {
         "name": "Data Analysis",
-        "version": "1.0.0",
+        "version": "0.0.2",
         "description": "Analyze and visualize data",
         "url": "",
         "requires": ["python:pandas"],
@@ -26,7 +26,7 @@ BUILTIN_SKILLS = {
     },
     "file_conversion": {
         "name": "File Conversion",
-        "version": "1.0.0",
+        "version": "0.0.2",
         "description": "Convert between file formats",
         "url": "",
         "requires": ["pandoc", "imagemagick"],
@@ -34,7 +34,7 @@ BUILTIN_SKILLS = {
     },
     "network_diagnostics": {
         "name": "Network Diagnostics",
-        "version": "1.0.0",
+        "version": "0.0.2",
         "description": "Diagnose network issues",
         "url": "",
         "requires": ["ping", "traceroute"],
@@ -42,7 +42,7 @@ BUILTIN_SKILLS = {
     },
     "system_optimization": {
         "name": "System Optimization",
-        "version": "1.0.0",
+        "version": "0.0.2",
         "description": "Deep system optimization",
         "url": "",
         "requires": ["sudo"],
@@ -50,7 +50,7 @@ BUILTIN_SKILLS = {
     },
     "security_audit": {
         "name": "Security Audit",
-        "version": "1.0.0",
+        "version": "0.0.2",
         "description": "Security auditing",
         "url": "",
         "requires": ["nmap"],
@@ -58,7 +58,7 @@ BUILTIN_SKILLS = {
     },
     "crypto_tools": {
         "name": "Crypto Tools",
-        "version": "1.0.0",
+        "version": "0.0.2",
         "description": "Encryption, hashing, and signing",
         "url": "",
         "requires": ["openssl"],

@@ -1,6 +1,6 @@
 # ╔══════════════════════════════════════════╗
 # ║     SID - Super Intelligent Distro       ║
-# ║     v1.0 - For Old Hardware             ║
+# ║     v0.0.2 - For Old Hardware           ║
 # ╚══════════════════════════════════════════╝
 
 SID is an extremely lightweight, CLI-based Linux distribution designed to breathe new life into old hardware (4GB RAM minimum). It features a fully embedded AI system that works completely offline using small open-source models, with the ability to swap in any API key for cloud AI access.
@@ -22,7 +22,7 @@ SID is an extremely lightweight, CLI-based Linux distribution designed to breath
 ### Option 1: Install SID OS (Bare Metal)
 ```bash
 # Download the SID ISO and write to USB
-dd if=sid-1.0.0-x86_64.iso of=/dev/sdX bs=4M status=progress
+dd if=sid-0.0.2-x86_64.iso of=/dev/sdX bs=4M status=progress
 # Boot from USB and follow the installer
 ```
 
@@ -37,7 +37,7 @@ python3 src/main.py --theme green
 ```bash
 cd build
 ./scripts/build-sid.sh
-# Output: sid-1.0.0-x86_64.iso
+# Output: sid-0.0.2-x86_64.iso
 ```
 
 
@@ -88,7 +88,7 @@ voice           # Voice control mode
 ### Building an ISO (for VM or bare metal)
 ```bash
 ./build/scripts/build-sid.sh
-# Output: sid-1.0.0-x86_64.iso
+# Output: sid-0.0.2-x86_64.iso
 ```
 
 ### Tips for Xander 🎯

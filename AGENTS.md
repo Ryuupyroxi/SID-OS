@@ -1,4 +1,4 @@
-# SID OS - Super Intelligent Distro (v1.0)
+# SID OS - Super Intelligent Distro (v0.0.2)
 
 ## Architecture Overview
 
@@ -32,7 +32,7 @@ sid/
 └── test_sid.py             # 84-test validation suite
 ```
 
-## Key Features (v1.0)
+## Key Features (v0.0.2)
 
 ### AI & Intelligence
 - AI-First OS navigation - every command routes through AI
