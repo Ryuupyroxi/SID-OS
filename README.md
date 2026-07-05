@@ -1,189 +1,184 @@
 # ╔══════════════════════════════════════════╗
 # ║     SID - Super Intelligent Distro       ║
-# ║     v0.0.2 - For Old Hardware           ║
+# ║     v0.0.2 — For Old Hardware            ║
 # ╚══════════════════════════════════════════╝
 
-SID is an extremely lightweight, CLI-based Linux distribution designed to breathe new life into old hardware (4GB RAM minimum). It features a fully embedded AI system that works completely offline using small open-source models, with the ability to swap in any API key for cloud AI access.
-
-## ✨ Features
-
-- **🖥️ 80s Hacking Terminal Aesthetic** - Green/amber phosphor themes, retro boot screen, matrix-style UI
-- **🤖 Embedded AI** - Runs locally with llama.cpp; supports Llama, Phi, Qwen, Gemma models
-- **🎤 Voice Control** - Full voice operation via whisper.cpp (offline STT) + espeak/piper TTS
-- **🧠 Intelligent Context Compression** - Multi-strategy compression maximizes small model context windows
-- **💾 Persistent Memory** - SQLite-based episodic + semantic memory with automatic compression
-- **⚡ Hardware Optimization** - Auto-tunes CPU governor, swappiness, cache pressure for old hardware
-- **🔌 Plug & Play** - Simple installer with hardware detection; no technical knowledge needed
-- **🌐 Online/Offline** - Works fully offline with local models; add API key for cloud AI
-- **🔧 AI Tools Suite** - Code assistant, file manager, system analyzer, search engine
+SID is a lightweight CLI-based Linux distribution for old hardware (4GB RAM target).  
+AI is the primary interface — you navigate the OS by talking to it.
 
 ## 🚀 Quick Start
 
-### Option 1: Install SID OS (Bare Metal)
+### Option 1: Run Directly (no install)
 ```bash
-# Download the SID ISO and write to USB
-dd if=sid-0.0.2-x86_64.iso of=/dev/sdX bs=4M status=progress
-# Boot from USB and follow the installer
-```
-
-### Option 2: Run in Development Mode
-```bash
-git clone [repo]/sid
-cd sid
-python3 src/main.py --theme green
-```
-
-### Option 3: Build Your Own ISO
-```bash
-cd build
-./scripts/build-sid.sh
-# Output: sid-0.0.2-x86_64.iso
-```
-
-
-## 🧪 Testing Guide (for Xander)
-
-### Quick Smoke Test
-```bash
-# Clone and run in dev mode — no build needed
 git clone https://github.com/Ryuupyroxi/SID-OS.git
 cd SID-OS
-python3 test_sid.py --verbose
+python3 src/main.py --theme vt100
 ```
 
-### Run the Full Test Suite
+### Option 2: Run the test suite
 ```bash
-python3 test_sid.py --online --verbose
+git clone https://github.com/Ryuupyroxi/SID-OS.git
+cd SID-OS
+python3 test_sid.py
 ```
 
-Tests cover:
-- AI Engine initialization & model management
-- Context compression engine
-- Memory system (working, episodic, semantic)
-- Voice system (STT, TTS, VAD detection)
-- Hardware monitor & system optimizer
-- All AI tools (code assistant, file manager, search, system analyzer)
-- Media player, offline storage, browser file explorer
-- Theme manager, soul system, settings manager
-- Agent skill framework & tool registry
-
-### Dev Mode (interactive)
+### Option 3: Build a bootable ISO
 ```bash
-# Launch SID OS directly (no VM needed)
-python3 src/main.py --theme green
-
-# With debug logging
-python3 src/main.py --theme green --verbose
-
-# Commands to try inside SID:
-ai              # Launch AI assistant
-sys info        # System information
-sys mem         # Memory usage
-sys temp        # CPU temperature
-sys optimize    # Run performance optimization
-models list     # Available AI models
-voice           # Voice control mode
-```
-
-### Building an ISO (for VM or bare metal)
-```bash
+git clone https://github.com/Ryuupyroxi/SID-OS.git
+cd SID-OS
 ./build/scripts/build-sid.sh
-# Output: sid-0.0.2-x86_64.iso
+# Output: ./output/sid-0.0.2-x86_64.iso
 ```
 
-### Tips for Xander 🎯
-1. **Start with** `test_sid.py` — it validates every component without needing a VM
-2. **Dev mode is your friend** — no need to build the ISO for functional testing
-3. **Log issues clearly** — paste the test output + which component failed
-4. **Check AGENTS.md** for the full architecture overview before diving into code
-5. **PRs welcome** — bug fixes, new tools, theme tweaks, anything
+### Option 4: Install to disk
+```bash
+git clone https://github.com/Ryuupyroxi/SID-OS.git
+cd SID-OS
+python3 installer/scripts/install.py
+```
+
+## ✨ What's Inside
+
+- **🧠 AI Engine** — Local models (Llama, Phi, Qwen, Gemma) + any API key
+- **🎤 Voice Control** — Offline STT (whisper.cpp) + TTS (espeak/piper)
+- **🗄️ 3-Tier Memory** — Working / Episodic (SQLite) / Semantic
+- **🧩 Context Compression** — Sliding window, summarization, dedup, trimming
+- **🤖 Agentic Framework** — Hermes-inspired skill learning & tool use
+- **💾 Soul File** — Persistent personality (`/etc/sid/soul.json`)
+- **🖥️ 19 Retro Themes** — VT100, Apple II, C64, NeXTSTEP, etc.
+- **🌐 Web Viewer** — CLI browser with auto-offline cache
+- **🎨 Image Tools** — Generation, editing, format conversion
+- **📦 Offline Storage** — Web/wiki compression for offline access
+- **⚡ Hardware Monitor** — CPU temp, RAM, disk, auto-optimization
+- **🔧 Skills System** — `skills list/learn/execute/search`
+- **📊 Benchmark** — `benchmark quick` to find the best model for your hardware
+
+## 🎮 Basic Usage
+
+Once inside SID:
+
+```
+sid⏣ ai                    # AI assistant mode
+sid⏣ sys info             # System information
+sid⏣ sys mem              # Memory usage
+sid⏣ sys temp             # CPU temperature
+sid⏣ install quick 4gb    # Auto-setup AI for 4GB RAM
+sid⏣ models list          # Available AI models
+sid⏣ config set theme vt100  # Change theme
+sid⏣ soul show            # View SID's personality
+sid⏣ skills list          # List available skills
+sid⏣ image generate "a retro computer"  # Generate image
+sid⏣ web view http://example.com        # Browse with offline cache
+sid⏣ cache status         # Offline cache stats
+sid⏣ benchmark            # Hardware benchmark
+sid⏣ settings show        # Advanced settings
+sid⏣ help                 # Full command reference
+```
+Just type naturally — the AI understands:
+```
+sid⏣ what's my CPU temperature?
+sid⏣ show me the disk space
+sid⏣ play some music from ~/Music
+sid⏣ search memory for that thing we talked about earlier
+```
+
+## 🧪 Testing
+
+```bash
+python3 test_sid.py                    # Quick test (84 tests)
+python3 test_sid.py --verbose          # Detailed output
+python3 test_sid.py --online           # Include network tests
+```
 
 ## 📋 Requirements
 
 | Component | Minimum | Recommended |
 |-----------|---------|-------------|
-| **RAM** | 2GB | **4GB** |
-| **CPU** | Dual-core | Quad-core |
-| **Disk** | 4GB | 8GB+ |
-| **Arch** | x86_64 | x86_64 |
-| **GPU** | Not required | Any |
+| RAM       | 2GB     | **4GB**     |
+| CPU       | Dual-core | Quad-core |
+| Disk      | 4GB     | 8GB+        |
+| Arch      | x86_64  | x86_64      |
+| GPU       | Not required | Any    |
 
-## 🎮 Basic Usage
-
-### AI Assistant
-```
-sid@sidOS:~$ ai
-sid-ai> what files are in my home directory?
-```
-
-### Voice Control
-```
-sid@sidOS:~$ voice
-[SID] Listening...
-> "Show me system information"
-```
-
-### System Management
-```
-sid@sidOS:~$ sys info     # System information
-sid@sidOS:~$ sys temp     # Temperature monitor
-sid@sidOS:~$ sys mem      # Memory usage
-sid@sidOS:~$ sys optimize # Run optimization
-```
-
-### Model Management
-```
-sid@sidOS:~$ models list              # Available models
-sid@sidOS:~$ install model llama      # Download a model
-sid@sidOS:~$ model use llama-3.2-1b   # Switch model
-sid@sidOS:~$ config set api_key sk-... # Add API key
-```
-
-## 🎨 Themes
+## 🎨 Retro Computer Themes
 
 ```
-sid@sidOS:~$ config set theme green    # Classic green phosphor
-sid@sidOS:~$ config set theme amber    # Amber terminal
-sid@sidOS:~$ config set theme matrix   # Matrix rain
-sid@sidOS:~$ config set theme blue     # Blue screen
-sid@sidOS:~$ config set theme vintage  # Vintage Apple
+sid⏣ config set theme vt100       # DEC VT100 (1978) — default
+sid⏣ config set theme ibm3270    # IBM 3270 (1971)
+sid⏣ config set theme apple2     # Apple II (1977)
+sid⏣ config set theme c64        # Commodore 64 (1982)
+sid⏣ config set theme trs80      # TRS-80 (1977)
+sid⏣ config set theme altair     # Altair 8800 (1975)
+sid⏣ config set theme nextstep   # NeXT Computer (1988)
+sid⏣ config set theme teletype   # ASR-33 Teletype (1963)
+sid⏣ config set theme zx_spectrum # ZX Spectrum (1982)
+sid⏣ config set theme amiga      # Amiga Workbench (1985)
+theme list                         # See all 19 themes
 ```
 
-## 🧠 How The AI Works
+## 🐛 Troubleshooting (HP Pavilion & similar)
 
-1. **Model Selection**: Auto-detects best available model (local GGUF > API > Python fallback)
-2. **Context Compression**: Multiple strategies compress conversation history:
-   - Sliding window with summarization of older messages
-   - Key information extraction
-   - Deduplication
-   - Token-aware trimming
-3. **Memory System**: Three-tier memory:
-   - **Working**: FIFO queue for immediate context
-   - **Episodic**: SQLite database of past interactions
-   - **Semantic**: Extracted knowledge and patterns
-4. **Hardware Awareness**: Monitors CPU temp, RAM, and disk; adjusts model size and optimization accordingly
+**"python3 not found"** — Some old systems have `python` instead of `python3`:
+```bash
+python src/main.py --theme vt100
+```
 
-## 🔧 Configuration Files
+**"No module named ..."** — Make sure you're in the SID-OS directory:
+```bash
+cd SID-OS
+python3 src/main.py --theme vt100
+```
 
-- `/etc/sid/ai.json` - AI engine configuration
-- `/etc/sid/hardware.json` - Hardware monitoring settings
-- `/sid/config/models/registry.json` - Model registry
-- `~/.sid_history` - Command history
+**Permission denied** — The main.py needs execute permission:
+```bash
+chmod +x src/main.py
+```
 
-## 🤝 Contributing
+**"Command not found" in shell** — Commands like `ai`, `sys`, `models` are typed *inside* SID's shell, not in bash. Run `python3 src/main.py` first.
 
-1. Add new AI models to `config/models/registry.json`
-2. Add themes to `src/terminal/theme/manager.py`
-3. Add tools to `src/tools/`
-4. Follow AGENTS.md guidelines
+**Black screen / no output** — Try the safe mode theme:
+```bash
+python3 src/main.py --theme terminal
+```
+
+## 📁 Project Structure
+
+```
+SID-OS/
+├── src/                # All Python source
+│   ├── main.py         # Entry point
+│   ├── ai/             # Orchestrator, models, context, prompts
+│   ├── agent/          # Hermes-inspired agentic framework
+│   ├── soul/           # Personality/memory core
+│   ├── voice/          # STT, TTS, VAD
+│   ├── terminal/       # Shell, themes, voice button
+│   ├── memory/         # 3-tier memory system
+│   ├── system/         # Hardware monitor, optimizer, boot
+│   └── tools/          # 10+ AI-powered tools
+├── config/             # AI, hardware, soul, skills configuration
+├── build/              # ISO builder
+├── installer/          # Plug-and-play installer
+├── test_sid.py         # 84-test suite
+└── AGENTS.md           # Full architecture documentation
+```
+
+## 🔧 Config Files
+
+| File | Purpose |
+|------|---------|
+| `/etc/sid/ai.json` | AI engine settings |
+| `/etc/sid/soul.json` | Personality & user profiles |
+| `/etc/sid/settings.json` | Advanced settings |
+| `/var/lib/sid/memory/` | Episodic + semantic memory (SQLite) |
+| `/var/lib/sid/cache/` | Offline web/media cache |
+| `/sid/models/` | Downloaded GGUF models |
 
 ## 📄 License
 
-MIT - Open source and free for everyone.
+MIT — free for everyone.
 
 ## ⚡ Powered By
 
-- [llama.cpp](https://github.com/ggerganov/llama.cpp) - CPU-optimized LLM inference
-- [whisper.cpp](https://github.com/ggerganov/whisper.cpp) - Offline speech recognition
-- [Alpine Linux](https://alpinelinux.org/) - Minimal base system
-- [SQLite](https://sqlite.org/) - Lightweight persistent storage
+- [llama.cpp](https://github.com/ggerganov/llama.cpp) — CPU-optimized LLM inference  
+- [whisper.cpp](https://github.com/ggerganov/whisper.cpp) — Offline speech recognition  
+- [SQLite](https://sqlite.org/) — Lightweight persistent storage
