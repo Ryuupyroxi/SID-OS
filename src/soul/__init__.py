@@ -13,7 +13,7 @@ class SoulPersonality:
     """The personality definition of SID."""
     name: str = "SID"
     title: str = "Super Intelligent Distro"
-    version: str = "0.0.2"
+    version: str = "0.0.4"
     
     # Core traits
     traits: List[str] = field(default_factory=lambda: [
@@ -105,7 +105,7 @@ class Soul:
             "users": {name: asdict(profile) for name, profile in self.users.items()},
             "current_user": self.current_user,
             "saved_at": time.time(),
-            "version": "0.0.2"
+            "version": "0.0.4"
         }
         self.soul_path.write_text(json.dumps(data, indent=2))
     

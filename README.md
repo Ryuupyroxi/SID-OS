@@ -1,6 +1,6 @@
 # ╔══════════════════════════════════════════╗
 # ║     SID - Super Intelligent Distro       ║
-# ║     v0.0.2 — For Old Hardware            ║
+# ║     v0.0.4 — AI-First CLI OS for Old Hardware            ║
 # ╚══════════════════════════════════════════╝
 
 SID is a lightweight CLI-based Linux distribution for old hardware (4GB RAM target).  
@@ -12,26 +12,25 @@ AI is the primary interface — you navigate the OS by talking to it.
 
 ## 🚀 Quick Start
 
-### Option 1: Download Portable (no git, no install)
+### Option 1: One-Command Bootstrap (recommended — zero dependencies)
 ```bash
-# Download the latest portable release
-wget https://github.com/Ryuupyroxi/SID-OS/releases/latest/download/sid-0.0.2-portable.tar.gz
-# Or: curl -L -O https://github.com/Ryuupyroxi/SID-OS/releases/latest/download/sid-0.0.2-portable.tar.gz
+# Pure Python — no wget, curl, or git required:
+# On Linux/macOS:
+python3 -c "$(python3 -c "import urllib.request; print(urllib.request.urlopen('https://raw.githubusercontent.com/Ryuupyroxi/SID-OS/main/get-sid.py').read().decode())")" --setup
 
-# Extract and run
-tar xzf sid-0.0.2-portable.tar.gz
-cd sid-0.0.2-portable
-./sid --theme vt100
+# Or save the script once, then run offline:
+# python3 -c "import urllib.request; open('get-sid.py','w').write(urllib.request.urlopen('https://raw.githubusercontent.com/Ryuupyroxi/SID-OS/main/get-sid.py').read().decode())"
+# python3 get-sid.py --setup
 ```
 
 ### Option 2: Windows
 ```batch
-# Download and extract the portable release (same URL as Linux)
-wget https://github.com/Ryuupyroxi/SID-OS/releases/latest/download/sid-0.0.2-portable.tar.gz
-# Or just download the .zip from the Releases page
+# Download the bootstrap script and run:
+curl -O https://raw.githubusercontent.com/Ryuupyroxi/SID-OS/main/get-sid.py
+python get-sid.py --setup
 
-# Extract, then run:
-cd sid-0.0.2-portable
+# Or download the portable .zip from the Releases page, extract, and run:
+cd sid-0.0.4-portable
 sid.bat --theme vt100
 
 # Run tests:
@@ -40,7 +39,7 @@ sid-test.bat --verbose
 
 > **Note**: Windows support is limited to the Python-based AI features. Hardware monitoring, voice, and system commands are Linux-only. The portable release includes both `sid.bat` (Windows) and `./sid` (Linux) launchers.
 
-### Option 3: Clone and Run (for dev/test)
+### Option 3: Clone and Run (for developers/testers)
 ```bash
 git clone https://github.com/Ryuupyroxi/SID-OS.git
 cd SID-OS
@@ -50,15 +49,15 @@ python3 src/main.py --theme vt100
 python3 test_sid.py --verbose
 ```
 
-### Option 3: Build a bootable ISO
+### Option 4: Build a bootable ISO (advanced)
 ```bash
 git clone https://github.com/Ryuupyroxi/SID-OS.git
 cd SID-OS
 ./build/scripts/build-sid.sh
-# Output: ./output/sid-0.0.2-x86_64.iso
+# Output: ./output/sid-0.0.4-x86_64.iso
 ```
 
-### Option 4: Install to disk
+### Option 5: Install to disk (advanced)
 ```bash
 git clone https://github.com/Ryuupyroxi/SID-OS.git
 cd SID-OS

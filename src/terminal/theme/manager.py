@@ -189,7 +189,7 @@ class ThemeManager:
         
         art = f"""
 {a['HEADER']}╔══════════════════════════════════════════════════╗
-{a['HEADER']}║{a['BOLD']}          SID v0.0.2 - SUPER INTELLIGENT DISTRO        {a['HEADER']}║
+{a['HEADER']}║{a['BOLD']}          SID v0.0.4 - SUPER INTELLIGENT DISTRO        {a['HEADER']}║
 {a['HEADER']}║{a['DIM']}       {theme.description:<42} {a['HEADER']}║
 {a['HEADER']}║{a['BOLD']}          ███████╗██╗██████╗                        {a['HEADER']}║
 {a['HEADER']}║{a['BOLD']}          ██╔════╝██║██╔══██╗                       {a['HEADER']}║

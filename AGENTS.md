@@ -1,4 +1,4 @@
-# SID OS - Super Intelligent Distro (v0.0.2)
+# SID OS - Super Intelligent Distro (v0.0.4)
 
 ## Architecture Overview
 
@@ -32,7 +32,7 @@ sid/
 └── test_sid.py             # 84-test validation suite
 ```
 
-## Key Features (v0.0.2)
+## Key Features (v0.0.4)
 
 ### AI & Intelligence
 - AI-First OS navigation - every command routes through AI
@@ -134,14 +134,14 @@ SID OS follows `vMAJOR.MINOR.BUGFIX` — nothing fancy.
 
 | Bump | When | Example |
 |------|------|---------|
-| **BUGFIX** | Bug fixes, small tweaks, docs | `v0.0.1` → `v0.0.2` |
-| **MINOR** | New features, non-breaking changes | `v0.0.2` → `v0.1.0` |
+| **BUGFIX** | Bug fixes, small tweaks, docs | `v0.0.3` → `v0.0.4` |
+| **MINOR** | New features, non-breaking changes | `v0.0.4` → `v0.1.0` |
 | **MAJOR** | Breaking changes, stable releases | `v0.1.0` → `v1.0.0` |
 
 ### Pushing a new version
 ```bash
-git tag -a v0.0.3 -m "Description of changes"
-git push origin v0.0.3
+git tag -a v0.0.5 -m "Description of changes"
+git push origin v0.0.5
 ```
 
 ### Release naming
@@ -151,15 +151,15 @@ git push origin v0.0.3
 
 ### Current versions
 - `v0.0.1` — Initial scaffold
-- `v0.0.2` — Beta: agentic framework, soul, retro themes, offline tools
+- `v0.0.4` — Beta: agentic framework, soul, retro themes, offline tools
 
 ## Releasing a new version
 
 ### Automatic (GitHub Actions)
 Push a tag and the CI builds everything:
 ```bash
-git tag -a v0.0.3 -m "description"
-git push origin v0.0.3
+git tag -a v0.0.5 -m "description"
+git push origin v0.0.5
 ```
 This triggers `.github/workflows/build-iso.yml` which:
 1. Builds llama.cpp + whisper.cpp
@@ -170,18 +170,18 @@ This triggers `.github/workflows/build-iso.yml` which:
 ### Manual (build portable tarball locally)
 ```bash
 ./build/scripts/make-portable.sh
-# Output: build/output/sid-0.0.2-portable.tar.gz
+# Output: build/output/sid-0.0.4-portable.tar.gz
 ```
 
 ### Manual (build full ISO — requires x86_64 + build tools)
 ```bash
 ./build/scripts/build-sid.sh
-# Output: build/output/sid-0.0.2-x86_64.iso
+# Output: build/output/sid-0.0.4-x86_64.iso
 ```
 
 ### Portable tarball contents
 ```
-sid-0.0.2-portable/
+sid-0.0.4-portable/
 ├── sid              # Launcher: ./sid --theme vt100
 ├── sid-install      # Installer: sudo ./sid-install
 ├── sid-test         # Test suite: ./sid-test --verbose

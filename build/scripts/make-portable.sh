@@ -4,7 +4,7 @@
 # Usage: ./build/scripts/make-portable.sh [output_dir]
 
 set -e
-VERSION="0.0.2"
+VERSION="0.0.4"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 OUTPUT_DIR="${1:-$PROJECT_DIR/build/output}"
@@ -23,9 +23,10 @@ echo "[1/5] Creating portable structure..."
 cp -r "$PROJECT_DIR/src" "$PORTABLE_DIR/"
 cp -r "$PROJECT_DIR/config" "$PORTABLE_DIR/"
 cp -r "$PROJECT_DIR/installer" "$PORTABLE_DIR/"
-cp "$PROJECT_DIR/AGENTS.md" "$PROJECT_DIR/README.md" "$PROJECT_DIR/test_sid.py" "$PORTABLE_DIR/"
+cp "$PROJECT_DIR/AGENTS.md" "$PROJECT_DIR/README.md" "$PROJECT_DIR/test_sid.py" "$PROJECT_DIR/get-sid.py" "$PORTABLE_DIR/"
 chmod +x "$PORTABLE_DIR/src/main.py"
 chmod +x "$PORTABLE_DIR/installer/scripts/install.py"
+chmod +x "$PORTABLE_DIR/get-sid.py"
 
 # Create launcher scripts
 cat > "$PORTABLE_DIR/sid" << 'LAUNCHER'

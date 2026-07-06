@@ -11,7 +11,35 @@ import subprocess
 import threading
 from pathlib import Path
 
+
+def check_dependencies():
+    """Auto-detect and install missing Python dependencies on first run."""
+    import importlib, shutil
+    required = {"numpy": "numpy", "psutil": "psutil", "PIL": "pillow", "yaml": "pyyaml"}
+    missing = []
+    for imp_name, pkg_name in required.items():
+        try:
+            importlib.import_module(imp_name)
+        except ImportError:
+            missing.append(pkg_name)
+    if missing:
+        pkg_str = ", ".join(missing)
+        print(f"\033[33m[SID] Installing required deps: {pkg_str}\033[0m")
+        try:
+            import subprocess as sp
+            sp.check_call([sys.executable, "-m", "pip", "install", "--quiet"] + missing,
+                         stdout=sp.DEVNULL, stderr=sp.DEVNULL, timeout=120)
+            print(f"\033[32m[SID] Dependencies installed \u2713\033[0m")
+        except Exception as e:
+            print(f"\033[31m[SID] Warning: {e}\033[0m")
+    # Check system tools (non-critical, informational)
+    system_tools = {"mpv": "media playback", "espeak-ng": "text-to-speech", "w3m": "web viewer"}
+    for tool, purpose in system_tools.items():
+        if not shutil.which(tool):
+            print(f"  \033[2mNote: {tool} not found ({purpose})\033[0m")
+
 def main():
+    check_dependencies()
     parser = argparse.ArgumentParser(
         description="SID - Super Intelligent Distro: AI-First OS for Old Hardware",
         epilog="Just run it. The AI will guide you."
