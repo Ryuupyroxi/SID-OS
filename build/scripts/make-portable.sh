@@ -55,29 +55,34 @@ chmod +x "$PORTABLE_DIR/sid-test"
 cat > "$PORTABLE_DIR/BOOT_HELPER.md" << 'HELP'
 # SID OS Portable — Quick Start
 
-## Run on any Linux system
+## Linux / macOS
 ```bash
 ./sid --theme vt100
-```
-
-## Test everything
-```bash
 ./sid-test --verbose
+sudo ./sid-install
 ```
 
-## Install to disk (run as root)
-```bash
-sudo ./sid-install
+## Windows (cmd.exe or PowerShell)
+```batch
+sid.bat --theme vt100
+sid-test.bat --verbose
+sid-install.bat
 ```
 
 ## Requirements
 - Python 3.8+
-- Any Linux distro
 - 4GB RAM recommended
 - No GPU required
+- Windows: Python must be in PATH (get it at python.org)
+- Linux: bash + python3
 
-## HP Pavilion notes
-If `python3` isn't found, try `python` instead.
+## Troubleshooting
+| Problem | Fix |
+|---------|-----|
+| `python3` not found (Linux) | Try `python` instead |
+| `python` not found (Windows) | Install Python from python.org, check "Add to PATH" |
+| "No module named..." | Run from the extracted directory |
+| Black screen | Use `--theme terminal` |
 HELP
 
 echo "[2/5] Creating portable tarball..."

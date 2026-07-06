@@ -24,7 +24,23 @@ cd sid-0.0.2-portable
 ./sid --theme vt100
 ```
 
-### Option 2: Clone and Run (for dev/test)
+### Option 2: Windows
+```batch
+# Download and extract the portable release (same URL as Linux)
+wget https://github.com/Ryuupyroxi/SID-OS/releases/latest/download/sid-0.0.2-portable.tar.gz
+# Or just download the .zip from the Releases page
+
+# Extract, then run:
+cd sid-0.0.2-portable
+sid.bat --theme vt100
+
+# Run tests:
+sid-test.bat --verbose
+```
+
+> **Note**: Windows support is limited to the Python-based AI features. Hardware monitoring, voice, and system commands are Linux-only. The portable release includes both `sid.bat` (Windows) and `./sid` (Linux) launchers.
+
+### Option 3: Clone and Run (for dev/test)
 ```bash
 git clone https://github.com/Ryuupyroxi/SID-OS.git
 cd SID-OS
