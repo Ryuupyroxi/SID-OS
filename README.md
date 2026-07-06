@@ -23,19 +23,30 @@ python3 -c "$(python3 -c "import urllib.request; print(urllib.request.urlopen('h
 # python3 get-sid.py --setup
 ```
 
-### Option 2: Windows
-```batch
-# Download the bootstrap script and run:
-curl -O https://raw.githubusercontent.com/Ryuupyroxi/SID-OS/main/get-sid.py
-python get-sid.py --setup
+### Option 2: Windows (zero dependencies required)
+Windows doesn't ship with Python, so SID OS includes two bootstrap methods:
 
-# Or download the portable .zip from the Releases page, extract, and run:
+**Method A — Menu-driven launcher (recommended):**
+Download `get-sid.bat` from the [Releases page](https://github.com/Ryuupyroxi/SID-OS/releases), place it in any folder,
+and double-click. It will check for Python, guide you through installation if needed, then download and run SID.
+
+**Method B — PowerShell bootstrap (built into Windows 7+):**
+```powershell
+# Open PowerShell and run:
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Ryuupyroxi/SID-OS/main/get-sid.ps1" -OutFile "get-sid.ps1"
+.\get-sid.ps1 -Setup
+```
+
+**Method C — Manual (if you already have Python):**
+```batch
 cd sid-0.0.4-portable
 sid.bat --theme vt100
-
-# Run tests:
 sid-test.bat --verbose
 ```
+
+> **Note**: Full AI features require Python 3.8+ (download from python.org).
+> Hardware monitoring and system commands are Windows-compatible via psutil.
+> The portable release includes `sid.bat`, `get-sid.bat`, and `get-sid.ps1`.
 
 > **Note**: Windows support is limited to the Python-based AI features. Hardware monitoring, voice, and system commands are Linux-only. The portable release includes both `sid.bat` (Windows) and `./sid` (Linux) launchers.
 

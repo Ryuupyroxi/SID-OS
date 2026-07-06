@@ -23,10 +23,11 @@ echo "[1/5] Creating portable structure..."
 cp -r "$PROJECT_DIR/src" "$PORTABLE_DIR/"
 cp -r "$PROJECT_DIR/config" "$PORTABLE_DIR/"
 cp -r "$PROJECT_DIR/installer" "$PORTABLE_DIR/"
-cp "$PROJECT_DIR/AGENTS.md" "$PROJECT_DIR/README.md" "$PROJECT_DIR/test_sid.py" "$PROJECT_DIR/get-sid.py" "$PORTABLE_DIR/"
+cp "$PROJECT_DIR/AGENTS.md" "$PROJECT_DIR/README.md" "$PROJECT_DIR/test_sid.py" "$PROJECT_DIR/get-sid.py" "$PROJECT_DIR/get-sid.bat" "$PROJECT_DIR/get-sid.ps1" "$PORTABLE_DIR/"
 chmod +x "$PORTABLE_DIR/src/main.py"
 chmod +x "$PORTABLE_DIR/installer/scripts/install.py"
 chmod +x "$PORTABLE_DIR/get-sid.py"
+chmod +x "$PORTABLE_DIR/get-sid.bat"
 
 # Create launcher scripts
 cat > "$PORTABLE_DIR/sid" << 'LAUNCHER'
