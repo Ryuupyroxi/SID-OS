@@ -152,3 +152,44 @@ git push origin v0.0.3
 ### Current versions
 - `v0.0.1` — Initial scaffold
 - `v0.0.2` — Beta: agentic framework, soul, retro themes, offline tools
+
+## Releasing a new version
+
+### Automatic (GitHub Actions)
+Push a tag and the CI builds everything:
+```bash
+git tag -a v0.0.3 -m "description"
+git push origin v0.0.3
+```
+This triggers `.github/workflows/build-iso.yml` which:
+1. Builds llama.cpp + whisper.cpp
+2. Builds a bootable `.iso`
+3. Creates a portable `.tar.gz`
+4. Creates a GitHub Release with all artifacts attached
+
+### Manual (build portable tarball locally)
+```bash
+./build/scripts/make-portable.sh
+# Output: build/output/sid-0.0.2-portable.tar.gz
+```
+
+### Manual (build full ISO — requires x86_64 + build tools)
+```bash
+./build/scripts/build-sid.sh
+# Output: build/output/sid-0.0.2-x86_64.iso
+```
+
+### Portable tarball contents
+```
+sid-0.0.2-portable/
+├── sid              # Launcher: ./sid --theme vt100
+├── sid-install      # Installer: sudo ./sid-install
+├── sid-test         # Test suite: ./sid-test --verbose
+├── src/             # All source code
+├── config/          # Configuration files
+├── installer/       # Installation wizard
+├── AGENTS.md        # Architecture documentation
+├── README.md        # This file
+├── BOOT_HELPER.md   # Quick start guide
+└── test_sid.py      # Test suite
+```

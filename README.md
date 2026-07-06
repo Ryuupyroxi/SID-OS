@@ -6,20 +6,32 @@
 SID is a lightweight CLI-based Linux distribution for old hardware (4GB RAM target).  
 AI is the primary interface — you navigate the OS by talking to it.
 
+[![Download](https://img.shields.io/github/v/release/Ryuupyroxi/SID-OS?label=Download&color=brightgreen)](https://github.com/Ryuupyroxi/SID-OS/releases/latest)
+[![Tests](https://img.shields.io/badge/tests-84%2F84-passing-brightgreen)]()
+[![License](https://img.shields.io/badge/license-MIT-blue)]()
+
 ## 🚀 Quick Start
 
-### Option 1: Run Directly (no install)
+### Option 1: Download Portable (no git, no install)
+```bash
+# Download the latest portable release
+wget https://github.com/Ryuupyroxi/SID-OS/releases/latest/download/sid-0.0.2-portable.tar.gz
+# Or: curl -L -O https://github.com/Ryuupyroxi/SID-OS/releases/latest/download/sid-0.0.2-portable.tar.gz
+
+# Extract and run
+tar xzf sid-0.0.2-portable.tar.gz
+cd sid-0.0.2-portable
+./sid --theme vt100
+```
+
+### Option 2: Clone and Run (for dev/test)
 ```bash
 git clone https://github.com/Ryuupyroxi/SID-OS.git
 cd SID-OS
 python3 src/main.py --theme vt100
-```
 
-### Option 2: Run the test suite
-```bash
-git clone https://github.com/Ryuupyroxi/SID-OS.git
-cd SID-OS
-python3 test_sid.py
+# Run the test suite
+python3 test_sid.py --verbose
 ```
 
 ### Option 3: Build a bootable ISO

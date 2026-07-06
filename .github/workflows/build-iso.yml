@@ -1,0 +1,92 @@
+name: Build SID OS ISO
+
+on:
+  push:
+    tags:
+      - 'v*'          # Build ISO on any version tag
+      - '**-beta'     # Also on beta tags
+  workflow_dispatch:   # Manual trigger from Actions tab
+    inputs:
+      ram_tier:
+        description: 'Default RAM tier for the ISO'
+        required: true
+        default: '4gb'
+        type: choice
+        options:
+          - 2gb
+          - 4gb
+          - 6gb
+
+jobs:
+  build-iso:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq \
+            build-essential linux-headers-generic \
+            wget curl git ncurses-dev python3 python3-pip \
+            cmake xorriso syslinux squashfs-tools \
+            cpio gzip busybox-static isolinux
+
+      - name: Build llama.cpp
+        run: |
+          git clone --depth 1 https://github.com/ggerganov/llama.cpp /tmp/llama.cpp
+          cd /tmp/llama.cpp
+          mkdir build && cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DLLAMA_CUDA=OFF -DBUILD_SHARED_LIBS=ON
+          make -j$(nproc) llama-server
+          cp bin/llama-server $GITHUB_WORKSPACE/build/output/
+
+      - name: Build whisper.cpp
+        run: |
+          git clone --depth 1 https://github.com/ggerganov/whisper.cpp /tmp/whisper.cpp
+          cd /tmp/whisper.cpp
+          make -j$(nproc) whisper-cli
+          cp whisper-cli $GITHUB_WORKSPACE/build/output/
+
+      - name: Build SID OS ISO
+        run: |
+          chmod +x build/scripts/build-sid.sh
+          ./build/scripts/build-sid.sh
+        env:
+          ARCH: x86_64
+          OUTPUT_DIR: ${{ github.workspace }}/build/output
+
+      - name: Upload ISO as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sid-os-iso
+          path: build/output/*.iso
+          retention-days: 30
+
+      - name: Create portable tarball
+        run: |
+          VERSION=${GITHUB_REF_NAME:-v0.0.2}
+          tar czf build/output/sid-${VERSION}-portable.tar.gz \
+            --exclude='.git' \
+            --exclude='build/output' \
+            --exclude='__pycache__' \
+            -C $GITHUB_WORKSPACE .
+          ls -lh build/output/
+
+      - name: Upload portable tarball
+        uses: actions/upload-artifact@v4
+        with:
+          name: sid-os-portable
+          path: build/output/*portable.tar.gz
+          retention-days: 30
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            build/output/*.iso
+            build/output/*portable.tar.gz
+          generate_release_notes: true
+          make_latest: true
