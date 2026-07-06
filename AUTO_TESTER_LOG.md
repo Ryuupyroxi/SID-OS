@@ -44,4 +44,4 @@
 
 | Date | Tests Passed | Tests Failed | Notes |
 |-----|-------------|-------------|-------|
-| — | — | — | — |
+| 2026-07-06 | 84 | 0 | v0.0.4b — Windows bootstrap added, dep checker wired |
