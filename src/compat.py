@@ -3,11 +3,11 @@ Handles differences between Linux, macOS, and Windows so the
 rest of the codebase doesn't need to think about it."""
 import os
 import sys
-import platform
+import platform as _platform
 from pathlib import Path
 from typing import Dict, Optional
 
-SYSTEM = platform.system().lower()  # 'linux', 'darwin', 'windows'
+SYSTEM = _platform.system().lower()  # 'linux', 'darwin', 'windows'
 IS_WINDOWS = SYSTEM == 'windows'
 IS_LINUX = SYSTEM == 'linux'
 IS_MAC = SYSTEM == 'darwin'
@@ -118,8 +118,8 @@ def get_platform_info() -> Dict:
         'is_linux': IS_LINUX,
         'is_mac': IS_MAC,
         'python': sys.version,
-        'machine': platform.machine(),
-        'processor': platform.processor(),
+        'machine': _platform.machine(),
+        'processor': _platform.processor(),
         'data_dir': get_data_dir(),
         'config_dir': get_config_dir(),
         'cache_dir': get_cache_dir(),

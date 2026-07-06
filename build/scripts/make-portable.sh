@@ -4,7 +4,7 @@
 # Usage: ./build/scripts/make-portable.sh [output_dir]
 
 set -e
-VERSION="0.0.4"
+VERSION="0.5.0"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 OUTPUT_DIR="${1:-$PROJECT_DIR/build/output}"

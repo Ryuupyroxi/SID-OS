@@ -8,10 +8,42 @@ Key techniques:
 - Structured context framing for better recall
 - Progressive disclosure: surface-level first, depth on request
 - Memory anchors: tie new info to previously established context"""
+import os
+from pathlib import Path
 from typing import Dict, List, Optional
 
 class PromptTemplates:
     """Memory-optimized prompt templates using smart wording."""
+
+    # ===== SID OS SYSTEM CONTEXT =====
+    # Loaded from config/sid_context.md - gives every AI model complete
+    # knowledge of how SID OS works, its tools, commands, and architecture.
+    _sid_context = None
+    
+    @classmethod
+    def load_sid_context(cls) -> str:
+        """Load SID OS context document for AI awareness."""
+        if cls._sid_context is not None:
+            return cls._sid_context
+        for p in [Path(__file__).parent.parent.parent.parent / "config" / "sid_context.md",
+                  Path("/etc/sid/sid_context.md"), Path.cwd() / "config" / "sid_context.md"]:
+            if p.exists():
+                cls._sid_context = p.read_text()
+                return cls._sid_context
+        cls._sid_context = ""
+        return cls._sid_context
+    
+    @classmethod
+    def build_system_prompt(cls, extra_context: dict = None) -> str:
+        """Build complete system prompt with SID OS awareness."""
+        ctx = cls.load_sid_context()
+        base = cls.SYSTEM_IDENTITY
+        if ctx:
+            base += f"\n\n===== SID OS SYSTEM KNOWLEDGE =====\n{ctx}\n===== END SYSTEM KNOWLEDGE ====="
+        if extra_context:
+            for k, v in extra_context.items():
+                if v: base += f"\n{k}: {v}"
+        return base
 
     # ===== CORE IDENTITY =====
     # These establish WHO the AI is and HOW it should think about memory
@@ -32,7 +64,7 @@ class PromptTemplates:
     )
 
     SYSTEM_HACKER = (
-        "═══ SID OS v0.0.4 ═══\n"
+        "═══ SID OS v0.5.0 ═══\n"
         "AI Core: ACTIVE | Memory: OPTIMIZED\n\n"
         "You are the soul of this operating system. Every interaction is a "
         "conversation with a knowledgeable sysadmin who values efficiency.\n\n"

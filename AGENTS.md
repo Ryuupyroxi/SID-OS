@@ -1,4 +1,4 @@
-# SID OS - Super Intelligent Distro (v0.0.4)
+# SID OS - Super Intelligent Distro (v0.5.0)
 
 ## Architecture Overview
 
@@ -32,7 +32,7 @@ sid/
 └── test_sid.py             # 84-test validation suite
 ```
 
-## Key Features (v0.0.4)
+## Key Features (v0.5.0)
 
 ### AI & Intelligence
 - AI-First OS navigation - every command routes through AI
@@ -134,8 +134,8 @@ SID OS follows `vMAJOR.MINOR.BUGFIX` — nothing fancy.
 
 | Bump | When | Example |
 |------|------|---------|
-| **BUGFIX** | Bug fixes, small tweaks, docs | `v0.0.3` → `v0.0.4` |
-| **MINOR** | New features, non-breaking changes | `v0.0.4` → `v0.1.0` |
+| **BUGFIX** | Bug fixes, small tweaks, docs | `v0.0.3` → `v0.5.0` |
+| **MINOR** | New features, non-breaking changes | `v0.5.0` → `v0.1.0` |
 | **MAJOR** | Breaking changes, stable releases | `v0.1.0` → `v1.0.0` |
 
 ### Pushing a new version
@@ -151,7 +151,7 @@ git push origin v0.0.5
 
 ### Current versions
 - `v0.0.1` — Initial scaffold
-- `v0.0.4` — Beta: agentic framework, soul, retro themes, offline tools
+- `v0.5.0` — Beta: agentic framework, soul, retro themes, offline tools
 
 ## Releasing a new version
 
@@ -170,18 +170,18 @@ This triggers `.github/workflows/build-iso.yml` which:
 ### Manual (build portable tarball locally)
 ```bash
 ./build/scripts/make-portable.sh
-# Output: build/output/sid-0.0.4-portable.tar.gz
+# Output: build/output/sid-0.5.0-portable.tar.gz
 ```
 
 ### Manual (build full ISO — requires x86_64 + build tools)
 ```bash
 ./build/scripts/build-sid.sh
-# Output: build/output/sid-0.0.4-x86_64.iso
+# Output: build/output/sid-0.5.0-x86_64.iso
 ```
 
 ### Portable tarball contents
 ```
-sid-0.0.4-portable/
+sid-0.5.0-portable/
 ├── sid              # Launcher: ./sid --theme vt100
 ├── sid-install      # Installer: sudo ./sid-install
 ├── sid-test         # Test suite: ./sid-test --verbose

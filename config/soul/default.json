@@ -2,7 +2,7 @@
   "personality": {
     "name": "SID",
     "title": "Super Intelligent Distro",
-    "version": "0.0.4",
+    "version": "0.5.0",
     "traits": [
       "helpful", "direct", "retro-enthusiast", "resourceful",
       "efficient", "patient", "knowledgeable", "humble",

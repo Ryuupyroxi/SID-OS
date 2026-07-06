@@ -21,7 +21,7 @@ import tempfile
 import textwrap
 from pathlib import Path
 
-SID_VERSION = "0.0.4"
+SID_VERSION = "0.5.0"
 GITHUB_REPO = "Ryuupyroxi/SID-OS"
 RELEASE_URL = f"https://github.com/{GITHUB_REPO}/releases/download/v{SID_VERSION}/sid-{SID_VERSION}-portable.tar.gz"
 LATEST_URL = f"https://github.com/{GITHUB_REPO}/releases/latest/download/sid-portable.tar.gz"
@@ -244,8 +244,8 @@ def install_all_deps(sid_dir: Path):
     print(f"  ✓ Dependencies checked")
 
 def first_run_setup(sid_dir: Path):
-    """Run first-time configuration."""
-    print(f"\n  ⚙ First-run setup...")
+    """Run first-time configuration with AI setup wizard."""
+    print(f"\n  \u2699 First-run setup...")
     
     # Create SID directories
     for d in ["/sid/models", "/sid/memory", "/sid/logs"]:
@@ -254,25 +254,130 @@ def first_run_setup(sid_dir: Path):
     
     # Create default config files
     config_dir = sid_dir / "config"
+    ai_config_path = config_dir / "ai.json"
     if not (config_dir / ".configured").exists():
-        print(f"  • Creating default configuration...")
+        print(f"  \u2022 Creating default configuration...")
         (config_dir / ".configured").write_text("configured=true\n")
     
-    # Try to download a tiny model for immediate use
-    print(f"  • Would you like to download a small AI model now?")
-    print(f"    This enables offline AI (no internet needed later)")
+    # AI Setup Wizard
+    print(f"\n  {'='*50}")
+    print(f"  \U0001f916 AI Setup Wizard")
+    print(f"  {'='*50}")
+    print()
+    print(f"  How would you like to configure AI for SID OS?")
+    print()
+    print(f"  [1] Enter API key  \u2014 Use an API provider (OpenAI, Groq, etc.)")
+    print(f"                      Works immediately, requires internet")
+    print()
+    print(f"  [2] Download model \u2014 Hardware benchmark then download best model")
+    print(f"                      Requires ~1-3GB download, then works fully offline")
+    print()
+    print(f"  [3] Set up later   \u2014 Skip AI config for now")
+    print(f"                      Run 'sid' and configure manually later")
+    print()
+    
     try:
-        resp = input(f"  Download tiny model (~500MB)? [Y/n]: ").strip().lower()
-        if resp != 'n':
-            print(f"  📥 Downloading Llama 3.2 1B (this may take a while)...")
-            # Use the download_model helper
-            if (sid_dir / "src/tools/download_model.py").exists():
-                subprocess.run([sys.executable, "src/tools/download_model.py", 
-                              "Llama-3.2-1B-Instruct"], cwd=str(sid_dir))
+        resp = input(f"  Choose [1/2/3] (default: 3): ").strip()
+        
+        if resp == "1":
+            print(f"\n  \U0001f510 API Key Setup")
+            print(f"  Enter your API key (OpenAI, Groq, or any OpenAI-compatible provider)")
+            api_key = input(f"  API key: ").strip()
+            api_endpoint = input(f"  API endpoint [https://api.openai.com/v1]: ").strip() or "https://api.openai.com/v1"
+            api_model = input(f"  Model name [gpt-4o-mini]: ").strip() or "gpt-4o-mini"
+            
+            import json
+            cfg = json.loads(ai_config_path.read_text()) if ai_config_path.exists() else {}
+            cfg.update({"mode": "api", "api_key": api_key, "api_endpoint": api_endpoint, "api_model": api_model, "offline_first": False})
+            ai_config_path.write_text(json.dumps(cfg, indent=2))
+            print(f"  \u2713 API key configured")
+            if not api_key:
+                print(f"  \u26a0 No key set. Fix with: sid config set api_key <key>")
+        
+        elif resp == "2":
+            print(f"\n  \U0001f4e5 Model Download")
+            print(f"  Checking hardware...")
+            
+            # Step 1: Let user pick which router model to download
+            print(f"\n  \U0001f916 Step 1: Choose your conductor model")
+            print(f"  The conductor is a tiny always-on AI that runs SID's basic")
+            print(f"  functions even before you download a larger model.")
+            print(f"")
+            print(f"  [1] Qwen2.5-0.5B-Router  (468MB) - Tiny always-on conductor")
+            print(f"  [2] Skip conductor      - No built-in AI, set up manually later")
+            print(f"")
+            try:
+                router_choice = input(f"  Choose conductor [1]: ").strip() or "1"
+            except:
+                router_choice = "1"
+            
+            router_model = {"1": "Qwen2.5-0.5B-Router", "2": None}.get(router_choice)
+            
+            if router_model:
+                print(f"\n  \U0001f4e5 Downloading {router_model}...")
+                if (sid_dir / "src/tools/download_model.py").exists():
+                    subprocess.run([sys.executable, "src/tools/download_model.py", router_model], 
+                        cwd=str(sid_dir), capture_output=False)
+                print(f"  \u2713 Conductor online!")
+            else:
+                print(f"  \u23f3 Skipping conductor. SID will use keyword-based mode.")
+            
+            # Step 2: Detect RAM tier for the main model
+            try:
+                import subprocess, json
+                probe = subprocess.run([sys.executable, "-c", "import psutil; gb=psutil.virtual_memory().total//(1024**3); print('6gb' if gb>=6 else '4gb' if gb>=4 else '2gb')"], 
+                    cwd=str(sid_dir), capture_output=True, text=True, timeout=15)
+                detected = probe.stdout.strip()
+                if detected not in ("2gb", "4gb", "6gb"):
+                    detected = "4gb"
+            except:
+                detected = "4gb"
+            
+            print(f"\n  \U0001f4bb Step 2: Detected RAM: {detected.upper()} tier")
+            
+            # List available models for tier
+            try:
+                list_cmd = [sys.executable, "-c", f"""
+import sys; sys.path.insert(0, "src")
+from ai.engine.model_manager import ModelManager
+class C: ram_tier="{detected}"; context_window=4096; api_key=""; api_endpoint=""
+mm = ModelManager(C())
+for m in mm.KNOWN_MODELS.get("{detected}_tier", []):
+    if m.url: print(f"{{m.name}}|{{m.ram_required}}MB|{{m.context_length}}ctx|{{m.description}}")
+"""]
+                result = subprocess.run(list_cmd, cwd=str(sid_dir), capture_output=True, text=True, timeout=15)
+                models = [l for l in result.stdout.strip().split("\n") if l]
+            except:
+                models = []
+            
+            print(f"\n  Now choose your main AI model (or skip to use just the conductor):")
+            if models:
+                default = models[0].split("|")[0]
+                print(f"\n  Available models for {detected}:")
+                for m in models:
+                    parts = m.split("|")
+                    print(f"    \u2022 {parts[0]} ({parts[1]}, {parts[2]})")
+                chosen = input(f"\n  Download which model? (Enter to skip, or type name): ").strip()
+                if chosen:
+                    print(f"\n  \U0001f4e5 Downloading {chosen}...")
+                    subprocess.run([sys.executable, "src/tools/download_model.py", chosen], cwd=str(sid_dir))
+            else:
+                print(f"  (no downloadable models listed for this tier)")
+            
+            import json
+            cfg = json.loads(ai_config_path.read_text()) if ai_config_path.exists() else {}
+            cfg.update({"mode": "local", "ram_tier": detected, "offline_first": True, "auto_download_models": False})
+            ai_config_path.write_text(json.dumps(cfg, indent=2))
+            print(f"  \u2713 Conductor model installed! SID can now run basic AI offline.")
+            print(f"  Main model: {'ready' if chosen else 'skipped - run models download later'}")
+        
+        else:
+            print(f"  \u23f3 Skipping. Configure later with: sid config, or re-run: python3 get-sid.py --setup")
+    
     except (EOFError, KeyboardInterrupt):
         print()
     
-    print(f"  ✓ First-run setup complete")
+    print(f"  \u2713 First-run setup complete")
 
 def print_banner():
     banner = f"""

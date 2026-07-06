@@ -11,7 +11,7 @@ param(
     [switch]$Help
 )
 
-$SID_VERSION = "0.0.4"
+$SID_VERSION = "0.5.0"
 $GITHUB_REPO = "Ryuupyroxi/SID-OS"
 $RELEASE_URL = "https://github.com/$GITHUB_REPO/releases/download/v$SID_VERSION/sid-$SID_VERSION-portable.tar.gz"
 $BOOTSTRAP_URL = "https://raw.githubusercontent.com/$GITHUB_REPO/main/get-sid.py"

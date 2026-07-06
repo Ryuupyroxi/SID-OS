@@ -7,7 +7,7 @@ import json
 class SkillMetadata:
     """Metadata about a skill."""
     name: str
-    version: str = "0.0.4"
+    version: str = "0.5.0"
     description: str = ""
     author: str = "SID"
     requires: List[str] = field(default_factory=list)

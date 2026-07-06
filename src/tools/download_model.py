@@ -7,7 +7,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 if len(sys.argv) < 2:
     print("Usage: download_model.py <model_name>")
-    print("Example: download_model.py 'Llama-3.2-3B-Instruct-Abliterated'")
+    print("Example: download_model.py 'Qwen2.5-3B-Instruct'")
     sys.exit(1)
 
 model_name = sys.argv[1]

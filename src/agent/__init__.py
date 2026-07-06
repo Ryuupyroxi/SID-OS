@@ -1,5 +1,6 @@
 """SID Agentic Skill Framework - Inspired by Hermes agentic architecture.
 Skills are modular capabilities the AI can learn, add, and use dynamically."""
+from typing import Dict
 from .skill_manager import SkillManager
 from .tool_registry import ToolRegistry
 from .skill_base import BaseSkill

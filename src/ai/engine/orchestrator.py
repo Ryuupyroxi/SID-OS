@@ -360,13 +360,30 @@ class AIOrchestrator:
         self._trigger('before_process', input=user_input, intent=intent.intent)
 
         try:
-            # === STEP 5: Generate response ===
-            response = self.model_manager.generate(
-                messages=messages,
-                max_tokens=self.config.max_tokens,
-                temperature=self.config.temperature if intent.intent != "system" else 0.2,
-                top_p=self.config.top_p
-            )
+            # === STEP 5: Route through available model ===
+            # Priority: specialist model > router model > API fallback > error
+            if self.model_manager.current_model_name != "none":
+                # Full model available — use it
+                response = self.model_manager.generate(
+                    messages=messages,
+                    max_tokens=self.config.max_tokens,
+                    temperature=self.config.temperature if intent.intent != "system" else 0.2,
+                    top_p=self.config.top_p
+                )
+            elif self.model_manager.router_loaded:
+                # No specialist model but router is online — use tiny conductor
+                response = self._generate_with_router(user_input, intent)
+            elif self.config.api_key:
+                # API fallback
+                response = self.model_manager.generate(
+                    messages=messages,
+                    max_tokens=self.config.max_tokens,
+                    temperature=self.config.temperature,
+                    top_p=self.config.top_p
+                )
+            else:
+                # No model at all — give helpful message
+                response = self._no_model_response(user_input, intent)
 
             result = {
                 "response": response,
@@ -433,6 +450,40 @@ class AIOrchestrator:
             return {"response": f"Error: {e}", "direct": True, "error": str(e)}
         
         return {"direct": False}  # Not a direct command
+
+    def _generate_with_router(self, user_input: str, intent: IntentResult) -> str:
+        """Generate response using the router model or template fallback.
+        Router handles basic navigation, system info, help, and model setup
+        when no specialist model is loaded."""
+        # Try to use the full pipeline — if router is the active model, generate works
+        if self.model_manager.router_loaded and self.model_manager.current_model_name != "none":
+            system = self._build_optimized_prompt(intent, {})
+            messages = [{"role": "system", "content": system}, {"role": "user", "content": user_input}]
+            try:
+                response = self.model_manager.generate(messages, max_tokens=128, temperature=0.7, top_p=0.9)
+                if response and not response.startswith("Error"):
+                    return response
+            except:
+                pass
+        
+        # Fallback: templated responses for common intents
+        return self._template_response(user_input, intent)
+
+    def _template_response(self, user_input: str, intent: IntentResult) -> str:
+        """Template-based fallback when no model is available at all.
+        Provides useful functionality without any AI model loaded."""
+        templates = {
+            "system": "I can run system commands for you. Try: 'show system info', 'list files', 'disk usage'",
+            "file": "File operations are available. Try: 'list files in /home', 'show directory'",
+            "help": "SID OS Commands:\n  ai <question> - Ask the AI\n  sys <cmd> - Run system command\n  config - Settings\n  models - Manage AI models\n  install quick <tier> - Quick AI setup\n  benchmark - Test hardware\n  help - This message\n\nTo get started with AI, run: models download",
+            "config": "Configuration available. Try: 'config set theme vt100', 'config show'",
+            "general": "Hi! I'm SID OS. I'm running in basic mode without a full AI model loaded.\n\nTo enable full AI features:\n  1. models download - Download a local model\n  2. config set api_key <key> - Use an API provider\n  3. install quick 4gb - Auto-setup for 4GB RAM\n\nBasic commands still work: help, sys, config, theme, files"
+        }
+        return templates.get(intent.intent, templates["general"])
+
+    def _no_model_response(self, user_input: str, intent: IntentResult) -> str:
+        """Helpful response when no AI model is available."""
+        return f"SID OS has no AI model loaded yet.\n\nTo get started:\n  1. Run 'python3 get-sid.py --setup' to use the setup wizard\n  2. Or inside SID: 'models download' to download one\n  3. Or set an API key: 'config set api_key <key>'\n\nBasic commands still work: help, sys info, config, theme"
 
     def _build_optimized_prompt(self, intent: IntentResult, context: Dict) -> str:
         """Build memory-optimized system prompt based on intent.

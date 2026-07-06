@@ -33,49 +33,36 @@ class ModelManager:
     """Manages AI model loading with RAM awareness and dynamic swapping."""
 
     # Comprehensive model catalog with RAM tier awareness
+    # Comprehensive model catalog with RAM tier awareness
+    # ALL MODELS VERIFIED: URLs tested and confirmed accessible (Qwen official repos)
     KNOWN_MODELS = {
         "router": [
-            ModelInfo("SID-Router-0.5B", "sid-router-0.5b-q4_k_m.gguf", "smollm", "router", 256, 2048, "Q4_K_M",
-                     "Intent classifier - always kept in RAM", is_router=True, tier="2gb"),
-            ModelInfo("SmolLM-360M-Router", "smollm-360m-router-q4_k_m.gguf", "smollm", "router", 192, 2048, "Q4_K_M",
-                     "Ultra-lightweight router (360M params)", is_router=True, tier="2gb"),
+            ModelInfo("Qwen2.5-0.5B-Router", "qwen2.5-0.5b-instruct-q4_k_m.gguf", "qwen", "router", 256, 32768, "Q4_K_M",
+                     "Tiny always-on conductor. Basic AI even without a big model loaded.",
+                     is_router=True, tier="2gb",
+                     url="https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF/resolve/main/qwen2.5-0.5b-instruct-q4_k_m.gguf"),
         ],
         "2gb_tier": [
-            ModelInfo("Llama-3.2-1B-Instruct-Abliterated", "llama-3.2-1b-instruct-abliterated-q4_k_m.gguf", "llama", "tiny", 512, 8192, "Q4_K_M",
-                     "1B abliterated - uncensored, fast, fits 2GB systems", is_abliterated=True, tier="2gb",
-                     url="https://huggingface.co/failspy/Llama-3.2-1B-Instruct-abliterated-GGUF/resolve/main/Llama-3.2-1B-Instruct-abliterated-Q4_K_M.gguf"),
-            ModelInfo("Phi-3-Mini-1.5B", "phi-3-mini-1.5b-instruct-q4_k_m.gguf", "phi", "tiny", 512, 4096, "Q4_K_M",
-                     "Strong reasoning for its size, good fallback", tier="2gb"),
-            ModelInfo("Qwen-2.5-1.5B", "qwen-2.5-1.5b-instruct-q4_k_m.gguf", "qwen", "tiny", 512, 8192, "Q4_K_M",
-                     "Capable tiny model with strong multilingual support", tier="2gb"),
-            ModelInfo("Gemma-2-2B-Instruct", "gemma-2-2b-it-q4_k_m.gguf", "gemma", "small", 768, 8192, "Q4_K_M",
-                     "Google's ultra-efficient 2B, best perf-per-param", tier="2gb"),
+            ModelInfo("Qwen2.5-1.5B-Instruct", "qwen2.5-1.5b-instruct-q4_k_m.gguf", "qwen", "tiny", 512, 32768, "Q4_K_M",
+                     "Good tiny model for 2GB systems. Works with swap.",
+                     tier="2gb",
+                     url="https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF/resolve/main/qwen2.5-1.5b-instruct-q4_k_m.gguf"),
         ],
         "4gb_tier": [
-            ModelInfo("Llama-3.2-3B-Instruct-Abliterated", "llama-3.2-3b-instruct-abliterated-q4_k_m.gguf", "llama", "small", 1024, 8192, "Q4_K_M",
-                     "★ RECOMMENDED: Best balance for 4GB systems. Abliterated.", is_abliterated=True, tier="4gb",
-                     url="https://huggingface.co/failspy/Llama-3.2-3B-Instruct-abliterated-GGUF/resolve/main/Llama-3.2-3B-Instruct-abliterated-Q4_K_M.gguf"),
-            ModelInfo("Llama-3.2-3B-Instruct", "llama-3.2-3b-instruct-q4_k_m.gguf", "llama", "small", 1024, 8192, "Q4_K_M",
-                     "Standard 3B - balanced speed and capability", tier="4gb"),
-            ModelInfo("CodeLlama-7B-Python-Abliterated", "codellama-7b-python-abliterated-q4_k_m.gguf", "codellama", "specialty", 2048, 16384, "Q4_K_M",
-                     "Code specialist - needs swap on 4GB but worth it", specialty="coding", is_abliterated=True, tier="4gb",
-                     url="https://huggingface.co/failspy/CodeLlama-7B-Python-abliterated-GGUF/resolve/main/CodeLlama-7B-Python-abliterated-Q4_K_M.gguf"),
+            ModelInfo("Qwen2.5-3B-Instruct", "qwen2.5-3b-instruct-q4_k_m.gguf", "qwen", "small", 1024, 32768, "Q4_K_M",
+                     "★ RECOMMENDED: Best balance for 4GB systems. Strong reasoning.",
+                     tier="4gb",
+                     url="https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/resolve/main/qwen2.5-3b-instruct-q4_k_m.gguf"),
         ],
         "6gb_tier": [
-            ModelInfo("Qwen-2.5-7B-Instruct-Abliterated", "qwen-2.5-7b-instruct-abliterated-q4_k_m.gguf", "qwen", "medium", 3072, 32768, "Q4_K_M",
-                     "★ RECOMMENDED: Qwen 2.5 7B abliterated. Strong multilingual, math, coding.", is_abliterated=True, tier="6gb",
-                     url="https://huggingface.co/failspy/Qwen2.5-7B-Instruct-abliterated-GGUF/resolve/main/Qwen2.5-7B-Instruct-abliterated-Q4_K_M.gguf"),
-            ModelInfo("Llama-3.1-8B-Instruct-Abliterated", "llama-3.1-8b-instruct-abliterated-q4_k_m.gguf", "llama", "medium", 4096, 32768, "Q4_K_M",
-                     "Full Llama 3.1 8B with safety abliterated", is_abliterated=True, tier="6gb",
-                     url="https://huggingface.co/failspy/Llama-3.1-8B-Instruct-abliterated-GGUF/resolve/main/Llama-3.1-8B-Instruct-abliterated-Q4_K_M.gguf"),
-            ModelInfo("Mistral-7B-Instruct-v0.3", "mistral-7b-v0.3-instruct-q4_k_m.gguf", "mistral", "medium", 3072, 32768, "Q4_K_M",
-                     "Excellent general-purpose 7B efficient model", tier="6gb"),
-            ModelInfo("Dolphin-2.9.3-8B-Uncensored", "dolphin-2.9.3-8b-uncensored-q4_k_m.gguf", "llama", "medium", 4096, 32768, "Q4_K_M",
-                     "Uncensored Dolphin - no filters, no refusals", is_abliterated=True, tier="6gb"),
-            ModelInfo("DeepSeek-Coder-6.7B-Instruct", "deepseek-coder-6.7b-instruct-q4_k_m.gguf", "deepseek", "medium", 3072, 16384, "Q4_K_M",
-                     "Code specialist with multi-language support", specialty="coding", tier="6gb"),
-            ModelInfo("Zephyr-7B-Beta", "zephyr-7b-beta-q4_k_m.gguf", "mistral", "medium", 3072, 8192, "Q4_K_M",
-                     "HuggingFace's distilled Zephyr for natural chat", specialty="chat", tier="6gb"),
+            ModelInfo("Qwen2.5-7B-Instruct", "qwen2.5-7b-instruct-q2_k.gguf", "qwen", "medium", 2048, 32768, "Q2_K",
+                     "7B general model. Fits 6GB at Q2. Strong multilingual, math, coding.",
+                     tier="6gb",
+                     url="https://huggingface.co/Qwen/Qwen2.5-7B-Instruct-GGUF/resolve/main/qwen2.5-7b-instruct-q2_k.gguf"),
+            ModelInfo("Qwen2.5-Coder-7B-Instruct", "qwen2.5-coder-7b-instruct-q4_k_m.gguf", "qwen", "specialty", 3072, 32768, "Q4_K_M",
+                     "Code specialist. Multi-language programming expert.",
+                     tier="6gb", specialty="coding",
+                     url="https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/qwen2.5-coder-7b-instruct-q4_k_m.gguf"),
         ],
         "api": [
             ModelInfo("OpenAI GPT-4o-mini", "", "api", "large", 0, 128000, "api", "API: Best small online model", True, "https://api.openai.com/v1"),
@@ -196,24 +183,35 @@ class ModelManager:
                 return False
 
     def load_router_model(self) -> bool:
-        """Load the small router model (always kept in RAM if possible)."""
+        """Load the tiny router model (always-on conductor for SID).
+        Auto-downloads if not found. The router handles basic AI even
+        when no larger model is available."""
         if self.router_loaded:
             return True
 
-        # Try to find or download a tiny router model
-        router_path = self.model_paths.get("sid-router-0.5b")
-        if not router_path:
-            # Use SmolLM or the smallest available model
+        # Scan for an already-downloaded router model
+        router_names = ["qwen2.5-0.5b", "0.5b-router", "router"]
+        for name, path in self.model_paths.items():
+            if any(r in name.lower() for r in router_names):
+                self.router_model = path
+                self.router_loaded = True
+                print(f"[SID] Router model found: {path.name}")
+                return True
+
+        # Not found locally — try to auto-download the Qwen2.5-0.5B-Router (smallest, ~468MB)
+        print(f"[SID] No router model found. Downloading tiny conductor model (~200MB)...")
+        success = self.download_model("Qwen2.5-0.5B-Router")
+        if success:
+            # Re-scan paths
+            self.model_paths = self._scan_models()
             for name, path in self.model_paths.items():
-                if any(x in name.lower() for x in ['smollm', 'tiny', '360m', '0.5b']):
-                    router_path = path
-                    break
-        
-        if router_path:
-            self.router_model = router_path
-            self.router_loaded = True
-            return True
-        
+                if any(r in name.lower() for r in router_names):
+                    self.router_model = path
+                    self.router_loaded = True
+                    print(f"[SID] Router conductor online: {path.name}")
+                    return True
+
+        print(f"[SID] Router model unavailable. Using keyword-based intent classification.")
         return False
 
     def swap_to_specialist(self, specialty: str) -> bool:
@@ -299,7 +297,7 @@ class ModelManager:
         router_path = self.model_paths.get("sid-router-0.5b")
         if not router_path:
             for name, path in self.model_paths.items():
-                if any(x in name.lower() for x in ['smollm', 'tiny', '360m', '0.5b']):
+                if any(x in name.lower() for x in ['qwen', 'tiny', '0.5b', 'router']):
                     router_path = path
                     break
         

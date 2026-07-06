@@ -196,7 +196,7 @@ class SettingsManager:
         self.settings_path.parent.mkdir(parents=True, exist_ok=True)
         self.data["_meta"] = {
             "saved_at": time.time(),
-            "version": "0.0.4",
+            "version": "0.5.0",
             "description": "SID Advanced Settings - Full system control"
         }
         self.settings_path.write_text(json.dumps(self.data, indent=2))

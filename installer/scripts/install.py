@@ -29,20 +29,20 @@ class SIDInstaller:
     RAM_TIERS = {
         "2gb": {
             "label": "Ultra Light (2GB RAM)",
-            "models": ["Llama-3.2-1B-Instruct-Abliterated"],
+            "models": ["Qwen2.5-1.5B-Instruct"],
             "voice": "whisper_tiny",
             "features": "Basic AI, voice, system tools"
         },
         "4gb": {
             "label": "Default (4GB RAM) ★ Recommended",
-            "models": ["Llama-3.2-3B-Instruct-Abliterated", "CodeLlama-7B-Python-Abliterated"],
+            "models": ["Qwen2.5-3B-Instruct"],
             "voice": "whisper_tiny",
             "router": True,
             "features": "Full AI with routing, code specialist, voice, media"
         },
         "6gb": {
             "label": "Power User (6GB+ RAM)",
-            "models": ["Qwen-2.5-7B-Instruct-Abliterated", "Dolphin-2.9.3-8B-Uncensored", "CodeLlama-7B-Python-Abliterated"],
+            "models": ["Qwen2.5-7B-Instruct", "Qwen2.5-Coder-7B-Instruct"],
             "voice": "whisper_small",
             "router": True,
             "features": "Multi-model, uncensored, code specialist, voice"
@@ -63,7 +63,7 @@ class SIDInstaller:
         """Run the installation wizard."""
         print("\033[2J\033[H")
         print("\033[32m╔══════════════════════════════════════════╗\033[0m")
-        print("\033[32m║    SID OS v0.0.4 - Installation Wizard    ║\033[0m")
+        print("\033[32m║    SID OS v0.5.0 - Installation Wizard    ║\033[0m")
         print("\033[32m║    AI-First OS for Old Hardware          ║\033[0m")
         print("\033[32m╚══════════════════════════════════════════╝\033[0m\n")
 
@@ -372,7 +372,7 @@ class SIDInstaller:
 
         # Create GRUB entry
         boot_entry = """timeout=3
-menuentry "SID OS v0.0.4" {
+menuentry "SID OS v0.5.0" {
     linux /boot/vmlinuz-sid root={root} console=tty0 quiet loglevel=3
     initrd /boot/initramfs-sid.gz
 }
