@@ -17,7 +17,7 @@ error() { echo -e "${RED}[ERROR]${NC} $1"; exit 1; }
 header() { echo -e "\n${BLUE}════════════════════════════════════════${NC}"; echo -e "${BLUE}  $1${NC}"; echo -e "${BLUE}════════════════════════════════════════${NC}"; }
 
 # Configuration
-SID_VERSION="0.5.1"
+SID_VERSION="0.5.2"
 ARCH="${ARCH:-x86_64}"
 BASE_IMAGE="${BASE_IMAGE:-alpine:3.19}"
 KERNEL_VERSION="${KERNEL_VERSION:-6.6.x}"

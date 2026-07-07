@@ -5,7 +5,7 @@
 
 set -e
 
-VERSION="0.5.1"
+VERSION="0.5.2"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
@@ -48,7 +48,7 @@ fi
 echo ""
 echo "[1/4] Downloading Alpine Linux base..."
 ALPINE_ISO=$(mktemp)
-wget -q -O "$ALPINE_ISO" "https://dl-cdn.alpinelinux.org/alpine/v3.20/releases/x86_64/alpine-standard-3.20.3-x86_64.iso"
+wget -q -O "$ALPINE_ISO" "https://dl-cdn.alpinelinux.org/alpine/v3.24/releases/x86_64/alpine-standard-3.24.1-x86_64.iso"
 echo "  Downloaded Alpine ISO"
 
 echo "[2/4] Creating bootable USB..."

@@ -8,12 +8,12 @@ set -e
 # Debug mode
 # SID OS Live ISO Builder - Debug mode
 
-VERSION="0.5.1"
+VERSION="0.5.2"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 OUTPUT_DIR="${1:-$PROJECT_DIR/build/output}"
 BUILD_DIR="/tmp/sid-live-build-$$"
-ALPINE_VERSION="3.20.3"
+ALPINE_VERSION="3.24.1"
 ARCH="x86_64"
 
 echo "╔══════════════════════════════════════════╗"
@@ -32,7 +32,7 @@ if [ -n "$MISSING" ]; then
 fi
 echo "All build tools available ✓"
 
-ALPINE_MIRROR="https://dl-cdn.alpinelinux.org/alpine/v3.20"
+ALPINE_MIRROR="https://dl-cdn.alpinelinux.org/alpine/v3.24"
 ROOTFS_DIR="$BUILD_DIR/rootfs"
 ISO_DIR="$BUILD_DIR/iso"
 INITRAMFS_DIR="$BUILD_DIR/initramfs"
@@ -166,7 +166,7 @@ cat > "$ROOTFS_DIR/etc/profile.d/sid.sh" << 'SIDPROFILE'
 if [ "$(tty)" = "/dev/tty1" ]; then
     clear
     echo "====================================="
-    echo "  SID OS v0.5.1 - Super Intelligent Distro"
+    echo "  SID OS v0.5.2 - Super Intelligent Distro"
     echo "  Starting AI interface..."
     echo "====================================="
     sleep 1
@@ -228,7 +228,7 @@ mount -t devpts devpts /dev/pts
 clear
 echo ""
 echo "  ╔══════════════════════════════════════╗"
-echo "  ║    SID OS v0.5.1 - Super Intelligent ║"
+echo "  ║    SID OS v0.5.2 - Super Intelligent ║"
 echo "  ║    Distro                            ║"
 echo "  ╚══════════════════════════════════════╝"
 echo ""
@@ -293,7 +293,7 @@ cat > "$ISO_DIR/boot/grub/grub.cfg" << 'GRUB'
 set timeout=3
 set default=0
 
-menuentry "SID OS v0.5.1 - Super Intelligent Distro" {
+menuentry "SID OS v0.5.2 - Super Intelligent Distro" {
     linux /boot/vmlinuz-sid console=tty0 quiet loglevel=3
     initrd /boot/initramfs-sid.gz
 }

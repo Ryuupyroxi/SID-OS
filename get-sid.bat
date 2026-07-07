@@ -20,7 +20,7 @@ echo    ███████╗██║██║  ██║    ██║   █
 echo    ╚════██║██║██║  ██║    ██║   ██║╚════██║
 echo    ███████║██║██████╔╝    ╚██████╔╝███████║
 echo    ╚══════╝╚═╝╚═════╝      ╚═════╝ ╚═════╝
-echo    SUPER INTELLIGENT DISTRO    v0.5.1
+echo    SUPER INTELLIGENT DISTRO    v0.5.2
 echo =========================================================
 echo.
 echo  SID OS - Super Intelligent Distro for Old Hardware
@@ -116,7 +116,7 @@ goto end
 echo.
 echo  ╔══════════════════════════════════════════════════╗
 echo  ║           SID - Super Intelligent Distro          ║
-echo  ║            v0.5.1 — For Old Hardware              ║
+echo  ║            v0.5.2 — For Old Hardware              ║
 echo  ╚══════════════════════════════════════════════════╝
 echo.
 echo  SID is a lightweight CLI-based operating system for
