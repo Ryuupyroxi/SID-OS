@@ -18,14 +18,14 @@ jobs:
       
       - name: Build portable tarball
         env:
-          VERSION: ${GITHUB_REF_NAME#v}
+          VERSION: ${{ github.ref_name[1:] }}
         run: |
           mkdir -p build/output
           bash build/scripts/make-portable.sh build/output
       
       - name: Build bootable ISO
         env:
-          VERSION: ${GITHUB_REF_NAME#v}
+          VERSION: ${{ github.ref_name[1:] }}
         run: |
           bash build/scripts/build-live-iso.sh build/output
           ls -lh build/output/
