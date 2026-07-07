@@ -37,7 +37,7 @@ ROOTFS_DIR="$BUILD_DIR/rootfs"
 ISO_DIR="$BUILD_DIR/iso"
 INITRAMFS_DIR="$BUILD_DIR/initramfs"
 
-mkdir -p "$ROOTFS_DIR" "$ISO_DIR/boot/grub" "$INITRAMFS_DIR" "$OUTPUT_DIR"
+mkdir -p "$ROOTFS_DIR" "$ISO_DIR/boot/grub" "$ISO_DIR/isolinux" "$INITRAMFS_DIR" "$OUTPUT_DIR"
 
 # Step 1: Get Alpine base system
 echo ""
@@ -220,13 +220,14 @@ echo ""
 
 # Find and mount the root filesystem
 # Try various block devices
-ROOT_DEV=""
-for dev in /dev/sda1 /dev/sdb1 /dev/nvme0n1p1 /dev/mmcblk0p1; do
-    if [ -b "$dev" ]; then
-        ROOT_DEV="$dev"
-        break
-    fi
-done
+    # Find root filesystem - scan more devices
+    ROOT_DEV=""
+    for dev in /dev/sd* /dev/nvme* /dev/mmcblk* /dev/vd* /dev/hd*; do
+        if [ -b "$dev" ] && [ "${dev%%[0-9]*}" != "${dev}" ]; then
+            ROOT_DEV="$dev"
+            break
+        fi
+    done
 
 if [ -n "$ROOT_DEV" ]; then
     mount "$ROOT_DEV" /mnt 2>/dev/null || mount -t tmpfs tmpfs /mnt
@@ -296,15 +297,38 @@ GRUB
 # Create ISO
 ISO_NAME="sid-$VERSION-live-$ARCH.iso"
 cd "$ISO_DIR"
-xorriso -as mkisofs \
-    -V "SID-OS-$VERSION" \
-    -isohybrid-mbr /usr/lib/ISOLINUX/isohdpfx.bin 2>/dev/null || \
-    -isohybrid-mbr /usr/share/syslinux/isohdpfx.bin 2>/dev/null || true
-    -b isolinux/isolinux.bin 2>/dev/null || true
-    -c isolinux/boot.cat 2>/dev/null || true
-    -no-emul-boot -boot-load-size 4 -boot-info-table \
-    -eltorito-alt-boot -e boot/grub/efi.img -no-emul-boot \
-    -o "$OUTPUT_DIR/$ISO_NAME" \
+
+# Find the ISOLINUX MBR file
+ISOHYBRID_MBR=""
+for mbr in /usr/lib/ISOLINUX/isohdpfx.bin /usr/share/syslinux/isohdpfx.bin; do
+    if [ -f "$mbr" ]; then
+        ISOHYBRID_MBR="$mbr"
+        break
+    fi
+done
+
+# Create the bootable ISO
+if command -v grub-mkrescue &>/dev/null; then
+    echo "  Using grub-mkrescue for UEFI+BIOS bootable ISO..."
+    grub-mkrescue -o "$OUTPUT_DIR/$ISO_NAME" "$ISO_DIR" 2>/dev/null || \
+    xorriso -as mkisofs \
+        -V "SID-OS-$VERSION" \
+        ${ISOHYBRID_MBR:+-isohybrid-mbr "$ISOHYBRID_MBR"} \
+        -b isolinux/isolinux.bin -c isolinux/boot.cat \
+        -no-emul-boot -boot-load-size 4 -boot-info-table \
+        -eltorito-alt-boot -e boot/grub/efi.img -no-emul-boot \
+        -o "$OUTPUT_DIR/$ISO_NAME" \
+        "$ISO_DIR" 2>&1
+else
+    xorriso -as mkisofs \
+        -V "SID-OS-$VERSION" \
+        ${ISOHYBRID_MBR:+-isohybrid-mbr "$ISOHYBRID_MBR"} \
+        -b isolinux/isolinux.bin -c isolinux/boot.cat \
+        -no-emul-boot -boot-load-size 4 -boot-info-table \
+        -eltorito-alt-boot -e boot/grub/efi.img -no-emul-boot \
+        -o "$OUTPUT_DIR/$ISO_NAME" \
+        "$ISO_DIR" 2>&1
+fi
     . 2>&1
 
 echo ""

@@ -63,10 +63,16 @@ def main():
     print(f"  {'='*50}\n")
     
     os.chdir(str(sid_dir))
-    if sys.platform == "win32":
-        os.execvp("python", ["python", "src/main.py", "--theme", "vt100"])
-    else:
-        os.execvp("python3", ["python3", "src/main.py", "--theme", "vt100"])
+    try:
+        if sys.platform == "win32":
+            os.execvp("python", ["python", "src/main.py", "--theme", "vt100"])
+        else:
+            os.execvp("python3", ["python3", "src/main.py", "--theme", "vt100"])
+    except (FileNotFoundError, OSError):
+        # Fallback: use subprocess
+        import subprocess
+        python_cmd = "python" if sys.platform == "win32" else "python3"
+        subprocess.run([python_cmd, "src/main.py", "--theme", "vt100"])
 
 def find_sid_dir() -> Path:
     """Find or create SID install directory."""

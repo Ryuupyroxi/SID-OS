@@ -8,6 +8,10 @@ chcp 65001 > nul
 :: Double-click this file to download and run SID OS
 :: If Python is not installed, it will guide you
 
+goto menu
+
+:menu
+cls
 echo.
 echo =========================================================
 echo    ███████╗██╗██████╗      ██████╗ ███████╗
@@ -37,7 +41,6 @@ if "%choice%"=="4" goto about
 if "%choice%"=="5" goto end
 echo Invalid option. Please try again.
 timeout /t 2 > nul
-cls
 goto menu
 
 :setup
@@ -69,6 +72,7 @@ if exist "%~dp0src\main.py" (
 ) else (
     echo  SID OS not found in this folder.
     echo  Run option [1] first to download it.
+    pause
 )
 goto end
 
@@ -81,6 +85,7 @@ cd /d "%~dp0"
 if exist "%~dp0get-sid.py" (
     python get-sid.py --update
 ) else (
+    echo  Downloading bootstrap script...
     powershell -Command "& {[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/Ryuupyroxi/SID-OS/main/get-sid.py' -OutFile 'get-sid.py'}"
     python get-sid.py --update
 )

@@ -17,8 +17,9 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq \
-            xorriso isolinux squashfs-tools \
-            wget cpio gzip grub-pc-bin grub-efi
+            xorriso squashfs-tools syslinux-common \
+            grub-pc-bin grub-efi-amd64-bin grub-common \
+            wget cpio gzip dosfstools mtools
 
       - name: Build portable tarball
         run: |
@@ -34,6 +35,8 @@ jobs:
       - name: Build SID OS Live ISO
         run: |
           chmod +x build/scripts/build-live-iso.sh
+          # Check if packages installed properly
+          dpkg -l | grep -E "xorriso|squashfs|syslinux|grub" | awk '{print $2, $3}'
           ./build/scripts/build-live-iso.sh build/output
           ls -lh build/output/
 
@@ -48,6 +51,10 @@ jobs:
         with:
           name: sid-portable
           path: build/output/*.tar.gz*
+
+      - name: List release assets
+        if: startsWith(github.ref, 'refs/tags/')
+        run: ls -lh build/output/
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
