@@ -83,8 +83,14 @@ echo "[4/6] Installing SID OS..."
 bash "$PROJECT_DIR/build/scripts/make-portable.sh" "$BUILD_DIR/portable" >/dev/null 2>&1
 SID_TAR=$(ls "$BUILD_DIR/portable"/sid-*.tar.gz | head -1)
 tar xzf "$SID_TAR" -C "$ROOTFS_DIR/opt/"
-[ -d "$ROOTFS_DIR/opt/opt/sid" ] && { mv "$ROOTFS_DIR/opt/opt/sid"/* "$ROOTFS_DIR/opt/" 2>/dev/null; rm -rf "$ROOTFS_DIR/opt/opt"; }
-[ ! -f "$ROOTFS_DIR/opt/sid/src/main.py" ] && { mkdir -p "$ROOTFS_DIR/opt/sid"; mv "$ROOTFS_DIR/opt/"* "$ROOTFS_DIR/opt/sid/" 2>/dev/null; }
+if [ -d "$ROOTFS_DIR/opt/opt/sid" ]; then
+    mv "$ROOTFS_DIR/opt/opt/sid"/* "$ROOTFS_DIR/opt/" 2>/dev/null || true
+    rm -rf "$ROOTFS_DIR/opt/opt"
+fi
+if [ ! -f "$ROOTFS_DIR/opt/sid/src/main.py" ]; then
+    mkdir -p "$ROOTFS_DIR/opt/sid"
+    find "$ROOTFS_DIR/opt/" -maxdepth 1 -not -name opt -not -name sid -not -name '.' -exec mv {} "$ROOTFS_DIR/opt/sid/" \; 2>/dev/null || true
+fi
 
 cat > "$ROOTFS_DIR/usr/local/bin/sid" << 'EOF'
 #!/bin/sh
