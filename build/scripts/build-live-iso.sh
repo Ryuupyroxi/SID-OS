@@ -64,8 +64,8 @@ install_pkg() {
     fi
 }
 
-for pkg in linux-lts python3 py3-pip ncurses-libs ncurses-terminfo readline sqlite-libs openssl ca-certificates eudev-libs dhcpcd tzdata htop sudo syslinux; do
-    install_pkg "$pkg"
+for pkg in linux-lts python3 py3-pip ncurses-libs ncurses-terminfo readline sqlite-libs openssl ca-certificates eudev-libs dhcpcd tzdata htop doas syslinux; do
+    install_pkg "$pkg" || true
 done
 
 # Verify kernel
