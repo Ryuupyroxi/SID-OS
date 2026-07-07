@@ -75,7 +75,7 @@ cp /etc/resolv.conf "$ROOTFS_DIR/etc/resolv.conf" 2>/dev/null || true
 # Install base packages using apk in chroot
 chroot "$ROOTFS_DIR" /sbin/apk add --no-cache \
     alpine-base busybox \
-    linux-lts linux-firmware \
+    linux-lts \
     python3 py3-pip \
     musl ncurses-libs ncurses-terminfo \
     readline sqlite-libs \
