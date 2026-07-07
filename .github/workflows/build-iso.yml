@@ -18,24 +18,21 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq             xorriso squashfs-tools syslinux-common             grub-pc-bin grub-efi-amd64-bin grub-common             wget cpio gzip dosfstools mtools
 
+      - name: Install Python dependencies
+        run: |
+          sudo apt-get install -y -qq python3-pip
+          pip3 install --quiet numpy psutil pillow pyyaml requests 2>&1 ||             sudo apt-get install -y -qq python3-numpy python3-psutil python3-pil python3-yaml python3-requests
+
       - name: Build portable tarball
         run: |
           mkdir -p build/output
           bash build/scripts/make-portable.sh build/output
           ls -lh build/output/
 
-      - name: Test Python imports
+      - name: Run test suite
         run: |
-          sudo apt-get install -y -qq python3-numpy python3-psutil python3-pil python3-yaml python3-requests
-          python3 -c "\
-          import sys, os; sys.path.insert(0, 'src'); \
-          from ai.engine.orchestrator import AIOrchestrator; \
-          from ai.engine.model_manager import ModelManager; \
-          from ai.context.compressor import ContextCompressor; \
-          from terminal.theme.manager import ThemeManager; \
-          from memory import SidMemory; \
-          print('All core modules import OK') \
-          "
+          python3 -u test_sid.py --verbose 2>&1
+          echo "test exit: $?"
 
       - name: Build SID OS Live ISO
         run: |
