@@ -1,0 +1,22 @@
+FROM alpine:3.20 AS builder
+
+RUN apk add --no-cache alpine-base busybox linux-lts python3 py3-pip \
+    musl ncurses-libs ncurses-terminfo readline sqlite-libs \
+    openssl ca-certificates eudev-libs e2fsprogs util-linux kmod \
+    dhcpcd ethtool tzdata htop xorriso squashfs-tools cpio grub grub-bios \
+    py3-numpy py3-psutil py3-pillow py3-yaml py3-requests
+
+WORKDIR /build
+
+# Copy SID OS source
+COPY . /build/sid-source/
+
+# Build portable tarball
+RUN cd /build/sid-source && mkdir -p build/output && \
+    bash build/scripts/make-portable.sh build/output
+
+# Build live ISO
+RUN bash /build/sid-source/build/scripts/build-live-iso.sh /build/output
+
+FROM scratch
+COPY --from=builder /build/output/ /
