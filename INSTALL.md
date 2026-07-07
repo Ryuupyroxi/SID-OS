@@ -21,7 +21,15 @@ Same as the full method — Alpine ISO, Rufus, USB drive, phone tether.
 
 **1-3:** Same as Sections 1-3 — download Alpine, write USB with Rufus (DD mode), boot, login as root, connect tether.
 
-**4. Download and run the answer file:**
+**4. Check which disk is your USB:**
+
+```bash
+cat /proc/partitions
+```
+
+The internal hard drive (Windows) is usually `sda`. Your USB drive will be the other one — typically `sdb` or `sdc`. Note the name.
+
+**5. Download and run the answer file:**
 
 ```bash
 wget -O /tmp/sid-answers.conf https://raw.githubusercontent.com/Ryuupyroxi/SID-OS/main/installer/sid-answers.conf
@@ -31,12 +39,15 @@ setup-alpine -f /tmp/sid-answers.conf
 The installer will still prompt you for:
 - **Root password** (type it twice)
 - **Mirror number** (pick the closest one)
+- **Which disk** (type `sdb` or whatever your USB is — **not** `sda` which is Windows)
+- **How to use it** (type `sys`)
+- **Confirm** (type `y`)
 
-Everything else is automated.
+**6.** When done: `poweroff` → unplug USB → wait 10s → replug → reboot.
 
-**5.** When done: `poweroff` → unplug USB → wait 10s → replug → reboot.
+> **⚠️ WARNING**: When the installer asks "Which disk(s)?" — do NOT type `sda`. That's your Windows drive. Type the USB name you noted in step 4 (usually `sdb` or `sdc`).
 
-**6.** Login as `root` with the password you set. Then:
+**7.** Login as `root` with the password you set. Then:
 
 ```bash
 apk add curl python3
@@ -176,6 +187,14 @@ At the Alpine prompt, type:
 ip link show
 ```
 
+Also check which disk is your USB (so you don't accidentally wipe Windows later):
+
+```bash
+cat /proc/partitions
+```
+
+The internal drive (Windows) is `sda`. Your USB will be `sdb` or `sdc` — note it.
+
 Look for `usb0`, `enp0s20u1`, or similar. You should see it listed. Also ignore `lo` (loopback).
 
 ### 3.3 — Get an IP address
@@ -254,7 +273,7 @@ This will show a series of prompts. **Follow every line in the table below in ex
 | 16 | `Allow root ssh login? ('?' for help)` | **`yes`** | Enter |
 | 17 | `Enter ssh key or URL for root (or 'none')` | **`none`** | Enter |
 | | *(shows "Available disks are:" with disk info — this is info)* | *(wait for the actual prompt)* | |
-| 18 | `Which disk(s) would you like to use? (or '?' for help or 'none')` | `sda` | Enter |
+| 18 | `Which disk(s) would you like to use? (or '?' for help or 'none')` | `sdb` *(or whatever your USB showed up as — NOT sda)* | Enter |
 | | *(shows info about the selected disk)* | *(wait for the actual prompt)* | |
 | 19 | `How would you like to use it? ('sys', 'data' or '?' for help)` | `sys` | Enter |
 | 20 | `WARNING: The following disk(s) will be erased: /dev/sda. Continue? (y/n)` | **`y`** | Enter |
@@ -420,7 +439,7 @@ If you've already booted Alpine and just need the 20 prompt answers:
 | 15 | *(Enter)* |
 | 16 | **`yes`** |
 | 17 | **`none`** |
-| 18 | `sda` |
+| 18 | `sdb` *(or your USB disk)* |
 | 19 | **`sys`** |
 | 20 | **`y`** |
 
