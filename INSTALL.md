@@ -377,7 +377,6 @@ udhcpc -i usb0
 
 If still failing, unplug and re-plug the phone's USB cable, re-enable tethering, then repeat.
 
-On the HP Pavilion dv6 (1225dx), the front USB ports may be unreliable for tethering — try the **back USB ports** if you see intermittent drops.
 
 ### "python3: not found"
 
