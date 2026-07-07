@@ -17,11 +17,15 @@ jobs:
           sudo apt-get install -y -qq xorriso squashfs-tools wget cpio gzip
       
       - name: Build portable tarball
+        env:
+          VERSION: ${GITHUB_REF_NAME#v}
         run: |
           mkdir -p build/output
           bash build/scripts/make-portable.sh build/output
       
       - name: Build bootable ISO
+        env:
+          VERSION: ${GITHUB_REF_NAME#v}
         run: |
           bash build/scripts/build-live-iso.sh build/output
           ls -lh build/output/

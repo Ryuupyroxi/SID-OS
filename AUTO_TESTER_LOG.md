@@ -1,4 +1,4 @@
-# Auto Tester Log — SID OS v0.5.2
+# Auto Tester Log — SID OS v0.5.4
 
 > Maintained by the Codex Auto Tester automation (heartbeat, hourly).
 > Record bugs, glitches, regressions, and technical improvements here.
@@ -44,4 +44,4 @@
 
 | Date | Tests Passed | Tests Failed | Notes |
 |-----|-------------|-------------|-------|
-| 2026-07-06 | 84 | 0 | v0.5.2b — Windows bootstrap added, dep checker wired |
+| 2026-07-06 | 84 | 0 | v0.5.4b — Windows bootstrap added, dep checker wired |

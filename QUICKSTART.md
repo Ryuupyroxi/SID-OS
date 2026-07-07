@@ -1,6 +1,6 @@
 # SID OS — Quick Install Guide
 
-> **Version**: v0.5.2 | **Base**: Alpine 3.24.1  
+> **Version**: v0.5.4 | **Base**: Alpine 3.24.1  
 > **For people who've done this before. Need every detail? Read** `INSTALL.md`
 
 ---

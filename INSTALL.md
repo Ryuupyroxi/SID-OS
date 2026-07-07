@@ -1,6 +1,6 @@
 # SID OS — Complete Installation Guide
 
-> **Version**: v0.5.2  
+> **Version**: v0.5.4  
 > **Base**: Alpine Linux 3.24.1  
 > **Target**: Old laptops/desktops (4GB RAM)  
 > **Tested on**: HP Pavilion dv6 (1225dx)  

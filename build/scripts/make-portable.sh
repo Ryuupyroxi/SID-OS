@@ -3,7 +3,7 @@
 # Creates a self-contained portable tarball for any Linux system
 set -eo pipefail
 
-VERSION="0.5.2"
+VERSION="0.5.4"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 OUTPUT_DIR="${1:-$PROJECT_DIR/build/output}"

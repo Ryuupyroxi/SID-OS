@@ -2,7 +2,7 @@
 # SID OS Live ISO Builder - Builds a complete bootable Alpine + SID OS image
 set -eo pipefail
 
-VERSION="${VERSION:-0.5.2}"
+VERSION="${VERSION:-0.5.4}"
 ALPINE_VERSION="3.24.1"
 ARCH="x86_64"
 ALPINE_MIRROR="https://dl-cdn.alpinelinux.org/alpine/v3.24"
@@ -131,7 +131,7 @@ INIT
 cat > "$ROOTFS_DIR/etc/profile.d/sid.sh" << 'PROFILE'
 if [ "$(tty)" = "/dev/tty1" ]; then
     clear
-    echo "SID OS v0.5.2 - Super Intelligent Distro"
+    echo "SID OS v0.5.4 - Super Intelligent Distro"
     sleep 1
     sid
 fi
@@ -163,7 +163,7 @@ mount -t proc proc /proc
 mount -t sysfs sysfs /sys
 mount -t devtmpfs devtmpfs /dev
 clear
-echo "  SID OS v0.5.2 - booting..."
+echo "  SID OS v0.5.4 - booting..."
 for d in /dev/sr*; do [ -b "$d" ] && mount "$d" /mnt 2>/dev/null && [ -f /mnt/boot/sid.squashfs ] && break; done
 [ -f /mnt/boot/sid.squashfs ] || for d in /dev/sd*; do
     [ -b "$d" ] || continue
@@ -188,7 +188,7 @@ echo "  Initramfs: $(du -sh "$ISO_DIR/boot/initramfs-sid.gz" | cut -f1)"
 cat > "$ISO_DIR/boot/grub/grub.cfg" << 'GRUB'
 set timeout=3
 set default=0
-menuentry "SID OS v0.5.2" {
+menuentry "SID OS v0.5.4" {
     linux /boot/vmlinuz-sid console=tty0 quiet loglevel=3
     initrd /boot/initramfs-sid.gz
 }
