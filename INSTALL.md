@@ -204,8 +204,8 @@ The installer is now running. It will show you a series of prompts. Here is ever
 | 11 | `Which timezone are you in? (or '?' or 'none')` | `America/Chicago` *(or your city/region)* | Enter |
 | 12 | `HTTP/FTP proxy URL? (e.g. 'http://proxy:8080', or 'none')` | *(nothing — just press Enter)* | Enter |
 | 13 | `Which NTP client to run? ('busybox', 'openntpd', 'chrony' or 'none')` | *(nothing — just press Enter)* | Enter |
-| | *(shows a numbered list of mirrors — about 30-40 of them)* | | |
-| 14 | `Enter mirror number or URL:` | Type the number of the mirror closest to you (23 is USA, 1 is the CDN auto-select) | Enter |
+| | *(shows "Finding fastest mirror..." and tests mirror speeds)* | | |
+| 14 | *(auto-selected — answer file uses -f to pick the fastest)* | *(nothing to type)* | |
 | | *(shows "Updating repository index... Done" — wait for it, may take 10-60 seconds)* | | |
 | 15 | `Setup a user? (enter a lower-case loginname, or 'no')` | **`no`** | Enter |
 | 16 | `Which ssh server? ('openssh', 'dropbear' or 'none')` | *(nothing — just press Enter)* | Enter |

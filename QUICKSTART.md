@@ -60,7 +60,7 @@ setup-alpine -f /tmp/sid-answers.conf
 
 The installer asks you for 5 things:
 - **Password** (type it twice)
-- **Mirror number** (pick the closest)
+- **Mirror** (auto-selected — the answer file uses -f to find the fastest, just wait)
 - **Which disk** (type your USB name — **not** `sda`)
 - **How to use it** (type `sys`)
 - **Confirm** (type `y`)
