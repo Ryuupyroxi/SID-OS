@@ -4,7 +4,6 @@
 # Requires: xorriso, squashfs-tools, cpio, gzip, wget
 set -eo pipefail
 
-VERSION="${VERSION:-$(grep 'SID_VERSION' /root/SID-OS/get-sid.py 2>/dev/null | cut -d\" -f2 | head -1)}"
 VERSION="${VERSION:-0.5.2}"
 ALPINE_VERSION="3.24.1"
 ARCH="x86_64"
