@@ -1,14 +1,13 @@
-name: Build SID OS ISO
+name: Build SID OS ISO and Portable Release
 
 on:
   push:
     tags:
-      - 'v*'          # Build ISO on any version tag
-      - '**-beta'     # Also on beta tags
-  workflow_dispatch:   # Manual trigger from Actions tab
+      - 'v*'
+  workflow_dispatch:
     inputs:
       ram_tier:
-        description: 'Default RAM tier for the ISO'
+        description: 'Default RAM tier'
         required: true
         default: '4gb'
         type: choice
@@ -18,75 +17,91 @@ on:
           - 6gb
 
 jobs:
-  build-iso:
+  build-portable:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install build dependencies
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq \
-            build-essential linux-headers-generic \
-            wget curl git ncurses-dev python3 python3-pip \
-            cmake xorriso syslinux squashfs-tools \
-            cpio gzip busybox-static isolinux
-
-      - name: Build llama.cpp
-        run: |
-          git clone --depth 1 https://github.com/ggerganov/llama.cpp /tmp/llama.cpp
-          cd /tmp/llama.cpp
-          mkdir build && cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release -DLLAMA_CUDA=OFF -DBUILD_SHARED_LIBS=ON
-          make -j$(nproc) llama-server
-          cp bin/llama-server $GITHUB_WORKSPACE/build/output/
-
-      - name: Build whisper.cpp
-        run: |
-          git clone --depth 1 https://github.com/ggerganov/whisper.cpp /tmp/whisper.cpp
-          cd /tmp/whisper.cpp
-          make -j$(nproc) whisper-cli
-          cp whisper-cli $GITHUB_WORKSPACE/build/output/
-
-      - name: Build SID OS ISO
-        run: |
-          chmod +x build/scripts/build-sid.sh
-          ./build/scripts/build-sid.sh
-        env:
-          ARCH: x86_64
-          OUTPUT_DIR: ${{ github.workspace }}/build/output
-
-      - name: Upload ISO as artifact
-        uses: actions/upload-artifact@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          name: sid-os-iso
-          path: build/output/*.iso
-          retention-days: 30
+          python-version: '3.11'
 
-      - name: Create portable tarball
+      - name: Build portable tarball
         run: |
-          VERSION=${GITHUB_REF_NAME:-v0.5.0}
-          tar czf build/output/sid-${VERSION}-portable.tar.gz \
-            --exclude='.git' \
-            --exclude='build/output' \
-            --exclude='__pycache__' \
-            -C $GITHUB_WORKSPACE .
-          ls -lh build/output/
+          chmod +x build/scripts/make-portable.sh
+          ./build/scripts/make-portable.sh build/output
+
+      - name: Run test suite
+        run: |
+          pip install numpy psutil pillow pyyaml requests
+          python3 test_sid.py --verbose
 
       - name: Upload portable tarball
         uses: actions/upload-artifact@v4
         with:
-          name: sid-os-portable
-          path: build/output/*portable.tar.gz
-          retention-days: 30
+          name: sid-portable
+          path: build/output/*.tar.gz*
+
+  build-live-iso:
+    runs-on: ubuntu-latest
+    needs: build-portable
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download portable tarball
+        uses: actions/download-artifact@v4
+        with:
+          name: sid-portable
+          path: build/output/
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq \
+            xorriso isolinux squashfs-tools \
+            wget curl cpio gzip busybox-static
+
+      - name: Download Alpine Linux base
+        run: |
+          mkdir -p build/iso build/rootfs
+          # Download Alpine minirootfs (super minimal ~5MB)
+          wget -q -O build/alpine.tar.gz \
+            "https://dl-cdn.alpinelinux.org/alpine/v3.20/releases/x86_64/alpine-minirootfs-3.20.3-x86_64.tar.gz"
+
+      - name: Build SID OS Live ISO
+        run: |
+          chmod +x build/scripts/build-live-iso.sh
+          ./build/scripts/build-live-iso.sh
+        env:
+          ARCH: x86_64
+          OUTPUT_DIR: ${{ github.workspace }}/build/output
+
+      - name: Upload ISO
+        uses: actions/upload-artifact@v4
+        with:
+          name: sid-live-iso
+          path: build/output/*.iso
+
+  create-release:
+    runs-on: ubuntu-latest
+    needs: [build-portable, build-live-iso]
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
 
       - name: Create GitHub Release
-        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            build/output/*.iso
-            build/output/*portable.tar.gz
+            artifacts/sid-portable/*.tar.gz
+            artifacts/sid-portable/*.md5
+            artifacts/sid-portable/*.sha256
+            artifacts/sid-live-iso/*.iso
           generate_release_notes: true
           make_latest: true
