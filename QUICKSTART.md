@@ -5,6 +5,12 @@
 
 ---
 
+This guide has two paths (see INSTALL.md for full details):
+- **Path A — Internal drive** (recommended, uses answer file)
+- **Path B — Persistent USB** (interactive, no answer file)
+
+This quickstart covers Path A.
+
 ## What you need
 
 - USB drive **8GB+** (everything erased)
@@ -49,7 +55,7 @@ Test: `ping -c 3 google.com`
 cat /proc/partitions
 ```
 
-`sda` is your Windows drive. Your USB is `sdb` or `sdc`. Note the name.
+`sda` = internal drive, `sdb` = USB installer. We install to `sda`.
 
 ## Step 5: Run automated installer
 
@@ -58,10 +64,10 @@ wget -O /tmp/sid-answers.conf https://raw.githubusercontent.com/Ryuupyroxi/SID-O
 setup-alpine -f /tmp/sid-answers.conf
 ```
 
-The installer asks you for 5 things:
+The installer asks you for these::
 - **Password** (type it twice)
 - **Mirror** (auto-selected — the answer file uses -f to find the fastest, just wait)
-- **Which disk** (type your USB name — **not** `sda`)
+- **Which disk** (type **`sda`** — your internal drive)
 - **How to use it** (type `sys`)
 - **Confirm** (type `y`)
 

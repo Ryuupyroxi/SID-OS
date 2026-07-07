@@ -1,365 +1,217 @@
 #!/bin/bash
-# SID OS Live ISO Builder
-# Builds a bootable Alpine Linux + SID OS image
+# SID OS Live ISO Builder - Builds a complete bootable Alpine + SID OS image
 # Usage: ./build/scripts/build-live-iso.sh [output_dir]
 # Requires: xorriso, squashfs-tools, cpio, gzip, wget
+set -eo pipefail
 
-set -e
-# Debug mode
-# SID OS Live ISO Builder - Debug mode
-
-VERSION="0.5.2"
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
-OUTPUT_DIR="${1:-$PROJECT_DIR/build/output}"
-BUILD_DIR="/tmp/sid-live-build-$$"
+VERSION="${VERSION:-$(grep 'SID_VERSION' /root/SID-OS/get-sid.py 2>/dev/null | cut -d\" -f2 | head -1)}"
+VERSION="${VERSION:-0.5.2}"
 ALPINE_VERSION="3.24.1"
 ARCH="x86_64"
-
-echo "╔══════════════════════════════════════════╗"
-echo "║  SID OS Live ISO Builder v$VERSION       ║"
-echo "║  Alpine Linux + SID AI = SID OS         ║"
-echo "╚══════════════════════════════════════════╝"
-echo ""
-
-# Check required tools
-MISSING=""
-for cmd in xorriso mksquashfs cpio gzip wget dd; do
-    if ! command -v $cmd &>/dev/null; then MISSING="$MISSING $cmd"; fi
-done
-if [ -n "$MISSING" ]; then
-    echo "Missing build tools:$MISSING (non-fatal, continuing...)"
-fi
-echo "All build tools available ✓"
-
 ALPINE_MIRROR="https://dl-cdn.alpinelinux.org/alpine/v3.24"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+OUTPUT_DIR="$(realpath "${1:-$PROJECT_DIR/build/output}")"
+BUILD_DIR="/tmp/sid-live-build-$$"
 ROOTFS_DIR="$BUILD_DIR/rootfs"
 ISO_DIR="$BUILD_DIR/iso"
-INITRAMFS_DIR="$BUILD_DIR/initramfs"
+PKG_CACHE="$BUILD_DIR/packages"
 
-mkdir -p "$ROOTFS_DIR" "$ISO_DIR/boot/grub" "$ISO_DIR/isolinux" "$INITRAMFS_DIR" "$OUTPUT_DIR"
+mkdir -p "$ROOTFS_DIR" "$ISO_DIR/boot/grub" "$PKG_CACHE" "$OUTPUT_DIR"
 
-# Step 1: Get Alpine base system
-echo ""
-echo "[1/6] Downloading Alpine Linux base..."
-echo "STEP_MARKER: 1/6 Download Alpine"
+echo "╔══════════════════════════════════════════╗"
+echo "║  SID OS v$VERSION - Live ISO Builder     "
+echo "║  Alpine $ALPINE_VERSION $ARCH base"
+echo "╚══════════════════════════════════════════╝"
+
+# ---- Step 1: Get Alpine base ----
+echo "[1/6] Alpine minirootfs..."
 ALPINE_TAR="alpine-minirootfs-${ALPINE_VERSION}-${ARCH}.tar.gz"
-if [ ! -f "$BUILD_DIR/$ALPINE_TAR" ]; then
-    echo "  Downloading: $ALPINE_MIRROR/releases/$ARCH/$ALPINE_TAR" && \
-    echo "  Download URL: $ALPINE_MIRROR/releases/$ARCH/$ALPINE_TAR"
-    wget -v -O "$BUILD_DIR/$ALPINE_TAR" \
-        "$ALPINE_MIRROR/releases/$ARCH/$ALPINE_TAR" 2>&1
+wget -q -O "$PKG_CACHE/$ALPINE_TAR" "$ALPINE_MIRROR/releases/$ARCH/$ALPINE_TAR"
+tar xzf "$PKG_CACHE/$ALPINE_TAR" -C "$ROOTFS_DIR"
+echo "  Base: $(du -sh "$ROOTFS_DIR" | cut -f1)"
+
+# ---- Step 2: Download APKINDEX ----
+echo "[2/6] Package indexes..."
+for repo in main community; do
+    wget -q -O "$PKG_CACHE/APKINDEX-${repo}.tar.gz" "$ALPINE_MIRROR/$repo/$ARCH/APKINDEX.tar.gz"
+    tar xzf "$PKG_CACHE/APKINDEX-${repo}.tar.gz" -C "$PKG_CACHE/" 2>/dev/null || true
+    [ -f "$PKG_CACHE/APKINDEX" ] && mv "$PKG_CACHE/APKINDEX" "$PKG_CACHE/APKINDEX-$repo" 2>/dev/null || true
+done
+
+# ---- Step 3: Download and install packages ----
+echo "[3/6] Installing packages..."
+install_pkg() {
+    local name="$1" ver=""
+    for repo in main community; do
+        ver=$(grep -A20 "^P:$name$" "$PKG_CACHE/APKINDEX-$repo" 2>/dev/null | grep "^V:" | head -1 | cut -d: -f2-)
+        [ -n "$ver" ] && break
+    done
+    [ -z "$ver" ] && echo "  ? $name (not found)" && return 1
+    local file="${name}-${ver}.apk"
+    if [ ! -f "$PKG_CACHE/$file" ]; then
+        echo "  ↓ $name ($ver)"
+        for repo in main community; do
+            wget -q -O "$PKG_CACHE/$file" "$ALPINE_MIRROR/$repo/$ARCH/$file" 2>/dev/null && break
+        done
+    fi
+    if [ -f "$PKG_CACHE/$file" ] && [ -s "$PKG_CACHE/$file" ]; then
+        tar xzf "$PKG_CACHE/$file" -C "$ROOTFS_DIR" 2>/dev/null
+        rm -f "$ROOTFS_DIR/.PKGINFO" "$ROOTFS_DIR/.SIGN.RSA."* 2>/dev/null || true
+        echo "  + $name"
+    else
+        echo "  ✗ $name (download failed)"
+        return 1
+    fi
+}
+
+for pkg in linux-lts python3 py3-pip ncurses-libs ncurses-terminfo readline sqlite-libs openssl ca-certificates eudev-libs dhcpcd tzdata htop sudo syslinux; do
+    install_pkg "$pkg"
+done
+
+# Verify kernel
+if [ ! -f "$ROOTFS_DIR/boot/vmlinuz-lts" ]; then
+    echo "FATAL: Kernel not installed. Check network connectivity."
+    exit 1
 fi
-echo "  Alpine minirootfs downloaded ✓"
+echo "  Kernel: $(ls -lh "$ROOTFS_DIR/boot/vmlinuz-lts" | awk '{print $5}')"
 
-# Step 2: Extract and prepare root filesystem
-echo "[2/6] Setting up root filesystem..."
-echo "STEP_MARKER: 2/6 Extract rootfs"
-tar xzf "$BUILD_DIR/$ALPINE_TAR" -C "$ROOTFS_DIR"
+# Python pip packages (installed on first boot by SID)
+echo "  Python deps: auto-install on first boot"
 
-# Set up networking and basic config
-mkdir -p "$ROOTFS_DIR/etc"
+# ---- Step 4: Install SID OS ----
+echo "[4/6] Installing SID OS..."
+bash "$PROJECT_DIR/build/scripts/make-portable.sh" "$BUILD_DIR/portable" >/dev/null 2>&1
+SID_TAR=$(ls "$BUILD_DIR/portable"/sid-*.tar.gz | head -1)
+tar xzf "$SID_TAR" -C "$ROOTFS_DIR/opt/"
+[ -d "$ROOTFS_DIR/opt/opt/sid" ] && { mv "$ROOTFS_DIR/opt/opt/sid"/* "$ROOTFS_DIR/opt/" 2>/dev/null; rm -rf "$ROOTFS_DIR/opt/opt"; }
+[ ! -f "$ROOTFS_DIR/opt/sid/src/main.py" ] && { mkdir -p "$ROOTFS_DIR/opt/sid"; mv "$ROOTFS_DIR/opt/"* "$ROOTFS_DIR/opt/sid/" 2>/dev/null; }
+
+cat > "$ROOTFS_DIR/usr/local/bin/sid" << 'EOF'
+#!/bin/sh
+cd /opt/sid
+exec /usr/bin/python3 src/main.py "$@"
+EOF
+chmod +x "$ROOTFS_DIR/usr/local/bin/sid"
+mkdir -p "$ROOTFS_DIR/sid/models" "$ROOTFS_DIR/sid/memory" "$ROOTFS_DIR/sid/logs" "$ROOTFS_DIR/etc/sid"
+
+# ---- Step 5: Configure system ----
+echo "[5/6] Configuring boot..."
 echo "nameserver 1.1.1.1" > "$ROOTFS_DIR/etc/resolv.conf"
-echo "nameserver 8.8.8.8" >> "$ROOTFS_DIR/etc/resolv.conf"
 echo "127.0.0.1 localhost sid" > "$ROOTFS_DIR/etc/hosts"
 echo "sid" > "$ROOTFS_DIR/etc/hostname"
-
-# Set up APK repositories (Alpine package manager)
-mkdir -p "$ROOTFS_DIR/etc/apk"
 cat > "$ROOTFS_DIR/etc/apk/repositories" << REPOS
 $ALPINE_MIRROR/main
 $ALPINE_MIRROR/community
 REPOS
 
-# Step 3: Install packages via chroot
-echo "[3/6] Installing packages (kernel, Python, drivers)..."
-echo "STEP_MARKER: 3/6 Install packages"
-# Copy DNS config for chroot
-cp /etc/resolv.conf "$ROOTFS_DIR/etc/resolv.conf" 2>/dev/null || true
-
-echo "STEP_MARKER: Starting apk install in chroot..."
-echo "  Running: chroot $ROOTFS_DIR apk add..."
-chroot "$ROOTFS_DIR" /sbin/apk add --no-cache \
-    alpine-base busybox \
-    linux-lts \
-    python3 py3-pip \
-    musl ncurses-libs ncurses-terminfo \
-    readline sqlite-libs \
-    openssl ca-certificates \
-    eudev-libs e2fsprogs \
-    util-linux kmod \
-    dhcpcd ethtool \
-    tzdata htop \
-    2>&1 | tail -3
-
-# Install Python packages
-chroot "$ROOTFS_DIR" /usr/bin/pip3 install --no-cache-dir \
-    numpy psutil pillow pyyaml requests 2>&1 | tail -3
-
-echo "  Packages installed ✓"
-
-# Unmount virtual filesystems
-sudo umount "$ROOTFS_DIR/dev/pts" 2>/dev/null || true
-sudo umount "$ROOTFS_DIR/dev" 2>/dev/null || true
-sudo umount "$ROOTFS_DIR/sys" 2>/dev/null || true
-sudo umount "$ROOTFS_DIR/proc" 2>/dev/null || true
-
-# Step 4: Install SID OS
-echo "[4/6] Installing SID OS..."
-echo "STEP_MARKER: 4/6 Install SID"
-
-# Build portable tarball if needed
-SID_TARBALL=$(ls "$OUTPUT_DIR"/sid-*-portable.tar.gz 2>/dev/null | head -1)
-if [ -z "$SID_TARBALL" ]; then
-    echo "  Building portable tarball..."
-    bash "$PROJECT_DIR/build/scripts/make-portable.sh" "$BUILD_DIR/portable" >/dev/null 2>&1
-    SID_TARBALL=$(ls "$BUILD_DIR/portable"/sid-*.tar.gz | head -1)
-fi
-
-# Install SID to /opt/sid
-mkdir -p "$ROOTFS_DIR/opt"
-tar xzf "$SID_TARBALL" -C "$ROOTFS_DIR/opt/"
-mv "$ROOTFS_DIR/opt/"* "$ROOTFS_DIR/opt/sid" 2>/dev/null || true
-# Fix directory structure if tarball created root dir
-if [ -d "$ROOTFS_DIR/opt/sid/opt/sid" ]; then
-    mv "$ROOTFS_DIR/opt/sid/opt/sid/"* "$ROOTFS_DIR/opt/sid/" 2>/dev/null || true
-fi
-
-# Create SID command
-mkdir -p "$ROOTFS_DIR/usr/local/bin"
-cat > "$ROOTFS_DIR/usr/local/bin/sid" << 'SIDCMD'
-#!/bin/sh
-cd /opt/sid
-exec python3 src/main.py "$@"
-SIDCMD
-chmod +x "$ROOTFS_DIR/usr/local/bin/sid"
-
-# Create SID data directories
-mkdir -p "$ROOTFS_DIR/sid/models" "$ROOTFS_DIR/sid/memory" "$ROOTFS_DIR/sid/logs"
-mkdir -p "$ROOTFS_DIR/etc/sid"
-echo "  SID OS installed ✓"
-
-# Step 5: Create boot configuration
-echo "[5/6] Creating boot configuration..."
-echo "STEP_MARKER: 5/6 Boot config"
-
-# Create OpenRC service to auto-start SID on boot
-cat > "$ROOTFS_DIR/etc/init.d/sid" << 'SIDSVC'
-#!/sbin/openrc-run
-description="SID OS - Super Intelligent Distro"
-
-command="/usr/local/bin/sid"
-command_args="--theme vt100 --boot"
-command_background=false
-pidfile="/run/sid.pid"
-
-depend() {
-    need net localmount
-    after bootmisc
-}
-SIDSVC
-chmod +x "$ROOTFS_DIR/etc/init.d/sid"
-
-# Set up login profile to auto-launch SID on tty1
-cat > "$ROOTFS_DIR/etc/profile.d/sid.sh" << 'SIDPROFILE'
-# Auto-start SID on tty1 (physical console)
-if [ "$(tty)" = "/dev/tty1" ]; then
-    clear
-    echo "====================================="
-    echo "  SID OS v0.5.2 - Super Intelligent Distro"
-    echo "  Starting AI interface..."
-    echo "====================================="
-    sleep 1
-    sid
-fi
-SIDPROFILE
-chmod +x "$ROOTFS_DIR/etc/profile.d/sid.sh"
-
-# Enable services
-ln -sf /etc/init.d/sid "$ROOTFS_DIR/etc/runlevels/default/" 2>/dev/null || true
-ln -sf /etc/init.d/dhcpcd "$ROOTFS_DIR/etc/runlevels/default/" 2>/dev/null || true
-ln -sf /etc/init.d/localmount "$ROOTFS_DIR/etc/runlevels/default/" 2>/dev/null || true
-
-# Create /etc/inittab with auto-login on tty1
-cat > "$ROOTFS_DIR/etc/inittab" << 'INITTAB'
-# SID OS /etc/inittab
+cat > "$ROOTFS_DIR/etc/inittab" << 'INIT'
 ::sysinit:/sbin/openrc sysinit
 ::sysinit:/sbin/openrc boot
 ::wait:/sbin/openrc default
-
-# Auto-login on tty1 -> auto-starts SID via profile
 tty1::respawn:/sbin/getty -L 0 tty1 0 vt100
 tty2::respawn:/sbin/getty -L 38400 tty2 vt100
 tty3::respawn:/sbin/getty -L 38400 tty3 vt100
-
-# Restart on shutdown
 ::ctrlaltdel:/sbin/reboot
 ::shutdown:/sbin/openrc shutdown
-INITTAB
+INIT
 
-# Step 6: Build the bootable ISO
+cat > "$ROOTFS_DIR/etc/profile.d/sid.sh" << 'PROFILE'
+if [ "$(tty)" = "/dev/tty1" ]; then
+    clear; echo "SID OS v0.5.2 - Super Intelligent Distro"; sleep 1; sid
+fi
+PROFILE
+chmod +x "$ROOTFS_DIR/etc/profile.d/sid.sh"
+
+mkdir -p "$ROOTFS_DIR/etc/runlevels/default"
+ln -sf /etc/init.d/dhcpcd "$ROOTFS_DIR/etc/runlevels/default/" 2>/dev/null || true
+ln -sf /etc/init.d/localmount "$ROOTFS_DIR/etc/runlevels/default/" 2>/dev/null || true
+
+# ---- Step 6: Build bootable ISO ----
 echo "[6/6] Building bootable ISO..."
-echo "STEP_MARKER: 6/6 Build ISO"
 
-# Create squashfs of rootfs
+# Squashfs
 SQUASHFS="$BUILD_DIR/sid.squashfs"
 mksquashfs "$ROOTFS_DIR" "$SQUASHFS" -comp xz -b 256K -no-progress -noappend
 echo "  Squashfs: $(du -sh "$SQUASHFS" | cut -f1)"
 
-# Copy kernel from Alpine
-KERNEL="$ROOTFS_DIR/boot/vmlinuz-lts"
-INITRAMFS="$BUILD_DIR/initramfs-sid.gz"
+cp "$ROOTFS_DIR/boot/vmlinuz-lts" "$ISO_DIR/boot/vmlinuz-sid"
+cp "$SQUASHFS" "$ISO_DIR/boot/sid.squashfs"
 
-# Create minimal initramfs that mounts squashfs and boots
-cat > "$INITRAMFS_DIR/init" << 'INIT'
+# Initramfs
+INIT_DIR="$BUILD_DIR/initramfs"
+mkdir -p "$INIT_DIR"
+cat > "$INIT_DIR/init" << 'INIT'
 #!/bin/busybox sh
-
-# SID OS Init — boots Alpine + auto-starts SID
 /bin/busybox --install -s
-
-# Mount essential filesystems
 mount -t proc proc /proc
 mount -t sysfs sysfs /sys
 mount -t devtmpfs devtmpfs /dev
-mkdir -p /dev/pts
-mount -t devpts devpts /dev/pts
-
-# Print boot banner
 clear
-echo ""
-echo "  ╔══════════════════════════════════════╗"
-echo "  ║    SID OS v0.5.2 - Super Intelligent ║"
-echo "  ║    Distro                            ║"
-echo "  ╚══════════════════════════════════════╝"
-echo ""
-
-# Find and mount the root filesystem
-# Try various block devices
-    # Find root filesystem - scan more devices
-    ROOT_DEV=""
-    for dev in /dev/sd* /dev/nvme* /dev/mmcblk* /dev/vd* /dev/hd*; do
-        if [ -b "$dev" ] && [ "${dev%%[0-9]*}" != "${dev}" ]; then
-            ROOT_DEV="$dev"
-            break
-        fi
-    done
-
-if [ -n "$ROOT_DEV" ]; then
-    mount "$ROOT_DEV" /mnt 2>/dev/null || mount -t tmpfs tmpfs /mnt
+echo "  SID OS v0.5.2 - booting..."
+for d in /dev/sr*; do [ -b "$d" ] && mount "$d" /mnt 2>/dev/null && [ -f /mnt/boot/sid.squashfs ] && break; done
+[ -f /mnt/boot/sid.squashfs ] || for d in /dev/sd*; do
+    [ -b "$d" ] || continue
+    mount "$d" /mnt 2>/dev/null || continue
+    [ -f /mnt/boot/sid.squashfs ] && break
+    umount /mnt 2>/dev/null
+done
+if [ -f /mnt/boot/sid.squashfs ]; then
+    mkdir -p /rootfs
+    mount -o loop /mnt/boot/sid.squashfs /rootfs
+    umount /mnt 2>/dev/null
 else
-    mount -t tmpfs tmpfs /mnt
+    mount -t tmpfs tmpfs /rootfs
 fi
-
-# Mount the squashfs
-if [ -f "/mnt/sid.squashfs" ]; then
-    mkdir -p /mnt/root
-    mount -o loop /mnt/sid.squashfs /mnt/root
-    ROOTFS="/mnt/root"
-elif [ -f "/sid.squashfs" ]; then
-    mkdir -p /mnt/root
-    mount -o loop /sid.squashfs /mnt/root
-    ROOTFS="/mnt/root"
-else
-    # Fallback: use tmpfs
-    mkdir -p /mnt/root
-    mount -t tmpfs tmpfs /mnt/root
-    ROOTFS="/mnt/root"
-fi
-
-# Clean up /mnt before switch_root
-umount /mnt 2>/dev/null || true
-
-# Switch to the real root and run OpenRC
-exec switch_root "$ROOTFS" /sbin/init
+exec switch_root /rootfs /sbin/init
 INIT
-chmod +x "$INITRAMFS_DIR/init"
+chmod +x "$INIT_DIR/init"
+cd "$INIT_DIR"
+find . | cpio -H newc -o | gzip -9 > "$ISO_DIR/boot/initramfs-sid.gz"
+echo "  Initramfs: $(du -sh "$ISO_DIR/boot/initramfs-sid.gz" | cut -f1)"
 
-# Build initramfs
-cd "$INITRAMFS_DIR"
-find . | cpio -H newc -o | gzip -9 > "$INITRAMFS"
-echo "  Initramfs: $(du -sh "$INITRAMFS" | cut -f1)"
-
-# Copy kernel
-cp "$KERNEL" "$ISO_DIR/boot/vmlinuz-sid" 2>/dev/null || {
-    echo "  WARNING: No kernel found at $KERNEL"
-    echo "  The ISO will need a kernel to be bootable."
-}
-
-# Copy squashfs
-cp "$SQUASHFS" "$ISO_DIR/boot/sid.squashfs"
-
-# Create GRUB config
+# GRUB config
 cat > "$ISO_DIR/boot/grub/grub.cfg" << 'GRUB'
 set timeout=3
 set default=0
-
-menuentry "SID OS v0.5.2 - Super Intelligent Distro" {
+menuentry "SID OS v0.5.2" {
     linux /boot/vmlinuz-sid console=tty0 quiet loglevel=3
     initrd /boot/initramfs-sid.gz
 }
-
-menuentry "SID OS - Safe Mode (no AI)" {
-    linux /boot/vmlinuz-sid console=tty0 loglevel=3 noai
-    initrd /boot/initramfs-sid.gz
-}
-
-menuentry "SID OS - Hardware Test" {
-    linux /boot/vmlinuz-sid console=tty0 loglevel=3 test
+menuentry "SID OS (Safe Mode)" {
+    linux /boot/vmlinuz-sid console=tty0 nomodeset loglevel=3
     initrd /boot/initramfs-sid.gz
 }
 GRUB
 
-# Create ISO
-ISO_NAME="sid-$VERSION-live-$ARCH.iso"
-cd "$ISO_DIR"
-
-# Find the ISOLINUX MBR file
-ISOHYBRID_MBR=""
-for mbr in /usr/lib/ISOLINUX/isohdpfx.bin /usr/share/syslinux/isohdpfx.bin; do
-    if [ -f "$mbr" ]; then
-        ISOHYBRID_MBR="$mbr"
-        break
-    fi
-done
-
-# Create the bootable ISO
-if command -v grub-mkrescue &>/dev/null; then
-    echo "  Using grub-mkrescue for UEFI+BIOS bootable ISO..."
-    grub-mkrescue -o "$OUTPUT_DIR/$ISO_NAME" "$ISO_DIR" 2>/dev/null || \
-    xorriso -as mkisofs \
-        -V "SID-OS-$VERSION" \
-        ${ISOHYBRID_MBR:+-isohybrid-mbr "$ISOHYBRID_MBR"} \
-        -b isolinux/isolinux.bin -c isolinux/boot.cat \
-        -no-emul-boot -boot-load-size 4 -boot-info-table \
-        -eltorito-alt-boot -e boot/grub/efi.img -no-emul-boot \
-        -o "$OUTPUT_DIR/$ISO_NAME" \
-        "$ISO_DIR" 2>&1
-else
-    xorriso -as mkisofs \
-        -V "SID-OS-$VERSION" \
-        ${ISOHYBRID_MBR:+-isohybrid-mbr "$ISOHYBRID_MBR"} \
-        -b isolinux/isolinux.bin -c isolinux/boot.cat \
-        -no-emul-boot -boot-load-size 4 -boot-info-table \
-        -eltorito-alt-boot -e boot/grub/efi.img -no-emul-boot \
-        -o "$OUTPUT_DIR/$ISO_NAME" \
-        "$ISO_DIR" 2>&1
+# Get isolinux for BIOS boot
+if [ -f "$PKG_CACHE/syslinux-"*.apk ]; then
+    mkdir -p "$ISO_DIR/isolinux" "$BUILD_DIR/syslinux"
+    tar xzf "$PKG_CACHE"/syslinux-*.apk -C "$BUILD_DIR/syslinux" 2>/dev/null || true
+    cp "$BUILD_DIR/syslinux"/usr/share/syslinux/isolinux.bin "$ISO_DIR/isolinux/" 2>/dev/null || true
+    cp "$BUILD_DIR/syslinux"/usr/share/syslinux/isohdpfx.bin "$ISO_DIR/isolinux/" 2>/dev/null || true
 fi
-    . 2>&1
+
+# Create ISO
+ISO_NAME="sid-${VERSION}-live-${ARCH}.iso"
+if [ -f "$ISO_DIR/isolinux/isolinux.bin" ]; then
+    MBR="$ISO_DIR/isolinux/isohdpfx.bin"
+    [ -f "$MBR" ] && MBR_ARG="-isohybrid-mbr $MBR" || MBR_ARG=""
+    xorriso -as mkisofs -V "SID-OS-$VERSION" $MBR_ARG \
+        -b isolinux/isolinux.bin -c isolinux/boot.cat \
+        -no-emul-boot -boot-load-size 4 -boot-info-table \
+        -isohybrid-gpt-basdat \
+        -o "$OUTPUT_DIR/$ISO_NAME" "$ISO_DIR" 2>&1
+else
+    xorriso -as mkisofs -V "SID-OS-$VERSION" -o "$OUTPUT_DIR/$ISO_NAME" "$ISO_DIR" 2>&1
+fi
 
 echo ""
-echo "========================================"
-echo "  ✅ SID OS Live ISO built!"
-echo "  📁 $OUTPUT_DIR/$ISO_NAME"
-echo "  Size: $(du -sh "$OUTPUT_DIR/$ISO_NAME" | cut -f1)"
-echo "========================================"
-echo ""
-echo "  To write to USB (Linux):"
-echo "    sudo dd if=$OUTPUT_DIR/$ISO_NAME of=/dev/sdX bs=4M status=progress"
-echo ""
-echo "  To write to USB (Windows):"
-echo "    Use Rufus (rufus.ie) - select ISO, write in DD mode"
-echo ""
-echo "  Min requirements: 2GB RAM, x86_64 CPU, 4GB USB drive"
+echo "╔══════════════════════════════════════════╗"
+echo "║  ✅ SID OS Live ISO built!               ║"
+echo "║  $OUTPUT_DIR/$ISO_NAME"
+echo "║  $(du -h "$OUTPUT_DIR/$ISO_NAME" | cut -f1)"
+echo "╚══════════════════════════════════════════╝"
 
 # Cleanup
 rm -rf "$BUILD_DIR"

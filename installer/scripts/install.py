@@ -373,12 +373,12 @@ class SIDInstaller:
         # Create GRUB entry
         boot_entry = """timeout=3
 menuentry "SID OS v0.5.2" {
-    linux /boot/vmlinuz-sid root={root} console=tty0 quiet loglevel=3
-    initrd /boot/initramfs-sid.gz
+    linux /boot/vmlinuz-lts root={root} console=tty0 quiet loglevel=3
+    initrd /boot/initramfs-lts
 }
 menuentry "SID OS (Safe Mode)" {
-    linux /boot/vmlinuz-sid root={root} console=tty0 nomodeset acpi=off
-    initrd /boot/initramfs-sid.gz
+    linux /boot/vmlinuz-lts root={root} console=tty0 nomodeset acpi=off
+    initrd /boot/initramfs-lts
 }
 """
         (mount / "boot/grub/grub.cfg").write_text(

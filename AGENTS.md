@@ -134,9 +134,9 @@ SID OS follows `vMAJOR.MINOR.BUGFIX` — nothing fancy.
 
 | Bump | When | Example |
 |------|------|---------|
-| **BUGFIX** | Bug fixes, small tweaks, docs | `v0.0.3` → `v0.5.2` |
-| **MINOR** | New features, non-breaking changes | `v0.5.2` → `v0.1.0` |
-| **MAJOR** | Breaking changes, stable releases | `v0.1.0` → `v1.0.0` |
+| **BUGFIX** | Bug fixes, small tweaks, docs | `v0.5.1` → `v0.5.2` |
+| **MINOR** | New features, non-breaking changes | `v0.5.2` → `v0.6.0` |
+| **MAJOR** | Breaking changes, stable releases | `v0.6.0` → `v1.0.0` |
 
 ### Pushing a new version
 ```bash

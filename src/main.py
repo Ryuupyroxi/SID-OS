@@ -101,7 +101,7 @@ def main():
             ai = AIOrchestrator(config_path)
             
             # Apply RAM tier if specified
-            if args.ram_tier:
+            if args.ram_tier and ai:
                 ai.set_ram_tier(args.ram_tier)
             
             # Initialize memory

@@ -11,7 +11,12 @@
 
 ## Quick Install — Step by Step
 
-This is the exact process, in order, with what to type and what you'll see.
+This guide has two paths. Choose one:
+
+- **Path A — Install to internal drive** (recommended) — The USB is just the installer. Alpine wipes your internal drive and lives there permanently. Uses the answer file for automation.
+- **Path B — Persistent USB drive** — Alpine lives on the USB itself. You carry the OS in your pocket. Must run interactively (no answer file).
+
+Pick **Path A** unless you specifically need a portable USB OS.
 
 ---
 
@@ -149,7 +154,11 @@ Press Enter. You should see replies with times like `time=25ms`. Press Ctrl+C af
 
 ---
 
-### Step 6: Find your USB drive name (so you don't wipe Windows)
+## Path A — Install to Internal Drive (Recommended)
+
+The USB is a bootable installer. Alpine gets installed to your laptop's internal hard drive.
+
+### Step 6A: Identify your internal drive
 
 Type:
 ```
@@ -157,13 +166,15 @@ cat /proc/partitions
 ```
 Press Enter.
 
-You'll see a list of drives. One will say `sda` with a size around 120GB — that is your Windows hard drive. There will be another entry like `sdb` or `sdc` with a size matching your USB stick (8GB, 16GB, 32GB, etc.). That is your USB drive.
+You'll see a list of drives:
+- `sda` = your internal hard drive (Windows is on this)
+- `sdb` (or `sdc`) = your USB installer stick
 
-Write the USB name down. For the rest of this guide, we'll call it `sdb` — but if yours is `sdc` or `sdd`, use that instead.
+**The installer will erase `sda` and install Alpine there.** The USB is just the installer tool — like a CD you boot from.
 
----
+⚠ **Back up anything from Windows you want to keep before continuing.**
 
-### Step 7: Download the automated installer config
+### Step 7A: Download the automated installer config
 
 Type:
 ```
@@ -173,9 +184,7 @@ Press Enter.
 
 Output shows a progress bar as it downloads (2-3 seconds). When it finishes, the prompt returns.
 
----
-
-### Step 8: Run the installer with the config file
+### Step 8A: Run the installer with the config file
 
 Type:
 ```
@@ -183,9 +192,7 @@ setup-alpine -f /tmp/sid-answers.conf
 ```
 Press Enter.
 
----
-
-### Step 9: Answer the installer prompts
+### Step 9A: Answer the installer prompts
 
 The installer is now running. It will show you a series of prompts. Here is every single one, in order, with what to type:
 
@@ -212,21 +219,19 @@ The installer is now running. It will show you a series of prompts. Here is ever
 | 17 | `Allow root ssh login? ('?' for help)` | **`yes`** | Enter |
 | 18 | `Enter ssh key or URL for root (or 'none')` | **`none`** | Enter |
 | | *(shows "Available disks are:" with disk info — this is info, not a prompt)* | *(wait)* | |
-| 19 | `Which disk(s) would you like to use? (or '?' for help or 'none')` | Type the USB name you found in Step 6 — **not** `sda` | Enter |
+| 19 | `Which disk(s) would you like to use? (or '?' for help or 'none')` | Type **`sda`** (your internal drive) | Enter |
 | | *(shows more info about the selected disk)* | *(wait)* | |
 | 20 | `How would you like to use it? ('sys', 'data' or '?' for help)` | **`sys`** | Enter |
-| 21 | `WARNING: The following disk(s) will be erased: /dev/sdX. Continue? (y/n)` | **`y`** | Enter |
+| 21 | `WARNING: The following disk(s) will be erased: /dev/sda. Continue? (y/n)` | **`y`** | Enter |
 
----
+### Step 10A: Wait for installation to finish
 
-### Step 10: Wait for installation to finish
-
-The installer now formats the USB and copies Alpine onto it. You will see messages like:
+The installer now formats the internal drive and copies Alpine onto it. You will see messages like:
 
 ```
 mke2fs 1.x.x
 Creating journal...
-Installing system on /dev/sdb...
+Installing system on /dev/sda...
 ```
 
 Do not touch anything. This takes 3-5 minutes. When it finishes, you will see:
@@ -235,9 +240,7 @@ Do not touch anything. This takes 3-5 minutes. When it finishes, you will see:
 Installation is complete. Please reboot.
 ```
 
----
-
-### Step 11: Reboot
+### Step 11A: Reboot
 
 Type:
 ```
@@ -245,13 +248,11 @@ poweroff
 ```
 Press Enter. Wait for the laptop to shut down completely (the screen goes black and the fan stops).
 
----
+### Step 12A: Boot from the internal drive
 
-### Step 12: Boot from the new persistent USB
+Unplug the USB drive. Turn the laptop back on.
 
-Unplug the USB drive from the laptop. Wait 10 seconds. Plug the USB drive back in.
-
-Turn the laptop on. Press F9 repeatedly during boot. Select your USB drive from the boot menu.
+Alpine's boot menu should appear. If it doesn't, press F9/F10/F12 during boot and select your internal drive (not the USB).
 
 Wait. You will see:
 
@@ -261,14 +262,73 @@ localhost login:
 
 Type:
 ```
-root```
+root
+```
 Press Enter.
 
-Type the password you set in Step 9 (prompt #9). Press Enter.
+Type the password you set in Step 9A (prompt #9). Press Enter.
 
-You are now logged into Alpine Linux running from the USB drive. Everything you do from here will be saved.
+You are now logged into Alpine Linux installed on your internal drive. Everything you do from here will be saved.
 
 ---
+
+## Path B — Persistent USB Drive (Interactive)
+
+Alpine lives on the USB itself. You can boot any computer from it. This must be done interactively because the installer needs to unmount the USB to install onto it.
+
+### Step 6B: Find your USB drive name
+
+Type:
+```
+cat /proc/partitions
+```
+Press Enter.
+
+You'll see a list of drives:
+- `sda` = your internal hard drive (Windows)
+- `sdb` (or `sdc`) = your USB stick
+
+Write the USB name down (e.g. `sdb`). **This will be erased.**
+
+### Step 7B: Run the installer interactively (no answer file)
+
+```
+setup-alpine
+```
+Press Enter. **Do not use the `-f` flag** — we need to answer prompts manually.
+
+### Step 8B: Answer the prompts
+
+The prompts are the same as Path A Steps 1-18 above (keyboard, hostname, network, password, timezone, mirror, user, SSH). Answer them the same way.
+
+When you reach the disk prompt:
+
+- **Prompt: "Available disks are:"** — you may see no disks listed at first because the USB is in use as the boot device.
+- **Prompt: "Which disk(s) would you like to use? (or '?' for help or 'none')"** — if no disks are listed, a new prompt will appear:
+  - **"No disks available. Try boot media /dev/sdX? (y/n)"** — type **`y`**
+  - Alpine copies the boot files to RAM and unmounts the USB.
+  - The disk prompt appears again. Now type your USB name (e.g. **`sdb`**).
+- **Prompt: "How would you like to use it? ('sys', 'data' or '?' for help)"** — type **`sys`**
+- **Prompt: "WARNING: The following disk(s) will be erased: /dev/sdX. Continue?"** — type **`y`**
+
+### Step 9B: Wait and reboot
+
+Same as Steps 10A-11A. The installer writes Alpine to the USB.
+
+### Step 10B: Boot from the persistent USB
+
+When the install finishes and you poweroff:
+1. **Leave the USB plugged in** (it IS the installed system now)
+2. Turn the laptop back on
+3. Press F9 during boot, select the USB drive
+
+Login as `root` with your password. You now have a portable Alpine system on a USB.
+
+---
+
+## Both Paths — Install SID OS
+
+These steps are the same regardless of where Alpine was installed.
 
 ### Step 13: Connect to the internet again
 
@@ -286,8 +346,6 @@ Enter.
 ping -c 3 google.com
 ```
 Enter to confirm.
-
----
 
 ### Step 14: Install the SID OS software
 
@@ -308,56 +366,3 @@ SID downloads and launches automatically. You will see:
 ```
 sid⏣
 ```
-
-
-## Troubleshooting
-
-### "No such file or directory" when running get-sid.py
-
-Make sure curl finished downloading properly:
-
-```bash
-curl -sL -o get-sid.py https://raw.githubusercontent.com/Ryuupyroxi/SID-OS/main/get-sid.py
-ls -la get-sid.py
-python3 get-sid.py
-```
-
-### Internet stops working during setup-alpine
-
-Run this again and retry:
-
-```bash
-udhcpc -i usb0
-```
-
-### "Network is down" when running udhcpc
-
-The interface needs to be brought up first:
-
-```bash
-ip link set usb0 up
-udhcpc -i usb0
-```
-
-If still failing, unplug and re-plug the phone's USB cable, re-enable tethering, then repeat.
-
-
-### "python3: not found"
-
-Alpine is minimal — `apk add python3` installs it. If that command failed, run it again:
-
-```bash
-apk update
-apk add python3
-```
-
-### Bottom of screen cut off
-
-Follow the prompt table in Step 9. Every prompt is listed in order. If you hit something not in the table, write it down and stop.
-
-### USB not visible in Windows File Explorer after Rufus
-
-**Normal.** DD Image mode writes a Linux filesystem. Windows can't read it. The drive still works for booting.
-
----
-
