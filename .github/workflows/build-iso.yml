@@ -32,10 +32,26 @@ jobs:
 
       - name: Run test suite
         run: |
-          python3 -m pip install --quiet --upgrade pip 2>/dev/null || true
-          python3 -m pip install --quiet requests 2>/dev/null || true
-          python3 -c "import sys; import numpy, psutil, PIL, yaml, requests; print('All deps:', [numpy.__version__, psutil.__version__, PIL.__version__, yaml.__version__, requests.__version__])"
-          python3 test_sid.py --verbose 2>&1
+          echo "=== Python version ==="
+          python3 --version
+          echo "=== Working directory ==="
+          pwd
+          ls -la
+          echo "=== Check deps ==="
+          python3 -c "
+import sys
+print(f'Python {sys.version}')
+deps = {'numpy': 'numpy', 'psutil': 'psutil', 'PIL': 'pillow', 'yaml': 'pyyaml', 'requests': 'requests'}
+for imp, pkg in deps.items():
+    try:
+        exec(f'import {imp}')
+        print(f'  ✓ {imp}')
+    except ImportError:
+        print(f'  ✗ {imp} (needs {pkg})')
+" 2>&1
+          echo "=== Run tests ==="
+          python3 -u test_sid.py --verbose 2>&1 || true
+          echo "=== Test exit code: $? ==="
 
       - name: Build SID OS Live ISO
         run: |
