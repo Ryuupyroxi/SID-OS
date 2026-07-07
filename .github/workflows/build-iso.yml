@@ -16,10 +16,7 @@ jobs:
       - name: Install build dependencies
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq \
-            xorriso squashfs-tools syslinux-common \
-            grub-pc-bin grub-efi-amd64-bin grub-common \
-            wget cpio gzip dosfstools mtools
+          sudo apt-get install -y -qq             xorriso squashfs-tools syslinux-common             grub-pc-bin grub-efi-amd64-bin grub-common             wget cpio gzip dosfstools mtools
 
       - name: Build portable tarball
         run: |
@@ -30,17 +27,15 @@ jobs:
       - name: Test Python imports
         run: |
           sudo apt-get install -y -qq python3-numpy python3-psutil python3-pil python3-yaml python3-requests
-          python3 -c "
-import sys, os
-sys.path.insert(0, 'src')
-# Quick import test
-from ai.engine.orchestrator import AIOrchestrator
-from ai.engine.model_manager import ModelManager
-from ai.context.compressor import ContextCompressor
-from terminal.theme.manager import ThemeManager
-from memory import SidMemory
-print('All core modules import OK')
-"
+          python3 -c "\
+          import sys, os; sys.path.insert(0, 'src'); \
+          from ai.engine.orchestrator import AIOrchestrator; \
+          from ai.engine.model_manager import ModelManager; \
+          from ai.context.compressor import ContextCompressor; \
+          from terminal.theme.manager import ThemeManager; \
+          from memory import SidMemory; \
+          print('All core modules import OK') \
+          "
 
       - name: Build SID OS Live ISO
         run: |
