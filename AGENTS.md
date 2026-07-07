@@ -177,7 +177,7 @@ This triggers `.github/workflows/build-iso.yml` which:
 ### Manual (build full ISO — requires x86_64 + build tools)
 ```bash
 ./build/scripts/build-sid.sh
-# Output: build/output/sid-0.5.0-x86_64.iso
+# Output: build/output/sid-0.5.1-x86_64.iso
 ```
 
 ### Portable tarball contents

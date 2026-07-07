@@ -7,23 +7,22 @@ SID is a lightweight CLI-based Linux distribution for old hardware (4GB RAM targ
 AI is the primary interface — you navigate the OS by talking to it.
 
 [![Download](https://img.shields.io/github/v/release/Ryuupyroxi/SID-OS?label=Download&color=brightgreen)](https://github.com/Ryuupyroxi/SID-OS/releases/latest)
-[![Tests](https://img.shields.io/badge/tests-84%2F84-passing-brightgreen)]()
-[![License](https://img.shields.io/badge/license-MIT-blue)]()
+[![Tests](https://img.shields.io/badge/tests-84%2F84-passing-brightgreen)](https://github.com/Ryuupyroxi/SID-OS/blob/main/test_sid.py)
+[![License](https://img.shields.io/badge/license-MIT-blue)](https://github.com/Ryuupyroxi/SID-OS/blob/main/LICENSE)
 
 ## 🚀 Quick Start
 
-### Option 1: One-Command Bootstrap (recommended — zero dependencies)
+### Option 1: Linux/macOS — One-Command Bootstrap (recommended)
 ```bash
-# Pure Python — no wget, curl, or git required:
-# On Linux/macOS:
+# Requires Python 3.8+ (pre-installed on most Linux/macOS)
 python3 -c "$(python3 -c "import urllib.request; print(urllib.request.urlopen('https://raw.githubusercontent.com/Ryuupyroxi/SID-OS/main/get-sid.py').read().decode())")" --setup
 
-# Or save the script once, then run offline:
-# python3 -c "import urllib.request; open('get-sid.py','w').write(urllib.request.urlopen('https://raw.githubusercontent.com/Ryuupyroxi/SID-OS/main/get-sid.py').read().decode())"
-# python3 get-sid.py --setup
+# Or download and run offline:
+python3 -c "import urllib.request; open('get-sid.py','w').write(urllib.request.urlopen('https://raw.githubusercontent.com/Ryuupyroxi/SID-OS/main/get-sid.py').read().decode())"
+python3 get-sid.py --setup
 ```
 
-### Option 2: Windows (zero dependencies required)
+### Option 2: Windows (Python NOT included — get it first)
 Windows doesn't ship with Python, so SID OS includes two bootstrap methods:
 
 **Method A — Menu-driven launcher (recommended):**
@@ -40,15 +39,13 @@ Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Ryuupyroxi/SID-OS/main
 **Method C — Manual (if you already have Python):**
 ```batch
 cd sid-0.5.1-portable
-sid.bat --theme vt100
-sid-test.bat --verbose
+python src\main.py --theme vt100
 ```
 
-> **Note**: Full AI features require Python 3.8+ (download from python.org).
-> Hardware monitoring and system commands are Windows-compatible via psutil.
-> The portable release includes `sid.bat`, `get-sid.bat`, and `get-sid.ps1`.
+> **Note**: Full AI features require Python 3.8+ (download from python.org). Windows does not ship with Python.
+> The portable release includes `get-sid.bat`, `get-sid.ps1`, and Linux `./sid` launcher.
 
-> **Note**: Windows support is limited to the Python-based AI features. Hardware monitoring, voice, and system commands are Linux-only. The portable release includes both `sid.bat` (Windows) and `./sid` (Linux) launchers.
+> **Note**: Windows support is limited to the Python-based AI features. Hardware monitoring, voice, and system commands are Linux-only.
 
 ### Option 3: Clone and Run (for developers/testers)
 ```bash
@@ -60,7 +57,7 @@ python3 src/main.py --theme vt100
 python3 test_sid.py --verbose
 ```
 
-### Option 4: Build a bootable ISO (advanced)
+### Option 4: Build a bootable ISO (experimental)
 ```bash
 git clone https://github.com/Ryuupyroxi/SID-OS.git
 cd SID-OS
@@ -77,10 +74,11 @@ python3 installer/scripts/install.py
 
 ## ✨ What's Inside
 
-- **🧠 AI Engine** — Local models (Llama, Phi, Qwen, Gemma) + any API key
+- **🧠 AI Engine** — Local Qwen models (0.5B router to 7B specialist) + any API key (OpenAI, Anthropic, Gemini, Groq)
 - **🎤 Voice Control** — Offline STT (whisper.cpp) + TTS (espeak/piper)
 - **🗄️ 3-Tier Memory** — Working / Episodic (SQLite) / Semantic
 - **🧩 Context Compression** — Sliding window, summarization, dedup, trimming
+- **🔀 Router Model** — Tiny 468MB Qwen2.5-0.5B always-on conductor for intent routing
 - **🤖 Agentic Framework** — Hermes-inspired skill learning & tool use
 - **💾 Soul File** — Persistent personality (`/etc/sid/soul.json`)
 - **🖥️ 19 Retro Themes** — VT100, Apple II, C64, NeXTSTEP, etc.
