@@ -192,6 +192,12 @@ Wait 3-5 seconds. You should see:
 udhcpc: lease of 10.x.x.x obtained from 10.x.x.x
 ```
 
+> **If it says "network is down":** The interface needs to be brought up first.
+> ```bash
+> ip link set usb0 up
+> udhcpc -i usb0
+> ```
+
 ### 3.4 — Confirm internet works
 
 ```bash
@@ -362,12 +368,16 @@ udhcpc -i usb0
 
 ### "Network is down" when running udhcpc
 
+The interface needs to be brought up first:
+
 ```bash
 ip link set usb0 up
 udhcpc -i usb0
 ```
 
 If still failing, unplug and re-plug the phone's USB cable, re-enable tethering, then repeat.
+
+On the HP Pavilion dv6 (1225dx), the front USB ports may be unreliable for tethering — try the **back USB ports** if you see intermittent drops.
 
 ### "python3: not found"
 
