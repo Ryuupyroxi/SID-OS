@@ -5,6 +5,7 @@
 # Requires: xorriso, squashfs-tools, cpio, gzip, wget
 
 set -e
+# Debug mode
 # SID OS Live ISO Builder - Debug mode
 
 VERSION="0.5.1"
@@ -43,16 +44,19 @@ mkdir -p "$ROOTFS_DIR" "$ISO_DIR/boot/grub" "$ISO_DIR/isolinux" "$INITRAMFS_DIR"
 # Step 1: Get Alpine base system
 echo ""
 echo "[1/6] Downloading Alpine Linux base..."
+echo "STEP_MARKER: 1/6 Download Alpine"
 ALPINE_TAR="alpine-minirootfs-${ALPINE_VERSION}-${ARCH}.tar.gz"
 if [ ! -f "$BUILD_DIR/$ALPINE_TAR" ]; then
     echo "  Downloading: $ALPINE_MIRROR/releases/$ARCH/$ALPINE_TAR" && \
-    wget -O "$BUILD_DIR/$ALPINE_TAR" \
+    echo "  Download URL: $ALPINE_MIRROR/releases/$ARCH/$ALPINE_TAR"
+    wget -v -O "$BUILD_DIR/$ALPINE_TAR" \
         "$ALPINE_MIRROR/releases/$ARCH/$ALPINE_TAR" 2>&1
 fi
 echo "  Alpine minirootfs downloaded ✓"
 
 # Step 2: Extract and prepare root filesystem
 echo "[2/6] Setting up root filesystem..."
+echo "STEP_MARKER: 2/6 Extract rootfs"
 tar xzf "$BUILD_DIR/$ALPINE_TAR" -C "$ROOTFS_DIR"
 
 # Set up networking and basic config
@@ -71,10 +75,11 @@ REPOS
 
 # Step 3: Install packages via chroot
 echo "[3/6] Installing packages (kernel, Python, drivers)..."
+echo "STEP_MARKER: 3/6 Install packages"
 # Copy DNS config for chroot
 cp /etc/resolv.conf "$ROOTFS_DIR/etc/resolv.conf" 2>/dev/null || true
 
-# Install base packages using apk in chroot
+echo "STEP_MARKER: Starting apk install in chroot..."
 echo "  Running: chroot $ROOTFS_DIR apk add..."
 chroot "$ROOTFS_DIR" /sbin/apk add --no-cache \
     alpine-base busybox \
@@ -103,6 +108,7 @@ sudo umount "$ROOTFS_DIR/proc" 2>/dev/null || true
 
 # Step 4: Install SID OS
 echo "[4/6] Installing SID OS..."
+echo "STEP_MARKER: 4/6 Install SID"
 
 # Build portable tarball if needed
 SID_TARBALL=$(ls "$OUTPUT_DIR"/sid-*-portable.tar.gz 2>/dev/null | head -1)
@@ -137,6 +143,7 @@ echo "  SID OS installed ✓"
 
 # Step 5: Create boot configuration
 echo "[5/6] Creating boot configuration..."
+echo "STEP_MARKER: 5/6 Boot config"
 
 # Create OpenRC service to auto-start SID on boot
 cat > "$ROOTFS_DIR/etc/init.d/sid" << 'SIDSVC'
@@ -194,6 +201,7 @@ INITTAB
 
 # Step 6: Build the bootable ISO
 echo "[6/6] Building bootable ISO..."
+echo "STEP_MARKER: 6/6 Build ISO"
 
 # Create squashfs of rootfs
 SQUASHFS="$BUILD_DIR/sid.squashfs"
