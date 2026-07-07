@@ -3,7 +3,9 @@
 # Creates a self-contained portable tarball for any Linux system
 set -eo pipefail
 
-VERSION="1.0.0"
+# Auto-detect version from env, git tag, or fallback
+[ -z "${VERSION}" ] && [ -n "${GITHUB_REF_NAME}" ] && VERSION="${GITHUB_REF_NAME#v}"
+VERSION="${VERSION:-1.0.0}"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 OUTPUT_DIR="${1:-$PROJECT_DIR/build/output}"

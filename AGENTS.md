@@ -134,40 +134,39 @@ SID OS follows `vMAJOR.MINOR.BUGFIX` — nothing fancy.
 
 | Bump | When | Example |
 |------|------|---------|
-| **BUGFIX** | Bug fixes, small tweaks, docs | `v0.5.4` → `v1.0.0` |
+| **BUGFIX** | Bug fixes, small tweaks, docs | `v1.0.0` → `v1.0.1` |
 | **MINOR** | New features, non-breaking changes | `v1.0.0` → `v1.1.0` |
-| **MAJOR** | Breaking changes, stable releases | `v0.6.0` → `v1.0.0` |
+| **MAJOR** | Breaking changes, stable releases | `v1.0.0` → `v2.0.0` |
 
 ### Pushing a new version
 ```bash
-git tag -a v0.0.5 -m "Description of changes"
-git push origin v0.0.5
+git tag -a v1.0.1 -m "Description of changes"
+git push origin v1.0.1
 ```
 
 ### Release naming
-- **Stable**: `v1.0.0` — first public release, production-ready
-- **Stable**: `v1.0.0` and up — production-ready
+- `v1.0.0` — First public release (Stable)
+- `v1.x.x` — Production-ready
 
-### Current versions
-- `v0.0.1` — Initial scaffold
-- `v0.5.0` — Alpha: agentic framework (first public release), soul, retro themes, offline tools
-- `v0.5.2` — Beta: portable tarball and ISO builder, Windows bootstrap, persistent memory
+### Version history
+- `v1.0.0` — First public release: bootable ISO, install guide, CI automation
 - `v0.5.3` — Release candidate: bootable ISO with busybox initramfs
-- `v1.0.0` — Stable: first public release — bootable ISO, install guide, CI releases
+- `v0.5.2` — Beta: portable tarball and ISO builder, Windows bootstrap, persistent memory
+- `v0.5.0` — Alpha: agentic framework, soul, retro themes, offline tools
+- `v0.0.1` — Initial scaffold
 
 ## Releasing a new version
 
 ### Automatic (GitHub Actions)
 Push a tag and the CI builds everything:
 ```bash
-git tag -a v0.0.5 -m "description"
-git push origin v0.0.5
+git tag -a v1.0.1 -m "description"
+git push origin v1.0.1
 ```
 This triggers `.github/workflows/build-iso.yml` which:
-1. Builds llama.cpp + whisper.cpp
-2. Builds a bootable `.iso`
-3. Creates a portable `.tar.gz`
-4. Creates a GitHub Release with all artifacts attached
+1. Builds the bootable `.iso` from Alpine base + SID OS
+2. Creates a portable `.tar.gz` for non-ISO use
+3. Creates a GitHub Release with all artifacts attached
 
 ### Manual (build portable tarball locally)
 ```bash

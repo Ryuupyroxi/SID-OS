@@ -2,6 +2,8 @@
 # SID OS Live ISO Builder - Builds a complete bootable Alpine + SID OS image
 set -eo pipefail
 
+# Auto-detect version from env, git tag, or fallback
+[ -z "${VERSION}" ] && [ -n "${GITHUB_REF_NAME}" ] && VERSION="${GITHUB_REF_NAME#v}"
 VERSION="${VERSION:-1.0.0}"
 ALPINE_VERSION="3.24.1"
 ARCH="x86_64"
@@ -59,7 +61,7 @@ install_pkg() {
     fi
 }
 
-for pkg in linux-lts python3 py3-pip ncurses-libs ncurses-terminfo readline sqlite-libs openssl ca-certificates eudev-libs dhcpcd tzdata htop doas syslinux; do
+for pkg in linux-lts python3 py3-pip ncurses-libs ncurses-terminfo readline sqlite-libs openssl ca-certificates eudev-libs dhcpcd tzdata doas syslinux; do
     install_pkg "$pkg" || true
 done
 
@@ -220,4 +222,9 @@ echo "  SID OS ISO built!"
 echo "  $OUTPUT_DIR/$ISO_NAME"
 echo "  $(du -h "$OUTPUT_DIR/$ISO_NAME" | cut -f1)"
 echo "=========================================="
+# Generate checksums
+cd "$OUTPUT_DIR"
+sha256sum "$ISO_NAME" > "${ISO_NAME}.sha256"
+echo "  SHA256: $(cat "${ISO_NAME}.sha256")"
+echo ""
 rm -rf "$BUILD_DIR"
