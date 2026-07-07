@@ -6,7 +6,7 @@
 
 set -e
 
-VERSION="0.5.0"
+VERSION="0.5.1"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 OUTPUT_DIR="${1:-$PROJECT_DIR/build/output}"
