@@ -9,153 +9,251 @@
 ---
 ---
 
-## Quick Method (recommended)
+## Quick Install — Step by Step
 
-Skip the 20-prompt setup-alpine by using the answer file. Same result, zero typing.
-
-### What you need
-
-Same as the full method — Alpine ISO, Rufus, USB drive, phone tether.
-
-### Steps
-
-**1-3:** Same as Sections 1-3 — download Alpine, write USB with Rufus (DD mode), boot, login as root, connect tether.
-
-**4. Check which disk is your USB:**
-
-```bash
-cat /proc/partitions
-```
-
-The internal hard drive (Windows) is usually `sda`. Your USB drive will be the other one — typically `sdb` or `sdc`. Note the name.
-
-**5. Download and run the answer file:**
-
-```bash
-wget -O /tmp/sid-answers.conf https://raw.githubusercontent.com/Ryuupyroxi/SID-OS/main/installer/sid-answers.conf
-setup-alpine -f /tmp/sid-answers.conf
-```
-
-The installer will still prompt you for:
-- **Root password** (type it twice)
-- **Mirror number** (pick the closest one)
-- **Which disk** (type `sdb` or whatever your USB is — **not** `sda` which is Windows)
-- **How to use it** (type `sys`)
-- **Confirm** (type `y`)
-
-**6.** When done: `poweroff` → unplug USB → wait 10s → replug → reboot.
-
-> **⚠️ WARNING**: When the installer asks "Which disk(s)?" — do NOT type `sda`. That's your Windows drive. Type the USB name you noted in step 4 (usually `sdb` or `sdc`).
-
-**7.** Login as `root` with the password you set. Then:
-
-```bash
-apk add curl python3
-curl -sL https://raw.githubusercontent.com/Ryuupyroxi/SID-OS/main/get-sid.py | python3
-```
+This is the exact process, in order, with what to type and what you'll see.
 
 ---
 
+### Step 1: Download Alpine Linux
 
+On your Windows 10 laptop, open a web browser.
 
-## What you're building
-
-A persistent bootable USB that runs SID OS — an AI-first CLI operating system for old hardware. Alpine Linux is the hidden base. SID auto-launches on boot.
-
----
-
-## What you need
-
-- HP Pavilion (or any old x86_64 computer)
-- USB drive **8GB+** (everything on it gets erased)
-- Phone with USB tethering (for internet during install)
-- This guide printed or open on another device
-
----
-
-## Section 1: Download Alpine Linux
-
-Open **Edge** or **Chrome** on the HP (tethered to your phone or on WiFi).
-
-Go to this URL:
-
+Go to this address:
 ```
 https://dl-cdn.alpinelinux.org/alpine/v3.24/releases/x86_64/alpine-standard-3.24.1-x86_64.iso
 ```
 
-Save the file to your **Downloads** folder. It's about 450MB.
+The file downloads. Save it to your Downloads folder.
 
 ---
 
-## Section 2: Write Alpine to USB with Rufus
-
-### 2.1 — Download Rufus
+### Step 2: Download Rufus
 
 Go to:
-
 ```
 https://rufus.ie
 ```
 
-Click the download link for the **portable version** (not the installer). Save it to Downloads.
+Click the download link labeled "Rufus 4.x Portable". Save it to your Downloads folder.
 
-### 2.2 — Open Rufus
+---
 
-Double-click `rufus-4.x-portable.exe`. You don't need to install it.
+### Step 3: Write the Alpine ISO to your USB drive
 
-### 2.3 — Set up Rufus
+Open Rufus by double-clicking `rufus-4.x-portable.exe`. No installation needed.
 
-Plug in your USB drive. In Rufus, set every field:
+Plug your USB drive into the laptop.
 
-| Field | Setting |
-|---|---|
-| **Drive** | Select your USB drive (check the size to pick the right one) |
-| **Boot selection** | Click SELECT → pick `alpine-standard-3.24.1-x86_64.iso` from your Downloads |
-| **Partition scheme** | MBR (greyed out until you pick a mode — leave it) |
-| **Target system** | BIOS or UEFI (leave default) |
-| **Volume label** | Leave as-is |
-| **File system** | Large FAT32 (leave default) |
-| **Cluster size** | 4096 bytes (leave default) |
+In the Rufus window, do the following:
 
-### 2.4 — Start writing
+**Drive:** Click the dropdown and select your USB drive (match the size to confirm it's the right one).
 
-Click **START** at the bottom.
+**Boot selection:** Click the SELECT button. Browse to your Downloads folder and pick `alpine-standard-3.24.1-x86_64.iso`. Click Open.
 
-A popup appears with two radio buttons:
+All other fields (Partition scheme, Target system, Volume label, File system, Cluster size) — leave them at their defaults.
 
-- `💿 Write in ISO Image mode` ← DO NOT PICK THIS
-- `💾 Write in DD Image mode` ← PICK THIS
+Click the **START** button at the bottom of the window.
 
-Click **OK**.
+A popup appears with two options:
+- `💿 Write in ISO Image mode` — do NOT pick this
+- `💾 Write in DD Image mode` — pick this one
 
-Rufus warns "This will destroy all data" — click **OK**.
+Click OK.
 
-Wait for the green **"Ready"** bar at the bottom. About 2 minutes.
+Another popup says "This will destroy all data..." Click OK.
 
-### 2.5 — Verify in Disk Management (optional)
+Wait. A progress bar moves. When the bar reaches the end and the bottom of the window says **"Ready"** in green text, it's done. This takes about 2 minutes.
 
-1. Press `Windows + X` → click **Disk Management**
-2. Find your USB drive
-3. You should see a **1MB FAT partition** (EFI System) and the rest as **unallocated**
+Close Rufus. Leave the USB plugged in.
 
-This is correct. Alpine's hybrid ISO appears this way in Windows.
+---
 
-### 2.6 — Boot from the USB
+### Step 4: Boot from the USB
 
-1. Leave the USB plugged in
-2. Click **Restart** in Windows
-3. During boot, immediately start pressing **F9** repeatedly (about once per second)
-4. Keep pressing until a boot menu appears
-5. Use arrow keys to select your USB drive
-6. Press Enter
+Click the Windows Start menu. Click the power icon. Click **Restart**.
 
-> **If F9 doesn't work**: Try `F10`, `F12`, or `Esc` instead. HP uses F9 for the boot menu on most models.
+As soon as the screen goes black, start pressing the **F9** key once per second. Keep pressing until a boot menu appears with a list of devices.
 
-### 2.7 — Alpine boots
+If F9 doesn't work, try F10, F12, or Esc instead (HP uses F9 on most models but your model may differ).
 
-You'll see a blue screen with Alpine Linux boot options. Press **Enter**.
+The boot menu shows a list. Use the arrow keys to highlight your USB drive. Press Enter.
 
-Wait about 30 seconds. Eventually you'll see:
+A blue screen appears with Alpine Linux boot options. Press **Enter**.
+
+Wait 20-40 seconds. Text scrolls by. Eventually the screen shows:
+
+```
+localhost login:
+```
+
+At this prompt, type:
+```
+root
+```
+Press Enter. No password is needed.
+
+You are now logged into Alpine Linux. The operating system is running entirely in your laptop's RAM. Nothing has been written to any hard drive or USB yet.
+
+---
+
+### Step 5: Connect your phone for internet
+
+Plug your phone into the laptop's USB port using its charging cable.
+
+On your phone, go to **Settings** → **Connections** → **Mobile Hotspot & Tethering** and turn on **USB tethering**.
+
+Back at the Alpine prompt, type:
+```
+ip link show
+```
+Press Enter.
+
+You'll see a list of network interfaces. Look for one called `usb0`. If you see `usb0`, that is your phone tether.
+
+Now type:
+```
+ip link set usb0 up
+```
+Press Enter. No output means it worked.
+
+Then type:
+```
+udhcpc -i usb0
+```
+Press Enter.
+
+Wait 3 seconds. You should see:
+
+```
+udhcpc: lease of 10.x.x.x obtained from 10.x.x.x
+```
+
+(Your IP numbers will be different — that's fine.)
+
+If you see "network is down" instead, run both commands again one at a time:
+```
+ip link set usb0 up
+```
+Enter.
+```
+udhcpc -i usb0
+```
+Enter.
+
+To confirm the internet works, type:
+```
+ping -c 3 google.com
+```
+Press Enter. You should see replies with times like `time=25ms`. Press Ctrl+C after 3 replies to stop.
+
+---
+
+### Step 6: Find your USB drive name (so you don't wipe Windows)
+
+Type:
+```
+cat /proc/partitions
+```
+Press Enter.
+
+You'll see a list of drives. One will say `sda` with a size around 120GB — that is your Windows hard drive. There will be another entry like `sdb` or `sdc` with a size matching your USB stick (8GB, 16GB, 32GB, etc.). That is your USB drive.
+
+Write the USB name down. For the rest of this guide, we'll call it `sdb` — but if yours is `sdc` or `sdd`, use that instead.
+
+---
+
+### Step 7: Download the automated installer config
+
+Type:
+```
+wget -O /tmp/sid-answers.conf https://raw.githubusercontent.com/Ryuupyroxi/SID-OS/main/installer/sid-answers.conf
+```
+Press Enter.
+
+Output shows a progress bar as it downloads (2-3 seconds). When it finishes, the prompt returns.
+
+---
+
+### Step 8: Run the installer with the config file
+
+Type:
+```
+setup-alpine -f /tmp/sid-answers.conf
+```
+Press Enter.
+
+---
+
+### Step 9: Answer the installer prompts
+
+The installer is now running. It will show you a series of prompts. Here is every single one, in order, with what to type:
+
+| # | Prompt text | What to type | Then press |
+|---|---|---|---|
+| 1 | `Select keyboard layout:` | `us` | Enter |
+| 2 | `Select variant (or 'abort'):` | `us` | Enter |
+| 3 | `Enter system hostname (fully qualified form, e.g. 'foo.example.org')` | `sid` | Enter |
+| 4 | *(shows "Available interfaces are: usb0." — this is informational, not a prompt)* | *(wait for the actual prompt to appear)* | |
+| 5 | `Which one do you want to initialize? (or '?' or 'done')` | *(nothing — just press Enter — accepts usb0)* | Enter |
+| 6 | `IPv4 address for usb0? (or 'dhcp', 'none', '?')` | `dhcp` | Enter |
+| 7 | `IPv6 address for usb0? (or 'auto', 'dhcp', 'none', '?')` | `none` | Enter |
+| 8 | `Do you want to do any manual network configuration? (y/n)` | `n` | Enter |
+| 9 | `New password:` | Type a password you will remember (e.g. `sid123`) — the screen will not show what you type | Enter |
+| 10 | `Retype password:` | Type the same password again | Enter |
+| 11 | `Which timezone are you in? (or '?' or 'none')` | `America/Chicago` *(or your city/region)* | Enter |
+| 12 | `HTTP/FTP proxy URL? (e.g. 'http://proxy:8080', or 'none')` | *(nothing — just press Enter)* | Enter |
+| 13 | `Which NTP client to run? ('busybox', 'openntpd', 'chrony' or 'none')` | *(nothing — just press Enter)* | Enter |
+| | *(shows a numbered list of mirrors — about 30-40 of them)* | | |
+| 14 | `Enter mirror number or URL:` | Type the number of the mirror closest to you (23 is USA, 1 is the CDN auto-select) | Enter |
+| | *(shows "Updating repository index... Done" — wait for it, may take 10-60 seconds)* | | |
+| 15 | `Setup a user? (enter a lower-case loginname, or 'no')` | **`no`** | Enter |
+| 16 | `Which ssh server? ('openssh', 'dropbear' or 'none')` | *(nothing — just press Enter)* | Enter |
+| 17 | `Allow root ssh login? ('?' for help)` | **`yes`** | Enter |
+| 18 | `Enter ssh key or URL for root (or 'none')` | **`none`** | Enter |
+| | *(shows "Available disks are:" with disk info — this is info, not a prompt)* | *(wait)* | |
+| 19 | `Which disk(s) would you like to use? (or '?' for help or 'none')` | Type the USB name you found in Step 6 — **not** `sda` | Enter |
+| | *(shows more info about the selected disk)* | *(wait)* | |
+| 20 | `How would you like to use it? ('sys', 'data' or '?' for help)` | **`sys`** | Enter |
+| 21 | `WARNING: The following disk(s) will be erased: /dev/sdX. Continue? (y/n)` | **`y`** | Enter |
+
+---
+
+### Step 10: Wait for installation to finish
+
+The installer now formats the USB and copies Alpine onto it. You will see messages like:
+
+```
+mke2fs 1.x.x
+Creating journal...
+Installing system on /dev/sdb...
+```
+
+Do not touch anything. This takes 3-5 minutes. When it finishes, you will see:
+
+```
+Installation is complete. Please reboot.
+```
+
+---
+
+### Step 11: Reboot
+
+Type:
+```
+poweroff
+```
+Press Enter. Wait for the laptop to shut down completely (the screen goes black and the fan stops).
+
+---
+
+### Step 12: Boot from the new persistent USB
+
+Unplug the USB drive from the laptop. Wait 10 seconds. Plug the USB drive back in.
+
+Turn the laptop on. Press F9 repeatedly during boot. Select your USB drive from the boot menu.
+
+Wait. You will see:
 
 ```
 localhost login:
@@ -163,207 +261,54 @@ localhost login:
 
 Type:
 ```
-root
-```
-Press **Enter**. No password needed.
+root```
+Press Enter.
 
-You're now logged into Alpine Linux running entirely in RAM. Nothing is written to the USB yet.
+Type the password you set in Step 9 (prompt #9). Press Enter.
+
+You are now logged into Alpine Linux running from the USB drive. Everything you do from here will be saved.
 
 ---
 
-## Section 3: Connect to the internet
+### Step 13: Connect to the internet again
 
-### 3.1 — Phone tether
-
-1. Plug your phone into the HP via USB
-2. On your phone, go to **Settings** → **Connections** → **Mobile Hotspot & Tethering**
-3. Enable **USB tethering**
-
-### 3.2 — Find the interface
-
-At the Alpine prompt, type:
-
-```bash
-ip link show
 ```
-
-Also check which disk is your USB (so you don't accidentally wipe Windows later):
-
-```bash
-cat /proc/partitions
+ip link set usb0 up
 ```
+Enter.
 
-The internal drive (Windows) is `sda`. Your USB will be `sdb` or `sdc` — note it.
-
-Look for `usb0`, `enp0s20u1`, or similar. You should see it listed. Also ignore `lo` (loopback).
-
-### 3.3 — Get an IP address
-
-```bash
+```
 udhcpc -i usb0
 ```
-
-(Replace `usb0` with whatever your interface is called)
-
-Wait 3-5 seconds. You should see:
+Enter.
 
 ```
-udhcpc: lease of 10.x.x.x obtained from 10.x.x.x
-```
-
-> **If it says "network is down":** The interface needs to be brought up first.
-> ```bash
-> ip link set usb0 up
-> udhcpc -i usb0
-> ```
-
-### 3.4 — Confirm internet works
-
-```bash
 ping -c 3 google.com
 ```
-
-You should see replies.
-
-> **If it doesn't work the first time:** Unplug the USB cable from the phone, wait 5 seconds, plug it back, re-enable tethering, and run `udhcpc -i usb0` again.
+Enter to confirm.
 
 ---
 
-## Section 4: Install Alpine persistently to USB
+### Step 14: Install the SID OS software
 
-Run the Alpine installer:
-
-```bash
-setup-alpine
+Type:
 ```
-
-This will show a series of prompts. **Follow every line in the table below in exact order.**
-
-### Important notes before you start:
-
-- **Lines marked `(just press Enter)`**: Press Enter only — do not type anything
-- **Lines marked with text**: Type the text shown, then press Enter
-- If you can't see the bottom of your screen (broken display), just follow the table blindly
-- If you see something not in this table, **stop and write it down**
-
-### The complete prompt table
-
-| # | What you see on screen | What to type | Then press |
-|---|---|---|---|
-| | *(script starts)* | *(nothing, just wait for first prompt)* | |
-| 1 | `Select keyboard layout:` | `us` | Enter |
-| 2 | `Select variant (or 'abort'):` | `us` | Enter |
-| 3 | `Enter system hostname (fully qualified form, e.g. 'foo.example.org')` | `sid` | Enter |
-| | *(shows "Available interfaces are: usb0." — this is info, not a prompt)* | *(wait for the actual prompt)* | |
-| 4 | `Which one do you want to initialize? (or '?' or 'done')` | *(just press Enter — defaults to usb0)* | Enter |
-| 5 | `IPv4 address for usb0? (or 'dhcp', 'none', '?')` | `dhcp` | Enter |
-| | *(IP address gets assigned)* | *(wait 3 seconds)* | |
-| 6 | `IPv6 address for usb0? (or 'auto', 'dhcp', 'none', '?')` | `none` | Enter |
-| 7 | `Do you want to do any manual network configuration? (y/n)` | `n` | Enter |
-| 8 | `New password:` | Choose a password (e.g. `sid123`) | Enter |
-| 9 | `Retype password:` | Same password again | Enter |
-| 10 | `Which timezone are you in? (or '?' or 'none')` | `America/Chicago` *(or your timezone)* | Enter |
-| 11 | `HTTP/FTP proxy URL? (e.g. 'http://proxy:8080', or 'none')` | *(just press Enter — defaults to none)* | Enter |
-| 12 | `Which NTP client to run? ('busybox', 'openntpd', 'chrony' or 'none')` | *(just press Enter — defaults to busybox)* | Enter |
-| | *(shows mirror list with numbers)* | | |
-| 13 | `Enter mirror number or URL:` | Pick the number closest to you (e.g. 23 for USA) | Enter |
-| | *(shows "Updating repository index... Done")* | *(wait for it to finish — this may take 10-60 seconds)* | |
-| 14 | `Setup a user? (enter a lower-case loginname, or 'no')` | **`no`** (must be full word) | Enter |
-| 15 | `Which ssh server? ('openssh', 'dropbear' or 'none')` | *(just press Enter — defaults to openssh)* | Enter |
-| 16 | `Allow root ssh login? ('?' for help)` | **`yes`** | Enter |
-| 17 | `Enter ssh key or URL for root (or 'none')` | **`none`** | Enter |
-| | *(shows "Available disks are:" with disk info — this is info)* | *(wait for the actual prompt)* | |
-| 18 | `Which disk(s) would you like to use? (or '?' for help or 'none')` | `sdb` *(or whatever your USB showed up as — NOT sda)* | Enter |
-| | *(shows info about the selected disk)* | *(wait for the actual prompt)* | |
-| 19 | `How would you like to use it? ('sys', 'data' or '?' for help)` | `sys` | Enter |
-| 20 | `WARNING: The following disk(s) will be erased: /dev/sda. Continue? (y/n)` | **`y`** | Enter |
-
-### After the last prompt
-
-The installer now formats the USB and installs Alpine. You'll see:
-
-```
-mke2fs messages...
-Installing system on /dev/sda...
-Installation is complete. Please reboot.
-```
-
-This takes about **3-5 minutes**.
-
-### Reboot
-
-```bash
-poweroff
-```
-
-(It may ask to confirm — just press Enter again.)
-
----
-
-## Section 5: Boot into persistent Alpine
-
-1. **Unplug the USB** from the laptop
-2. **Wait 10 seconds**
-3. **Plug the USB back in**
-4. **Restart the laptop**
-5. Spam **F9** during boot
-6. Pick the USB drive from the menu
-7. Wait for `localhost login:`
-8. Type: `root` → Enter
-9. Type: the password you set in Section 4, step 8 → Enter
-10. Reconnect the phone tether:
-
-```bash
-udhcpc -i usb0
-```
-
-11. Verify internet:
-
-```bash
-ping -c 3 google.com
-```
-
----
-
-## Section 6: Install SID OS
-
-With internet working:
-
-```bash
 apk add curl python3
 ```
+Press Enter. Wait for it to install (10-20 seconds). You'll see package download messages.
 
-Wait for it to install (10-20 seconds). Then:
-
-```bash
+Then type:
+```
 curl -sL https://raw.githubusercontent.com/Ryuupyroxi/SID-OS/main/get-sid.py | python3
 ```
+Press Enter.
 
-SID downloads, extracts, and launches automatically. You'll see:
+SID downloads and launches automatically. You will see:
 
 ```
 sid⏣
 ```
 
-From now on, **every time you boot this USB**, SID starts automatically. Alpine is underneath but you rarely need to see it.
-
----
-
-## Section 7: Basic usage
-
-Once inside SID:
-
-| Command | What it does |
-|---|---|
-| `ai what's my CPU temp?` | Ask the AI anything |
-| `sys info` | System information |
-| `config set theme vt100` | Switch to retro theme |
-| `help` | Full command list |
-| `benchmark` | See if your system can run larger AI models |
-
-Type naturally — the AI understands `how much RAM do I have left?` as well as `sys mem`.
-
----
 
 ## Troubleshooting
 
@@ -408,7 +353,7 @@ apk add python3
 
 ### Bottom of screen cut off
 
-Follow the table in Section 4 blindly. Every prompt is listed in order. If you hit something not in the table, write it down and stop.
+Follow the prompt table in Step 9. Every prompt is listed in order. If you hit something not in the table, write it down and stop.
 
 ### USB not visible in Windows File Explorer after Rufus
 
@@ -416,33 +361,3 @@ Follow the table in Section 4 blindly. Every prompt is listed in order. If you h
 
 ---
 
-## Quick Reference — Section 4 answers only
-
-If you've already booted Alpine and just need the 20 prompt answers:
-
-| # | Answer |
-|---|---|
-| 1 | `us` |
-| 2 | `us` |
-| 3 | `sid` |
-| 4 | *(Enter)* |
-| 5 | `dhcp` |
-| 6 | `none` |
-| 7 | `n` |
-| 8 | *your password* |
-| 9 | *same password* |
-| 10 | `America/Chicago` |
-| 11 | *(Enter)* |
-| 12 | *(Enter)* |
-| 13 | *pick a mirror number* |
-| 14 | **`no`** |
-| 15 | *(Enter)* |
-| 16 | **`yes`** |
-| 17 | **`none`** |
-| 18 | `sdb` *(or your USB disk)* |
-| 19 | **`sys`** |
-| 20 | **`y`** |
-
----
-
-> Found a bug? Open an issue at: https://github.com/Ryuupyroxi/SID-OS/issues
