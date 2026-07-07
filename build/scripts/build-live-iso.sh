@@ -5,6 +5,7 @@
 # Requires: xorriso, squashfs-tools, cpio, gzip, wget
 
 set -e
+# SID OS Live ISO Builder - Debug mode
 
 VERSION="0.5.1"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -44,8 +45,9 @@ echo ""
 echo "[1/6] Downloading Alpine Linux base..."
 ALPINE_TAR="alpine-minirootfs-${ALPINE_VERSION}-${ARCH}.tar.gz"
 if [ ! -f "$BUILD_DIR/$ALPINE_TAR" ]; then
-    wget -q -O "$BUILD_DIR/$ALPINE_TAR" \
-        "$ALPINE_MIRROR/releases/$ARCH/$ALPINE_TAR"
+    echo "  Downloading: $ALPINE_MIRROR/releases/$ARCH/$ALPINE_TAR" && \
+    wget -O "$BUILD_DIR/$ALPINE_TAR" \
+        "$ALPINE_MIRROR/releases/$ARCH/$ALPINE_TAR" 2>&1
 fi
 echo "  Alpine minirootfs downloaded ✓"
 
@@ -73,6 +75,7 @@ echo "[3/6] Installing packages (kernel, Python, drivers)..."
 cp /etc/resolv.conf "$ROOTFS_DIR/etc/resolv.conf" 2>/dev/null || true
 
 # Install base packages using apk in chroot
+echo "  Running: chroot $ROOTFS_DIR apk add..."
 chroot "$ROOTFS_DIR" /sbin/apk add --no-cache \
     alpine-base busybox \
     linux-lts \
@@ -87,7 +90,7 @@ chroot "$ROOTFS_DIR" /sbin/apk add --no-cache \
     2>&1 | tail -3
 
 # Install Python packages
-chroot "$ROOTFS_DIR" /usr/bin/pip3 install --quiet --no-cache-dir \
+chroot "$ROOTFS_DIR" /usr/bin/pip3 install --no-cache-dir \
     numpy psutil pillow pyyaml requests 2>&1 | tail -3
 
 echo "  Packages installed ✓"
