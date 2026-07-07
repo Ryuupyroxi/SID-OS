@@ -9,25 +9,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
+      - name: Install build deps
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xorriso squashfs-tools syslinux-common grub-pc-bin grub-efi-amd64-bin grub-common wget cpio gzip dosfstools mtools
+      
       - name: Build portable tarball
         run: |
           mkdir -p build/output
           bash build/scripts/make-portable.sh build/output
           ls -lh build/output/
       
-      - name: Build ISO via Docker
+      - name: Build SID OS Live ISO
         run: |
-          docker build -t sid-iso -f- . << 'DOCKER'
-          FROM alpine:3.20
-          RUN apk add --no-cache alpine-base busybox linux-lts python3 py3-pip musl ncurses-libs xorriso squashfs-tools cpio wget
-          RUN mkdir -p /build/sid-source
-          COPY . /build/sid-source/
-          RUN cd /build/sid-source && mkdir -p build/output && bash build/scripts/make-portable.sh build/output 2>&1
-          RUN cd /build/sid-source && bash build/scripts/build-live-iso.sh build/output 2>&1
-          DOCKER
-          docker create --name sid-tmp sid-iso
-          docker cp sid-tmp:/build/output/. build/output/ 2>/dev/null || true
-          docker rm sid-tmp 2>/dev/null || true
+          bash build/scripts/build-live-iso.sh build/output 2>&1
           ls -lh build/output/
       
       - name: Upload artifacts
