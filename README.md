@@ -57,15 +57,18 @@ python3 src/main.py --theme vt100
 python3 test_sid.py --verbose
 ```
 
-### Option 4: Build a bootable ISO (experimental)
+
+### Option 5: Persistent USB OS (full Alpine + SID)
 ```bash
-git clone https://github.com/Ryuupyroxi/SID-OS.git
-cd SID-OS
-./build/scripts/build-sid.sh
-# Output: ./output/sid-0.5.2-x86_64.iso
+# Boot Alpine 3.24.1 from USB -> login as root
+# Run setup-alpine, install to your USB (/dev/sda)
+# Reboot into persistent Alpine USB, then:
+apk add curl python3
+curl -sL https://raw.githubusercontent.com/Ryuupyroxi/SID-OS/main/get-sid.py | python3
+# SID auto-launches on every boot after that
 ```
 
-### Option 5: Install to disk (advanced)
+### Option 6: Install to disk (advanced)
 ```bash
 git clone https://github.com/Ryuupyroxi/SID-OS.git
 cd SID-OS
