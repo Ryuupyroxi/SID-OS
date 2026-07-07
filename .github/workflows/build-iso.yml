@@ -1,42 +1,47 @@
-name: Build SID OS ISO and Portable Release
+name: Build SID OS Live ISO
 
 on:
   push:
     tags:
       - 'v*'
   workflow_dispatch:
-    inputs:
-      ram_tier:
-        description: 'Default RAM tier'
-        required: true
-        default: '4gb'
-        type: choice
-        options:
-          - 2gb
-          - 4gb
-          - 6gb
 
 jobs:
-  build-portable:
+  build-sid-live:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq \
+            xorriso isolinux squashfs-tools \
+            wget cpio gzip grub-pc-bin grub-efi
 
       - name: Build portable tarball
         run: |
+          mkdir -p build/output
           chmod +x build/scripts/make-portable.sh
           ./build/scripts/make-portable.sh build/output
 
       - name: Run test suite
         run: |
-          pip install numpy psutil pillow pyyaml requests
+          pip install numpy psutil pillow pyyaml requests --quiet
           python3 test_sid.py --verbose
+
+      - name: Build SID OS Live ISO
+        run: |
+          chmod +x build/scripts/build-live-iso.sh
+          ./build/scripts/build-live-iso.sh build/output
+          ls -lh build/output/
+
+      - name: Upload ISO as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sid-live-iso
+          path: build/output/*.iso
 
       - name: Upload portable tarball
         uses: actions/upload-artifact@v4
@@ -44,64 +49,14 @@ jobs:
           name: sid-portable
           path: build/output/*.tar.gz*
 
-  build-live-iso:
-    runs-on: ubuntu-latest
-    needs: build-portable
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Download portable tarball
-        uses: actions/download-artifact@v4
-        with:
-          name: sid-portable
-          path: build/output/
-
-      - name: Install build dependencies
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq \
-            xorriso isolinux squashfs-tools \
-            wget curl cpio gzip busybox-static
-
-      - name: Download Alpine Linux base
-        run: |
-          mkdir -p build/iso build/rootfs
-          # Download Alpine minirootfs (super minimal ~5MB)
-          wget -q -O build/alpine.tar.gz \
-            "https://dl-cdn.alpinelinux.org/alpine/v3.20/releases/x86_64/alpine-minirootfs-3.20.3-x86_64.tar.gz"
-
-      - name: Build SID OS Live ISO
-        run: |
-          chmod +x build/scripts/build-live-iso.sh
-          ./build/scripts/build-live-iso.sh
-        env:
-          ARCH: x86_64
-          OUTPUT_DIR: ${{ github.workspace }}/build/output
-
-      - name: Upload ISO
-        uses: actions/upload-artifact@v4
-        with:
-          name: sid-live-iso
-          path: build/output/*.iso
-
-  create-release:
-    runs-on: ubuntu-latest
-    needs: [build-portable, build-live-iso]
-    if: startsWith(github.ref, 'refs/tags/')
-    steps:
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts/
-
       - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            artifacts/sid-portable/*.tar.gz
-            artifacts/sid-portable/*.md5
-            artifacts/sid-portable/*.sha256
-            artifacts/sid-live-iso/*.iso
+            build/output/*.iso
+            build/output/*.tar.gz
+            build/output/*.md5
+            build/output/*.sha256
           generate_release_notes: true
           make_latest: true

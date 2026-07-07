@@ -12,15 +12,40 @@ navigate and control the OS by talking to the AI.
 
 **Core Philosophy**: The AI is the OS shell. Every user action routes through AI.
 
-## Hardware Targets
+## Hardware Targets (Alpine Linux + SID OS)
 
-| Tier   | RAM      | Default Model                        | Context |
-|--------|----------|--------------------------------------|---------|
-| 2gb    | < 4GB    | Qwen2.5-1.5B-Instruct                | 32K     |
-| 4gb    | 4-6GB    | Qwen2.5-3B-Instruct                  | 32K     |
-| 6gb    | > 6GB    | Qwen2.5-7B-Instruct                  | 32K     |
+| Tier   | RAM      | Default Model                        | Disk   | Notes |
+|--------|----------|--------------------------------------|--------|-------|
+| 2gb    | < 4GB    | Qwen2.5-1.5B-Instruct                | 4GB    | Ultra light, swap needed |
+| 4gb    | 4-6GB    | Qwen2.5-3B-Instruct                  | 8GB    | ★ Recommended minimum |
+| 6gb    | > 6GB    | Qwen2.5-7B-Instruct                  | 16GB   | Full features |
 
-## Architecture
+SID OS runs as a live or installed system on top of Alpine Linux.
+The underlying Alpine base requires ~500MB RAM + 1GB disk.
+AI models require additional RAM based on the tier.
+
+## Architecture (Alpine Linux + SID OS)
+
+SID OS is built on Alpine Linux. The boot process:
+
+```
+Power On → BIOS/UEFI → GRUB → Linux Kernel → SID Init → OpenRC → SID AI
+```
+
+- **Underlying OS**: Alpine Linux (musl/busybox based, ~5MB base)
+- **Bootloader**: GRUB (supports BIOS + UEFI)
+- **Kernel**: Linux LTS (Alpine's linux-lts, hardware-optimized)
+- **Init System**: OpenRC (fast, simple)
+- **AI Layer**: SID OS Python application starts automatically
+- **User Experience**: Boot straight into SID AI prompt — never see Alpine
+
+Key facts:
+- Boot time: ~5-10 seconds on old hardware
+- Base RAM usage: ~300MB (Alpine + Python + SID)
+- Storage: ~1GB base install, +2GB per AI model
+- Network: DHCP auto-config on boot
+- Voice: ALSA + tinyalsa for audio (if hardware supports)
+- Display: Framebuffer console (no X11/Wayland needed)
 
 ```
 User Input → Intent Classification → Context Building → Compression → Model → Response
