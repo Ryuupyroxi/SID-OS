@@ -24,8 +24,8 @@ jobs:
       - name: Build portable tarball
         run: |
           mkdir -p build/output
-          chmod +x build/scripts/make-portable.sh
-          ./build/scripts/make-portable.sh build/output
+          bash build/scripts/make-portable.sh build/output
+          ls -lh build/output/
 
       - name: Run test suite
         run: |
@@ -34,10 +34,7 @@ jobs:
 
       - name: Build SID OS Live ISO
         run: |
-          chmod +x build/scripts/build-live-iso.sh
-          # Check if packages installed properly
-          dpkg -l | grep -E "xorriso|squashfs|syslinux|grub" | awk '{print $2, $3}'
-          ./build/scripts/build-live-iso.sh build/output
+          bash build/scripts/build-live-iso.sh build/output
           ls -lh build/output/
 
       - name: Upload ISO as artifact
