@@ -13,20 +13,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install build deps
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq             xorriso squashfs-tools syslinux-common             grub-pc-bin grub-efi-amd64-bin grub-common             wget cpio gzip dosfstools mtools             python3-pip python3-numpy python3-psutil python3-pil python3-yaml python3-requests
-
       - name: Build portable tarball
         run: |
           mkdir -p build/output
           bash build/scripts/make-portable.sh build/output
           ls -lh build/output/
 
-      - name: Build SID OS Live ISO
+      - name: Build ISO with Docker
         run: |
-          bash build/scripts/build-live-iso.sh build/output
+          docker build -f build/docker/Dockerfile.iso -t sid-builder .
+          docker run --rm -v $PWD/build/output:/output sid-builder sh -c "cp /*.iso /output/ 2>/dev/null; cp /*.tar.gz* /output/ 2>/dev/null; ls -lh /output/"
           ls -lh build/output/
 
       - name: Upload ISO as artifact
