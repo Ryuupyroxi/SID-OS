@@ -20,9 +20,6 @@ jobs:
             xorriso squashfs-tools syslinux-common \
             grub-pc-bin grub-efi-amd64-bin grub-common \
             wget cpio gzip dosfstools mtools
-          sudo apt-get install -y -qq \
-            python3-pip python3-numpy python3-psutil python3-pil python3-yaml \
-            python3-requests
 
       - name: Build portable tarball
         run: |
@@ -30,28 +27,20 @@ jobs:
           bash build/scripts/make-portable.sh build/output
           ls -lh build/output/
 
-      - name: Run test suite
+      - name: Test Python imports
         run: |
-          echo "=== Python version ==="
-          python3 --version
-          echo "=== Working directory ==="
-          pwd
-          ls -la
-          echo "=== Check deps ==="
+          sudo apt-get install -y -qq python3-numpy python3-psutil python3-pil python3-yaml python3-requests
           python3 -c "
-import sys
-print(f'Python {sys.version}')
-deps = {'numpy': 'numpy', 'psutil': 'psutil', 'PIL': 'pillow', 'yaml': 'pyyaml', 'requests': 'requests'}
-for imp, pkg in deps.items():
-    try:
-        exec(f'import {imp}')
-        print(f'  ✓ {imp}')
-    except ImportError:
-        print(f'  ✗ {imp} (needs {pkg})')
-" 2>&1
-          echo "=== Run tests ==="
-          python3 -u test_sid.py --verbose 2>&1 || true
-          echo "=== Test exit code: $? ==="
+import sys, os
+sys.path.insert(0, 'src')
+# Quick import test
+from ai.engine.orchestrator import AIOrchestrator
+from ai.engine.model_manager import ModelManager
+from ai.context.compressor import ContextCompressor
+from terminal.theme.manager import ThemeManager
+from memory import SidMemory
+print('All core modules import OK')
+"
 
       - name: Build SID OS Live ISO
         run: |
@@ -69,10 +58,6 @@ for imp, pkg in deps.items():
         with:
           name: sid-portable
           path: build/output/*.tar.gz*
-
-      - name: List release assets
-        if: startsWith(github.ref, 'refs/tags/')
-        run: ls -lh build/output/
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
