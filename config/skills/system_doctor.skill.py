@@ -10,7 +10,7 @@ class SystemDoctorSkill(BaseSkill):
         super().__init__()
         self.metadata = SkillMetadata(
             name="system_doctor",
-            version="0.5.4",
+            version="1.0.0",
             description="Diagnose system issues and suggest fixes",
             author="SID OS",
             dependencies=["bash", "python3"]

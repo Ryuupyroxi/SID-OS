@@ -6,7 +6,7 @@
 
 set -e
 
-VERSION="0.5.4"
+VERSION="1.0.0"
 BRANCH="main"
 BASE="https://raw.githubusercontent.com/Ryuupyroxi/SID-OS/$BRANCH"
 SID_TARBALL="$BASE/build/output/sid-$VERSION-portable.tar.gz"

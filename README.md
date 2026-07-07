@@ -1,6 +1,6 @@
 # ╔══════════════════════════════════════════╗
 # ║     SID - Super Intelligent Distro       ║
-# ║     v0.5.4 — AI-First CLI OS for Old Hardware            ║
+# ║     v1.0.0 — AI-First CLI OS for Old Hardware            ║
 # ╚══════════════════════════════════════════╝
 
 SID is a lightweight CLI-based Linux distribution for old hardware (4GB RAM target).  
@@ -38,7 +38,7 @@ Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Ryuupyroxi/SID-OS/main
 
 **Method C — Manual (if you already have Python):**
 ```batch
-cd sid-0.5.4-portable
+cd sid-1.0.0-portable
 python src\main.py --theme vt100
 ```
 

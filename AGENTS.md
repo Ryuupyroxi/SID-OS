@@ -1,4 +1,4 @@
-# SID OS - Super Intelligent Distro (v0.5.4)
+# SID OS - Super Intelligent Distro (v1.0.0)
 
 ## Architecture Overview
 
@@ -32,7 +32,7 @@ sid/
 └── test_sid.py             # 84-test validation suite
 ```
 
-## Key Features (v0.5.4)
+## Key Features (v1.0.0)
 
 ### AI & Intelligence
 - AI-First OS navigation - every command routes through AI
@@ -134,8 +134,8 @@ SID OS follows `vMAJOR.MINOR.BUGFIX` — nothing fancy.
 
 | Bump | When | Example |
 |------|------|---------|
-| **BUGFIX** | Bug fixes, small tweaks, docs | `v0.5.3` → `v0.5.4` |
-| **MINOR** | New features, non-breaking changes | `v0.5.4` → `v0.6.0` |
+| **BUGFIX** | Bug fixes, small tweaks, docs | `v0.5.4` → `v1.0.0` |
+| **MINOR** | New features, non-breaking changes | `v1.0.0` → `v1.1.0` |
 | **MAJOR** | Breaking changes, stable releases | `v0.6.0` → `v1.0.0` |
 
 ### Pushing a new version
@@ -145,16 +145,15 @@ git push origin v0.0.5
 ```
 
 ### Release naming
-- **Alpha**: `v0.x.x` — early development, unstable, breaking changes expected
-- **Beta**: `v1.0.0-rc.x` — feature-complete, release candidates
+- **Stable**: `v1.0.0` — first public release, production-ready
 - **Stable**: `v1.0.0` and up — production-ready
 
 ### Current versions
 - `v0.0.1` — Initial scaffold
-- `v0.5.0` — Pre-alpha: agentic framework, soul, retro themes, offline tools
-- `v0.5.2` — Beta: ISO builder, Windows bootstrap, persistent memory
-- `v0.5.3` — Alpha: bootable ISO (busybox initramfs), install path fixes
-- `v0.5.4` — Alpha: bootable ISO, install guide rewrite, CI publishes releases
+- `v0.5.0` — Alpha: agentic framework (first public release), soul, retro themes, offline tools
+- `v0.5.2` — Beta: portable tarball and ISO builder, Windows bootstrap, persistent memory
+- `v0.5.3` — Release candidate: bootable ISO with busybox initramfs
+- `v1.0.0` — Stable: first public release — bootable ISO, install guide, CI releases
 
 ## Releasing a new version
 
@@ -173,18 +172,18 @@ This triggers `.github/workflows/build-iso.yml` which:
 ### Manual (build portable tarball locally)
 ```bash
 ./build/scripts/make-portable.sh
-# Output: build/output/sid-0.5.4-portable.tar.gz
+# Output: build/output/sid-1.0.0-portable.tar.gz
 ```
 
 ### Manual (build full ISO — requires x86_64 + build tools)
 ```bash
 ./build/scripts/build-sid.sh
-# Output: build/output/sid-0.5.4-x86_64.iso
+# Output: build/output/sid-1.0.0-x86_64.iso
 ```
 
 ### Portable tarball contents
 ```
-sid-0.5.4-portable/
+sid-1.0.0-portable/
 ├── sid              # Launcher: ./sid --theme vt100
 ├── sid-install      # Installer: sudo ./sid-install
 ├── sid-test         # Test suite: ./sid-test --verbose
@@ -196,3 +195,35 @@ sid-0.5.4-portable/
 ├── BOOT_HELPER.md   # Quick start guide
 └── test_sid.py      # Test suite
 ```
+
+## ISO Build Reference (for Codex)
+
+### Quick rebuild
+```bash
+# Dev: build locally (run from repo root)
+bash build/scripts/build-live-iso.sh
+# Output: build/output/sid-1.0.0-live-x86_64.iso
+
+# Release: tag + push triggers CI
+git tag -a v1.0.0 -m "description"
+git push origin v1.0.0
+# CI builds, uploads artifact, publishes Release
+```
+
+### Build process (file-based, no QEMU needed)
+1. Download Alpine minirootfs → extract
+2. Download APKINDEX → find package versions
+3. Download .apk packages → extract into rootfs
+4. Install SID OS source → /opt/sid
+5. Configure inittab, profile, services
+6. mksquashfs rootfs → sid.squashfs
+7. Build initramfs with busybox + init script
+8. Copy kernel, squashfs, initramfs → ISO dir
+9. Get isolinux/syslinux for BIOS boot
+10. xorriso → bootable sid-*.iso
+
+### Key files
+- `build/scripts/build-live-iso.sh` — The ISO builder
+- `build/scripts/make-portable.sh` — Portable tarball builder  
+- `.github/workflows/build-iso.yml` — CI pipeline
+- `installer/sid-answers.conf` — Answer file for setup-alpine
