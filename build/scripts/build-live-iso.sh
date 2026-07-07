@@ -153,9 +153,11 @@ cp "$ROOTFS_DIR/boot/vmlinuz-lts" "$ISO_DIR/boot/vmlinuz-sid"
 cp "$SQUASHFS" "$ISO_DIR/boot/sid.squashfs"
 
 INIT_DIR="$BUILD_DIR/initramfs"
-mkdir -p "$INIT_DIR"
+rm -rf "$INIT_DIR" && mkdir -p "$INIT_DIR/bin" "$INIT_DIR/dev" "$INIT_DIR/proc" "$INIT_DIR/sys" "$INIT_DIR/mnt" "$INIT_DIR/rootfs"
+cp "$ROOTFS_DIR/bin/busybox" "$INIT_DIR/bin/"
+ln -s busybox "$INIT_DIR/bin/sh"
 cat > "$INIT_DIR/init" << 'INIT2'
-#!/bin/busybox sh
+#!/bin/sh
 /bin/busybox --install -s
 mount -t proc proc /proc
 mount -t sysfs sysfs /sys
