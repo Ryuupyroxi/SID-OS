@@ -55,8 +55,49 @@ python3 src/main.py --theme vt100
 
 # Run the test suite
 python3 test_sid.py --verbose
+
+
+### Option 4: Bootable ISO — Full OS Installation (recommended for old hardware)
+[![Download](https://img.shields.io/github/v/release/Ryuupyroxi/SID-OS?label=Download+ISO&color=brightgreen)](https://github.com/Ryuupyroxi/SID-OS/releases/latest)
+
+Download `sid-*-live-x86_64.iso` from the [Releases page](https://github.com/Ryuupyroxi/SID-OS/releases/latest).
+
+**On Windows — flash with Rufus:**
+1. Download [Rufus](https://rufus.ie) (portable is fine)
+2. Plug in a USB drive (8GB+, everything on it will be erased)
+3. Open Rufus, select your USB, pick the ISO
+4. Click START — when prompted, choose **"Write in DD Image mode"** (not ISO mode)
+5. Wait for "Ready", then reboot
+
+**On Linux — flash with dd:**
+```bash
+# Find your USB device (e.g. /dev/sdb) — be careful!
+lsblk
+sudo dd if=sid-1.0.0-live-x86_64.iso of=/dev/sdb bs=4M status=progress
 ```
 
+**Boot & install:**
+1. Plug the USB in, reboot, spam F9 (or F10/F12/Esc) to enter boot menu
+2. Select the USB drive, press Enter at the Alpine boot menu
+3. Login as `root` (no password), connect phone via USB tether:
+   ```bash
+   ip link set usb0 up
+   udhcpc -i usb0
+   ```
+4. Run the automated installer:
+   ```bash
+   wget -O /tmp/sid-answers.conf https://raw.githubusercontent.com/Ryuupyroxi/SID-OS/main/installer/sid-answers.conf
+   setup-alpine -f /tmp/sid-answers.conf
+   ```
+5. Enter a root password, type `sda` for the disk, `sys` for filesystem, `y` to confirm
+6. After install: `poweroff`, unplug USB, reboot — login as root, then:
+   ```bash
+   apk add curl python3
+   curl -sL https://raw.githubusercontent.com/Ryuupyroxi/SID-OS/main/get-sid.py | python3
+   ```
+   SID auto-launches on every boot after that.
+
+> **Need every detail?** See [`INSTALL.md`](INSTALL.md) for the full guide.
 
 ### Option 5: Persistent USB OS (full Alpine + SID)
 ```bash
