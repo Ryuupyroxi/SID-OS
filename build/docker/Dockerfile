@@ -1,5 +1,5 @@
 # SID OS Build Container
-FROM alpine:3.19 AS builder
+FROM alpine:3.24 AS builder
 
 LABEL description="SID OS Build Environment"
 LABEL version="1.0.0"

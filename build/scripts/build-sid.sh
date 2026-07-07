@@ -19,7 +19,7 @@ header() { echo -e "\n${BLUE}═════════════════
 # Configuration
 SID_VERSION="0.5.2"
 ARCH="${ARCH:-x86_64}"
-BASE_IMAGE="${BASE_IMAGE:-alpine:3.19}"
+BASE_IMAGE="${BASE_IMAGE:-alpine:3.24}"
 KERNEL_VERSION="${KERNEL_VERSION:-6.6.x}"
 
 check_deps() {
