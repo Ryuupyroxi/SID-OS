@@ -2,8 +2,8 @@
 
 ## Architecture Overview
 
-SID is a lightweight CLI-based Linux distribution for old hardware (4GB RAM) 
-with a deeply integrated AI system that functions as the primary OS interface.
+SID is lightweight CLI-based Linux distribution for old hardware (4GB RAM)
+with deeply integrated AI system that functions as primary OS interface.
 
 ## Core Architecture
 
@@ -76,10 +76,10 @@ sid/
 
 ### Themes
 - 19 Iconic CLI Computer Themes:
-  DEC VT100, IBM 3270, Apple II, Commodore 64, TRS-80,
-  Altair 8800, Xerox Alto, SGI Iris, Sun Micro, NeXTSTEP,
-  IBM PC-DOS, Amiga Workbench, TeleType ASR-33, Dragon 32,
-  ZX Spectrum, BBC Micro, Macintosh 128K, CP/M Osborne 1
+ DEC VT100, IBM 3270, Apple II, Commodore 64, TRS-80,
+ Altair 8800, Xerox Alto, SGI Iris, Sun Micro, NeXTSTEP,
+ IBM PC-DOS, Amiga Workbench, TeleType ASR-33, Dragon 32,
+ ZX Spectrum, BBC Micro, Macintosh 128K, CP/M Osborne 1
 
 ## Quick Start
 
@@ -138,7 +138,7 @@ SID OS follows `vMAJOR.MINOR.BUGFIX` — nothing fancy.
 | **MINOR** | New features, non-breaking changes | `v1.0.0` → `v1.1.0` |
 | **MAJOR** | Breaking changes, stable releases | `v1.0.0` → `v2.0.0` |
 
-### Pushing a new version
+### Pushing new version
 ```bash
 git tag -a v1.0.1 -m "Description of changes"
 git push origin v1.0.1
@@ -155,18 +155,18 @@ git push origin v1.0.1
 - `v0.5.0` — Alpha: agentic framework, soul, retro themes, offline tools
 - `v0.0.1` — Initial scaffold
 
-## Releasing a new version
+## Releasing new version
 
 ### Automatic (GitHub Actions)
-Push a tag and the CI builds everything:
+Push tag and CI builds everything:
 ```bash
 git tag -a v1.0.1 -m "description"
 git push origin v1.0.1
 ```
 This triggers `.github/workflows/build-iso.yml` which:
-1. Builds the bootable `.iso` from Alpine base + SID OS
-2. Creates a portable `.tar.gz` for non-ISO use
-3. Creates a GitHub Release with all artifacts attached
+1. Builds bootable `.iso` from Alpine base + SID OS
+2. Creates portable `.tar.gz` for non-ISO use
+3. Creates GitHub Release with all artifacts attached
 
 ### Manual (build portable tarball locally)
 ```bash
@@ -222,7 +222,7 @@ git push origin v1.0.0
 10. xorriso → bootable sid-*.iso
 
 ### Key files
-- `build/scripts/build-live-iso.sh` — The ISO builder
-- `build/scripts/make-portable.sh` — Portable tarball builder  
+- `build/scripts/build-live-iso.sh` — ISO builder
+- `build/scripts/make-portable.sh` — Portable tarball builder
 - `.github/workflows/build-iso.yml` — CI pipeline
 - `installer/sid-answers.conf` — Answer file for setup-alpine

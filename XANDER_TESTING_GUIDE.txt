@@ -1,0 +1,73 @@
+╔══════════════════════════════════════════════════╗
+║            🕵️ CLASSIFIED: XANDER ONLY           ║
+║        SID OS v1.0.0 — Field Test Brief         ║
+╚══════════════════════════════════════════════════╝
+
+Agent: Xander
+Codename: Lead Debugger
+Target: HP Pavilion dv6 (1225dx) — 4GB RAM
+
+────────────────────────────────────────────
+ MISSION OBJECTIVES
+────────────────────────────────────────────
+
+1. Download the ISO from the Releases page
+   → https://github.com/Ryuupyroxi/SID-OS/releases/tag/v1.0.0
+   → File: sid-1.0.0-live-x86_64.iso
+
+2. Flash it to a USB (8GB+) with Rufus in DD Image mode
+ (NOT ISO mode — this is critical, DD mode or bust)
+
+3. Boot from USB on the HP Pavilion
+   → Spam F9 during boot → pick the USB
+   → Press Enter at the Alpine boot menu
+   → Login: root (no password)
+
+4. Connect via phone USB tether:
+ ip link set usb0 up
+ udhcpc -i usb0
+ ping -c 3 google.com
+
+5. Run the installer:
+ wget -O /tmp/sid-answers.conf https://raw.githubusercontent.com/Ryuupyroxi/SID-OS/main/installer/sid-answers.conf
+ setup-alpine -f /tmp/sid-answers.conf
+   → Enter password when prompted
+   → Type sda for the disk
+   → Type sys for the filesystem
+   → Type y to confirm
+
+6. Reboot (remove USB), login, then:
+ apk add curl python3
+ curl -sL https://raw.githubusercontent.com/Ryuupyroxi/SID-OS/main/get-sid.py | python3
+
+7. You should see the sid⏣ prompt. You're in.
+
+────────────────────────────────────────────
+ WHAT TO TEST
+────────────────────────────────────────────
+
+[ ] ISO boots without errors
+[ ] Network tethering works (USB)
+[ ] Install completes without crash
+[ ] SID launches after install
+[ ] Commands respond within 5s
+[ ] No kernel panics or freezes
+[ ] Boot time under 30s
+
+────────────────────────────────────────────
+ BUG REPORTING (if something breaks)
+────────────────────────────────────────────
+
+Send exact error message and what you were
+doing when it happened. Screenshots of
+terminal help. If it boots to black screen,
+try "Safe Mode" option from boot menu.
+
+────────────────────────────────────────────
+ EYES ONLY — CLASSIFIED
+────────────────────────────────────────────
+
+This ISO was forged in fire. If it burns,
+tell me how. If it sings, tell me louder.
+
+— SID Command

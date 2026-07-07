@@ -203,8 +203,22 @@ GRUB
 if ls "$PKG_CACHE"/syslinux-*.apk 1>/dev/null 2>&1; then
     mkdir -p "$ISO_DIR/isolinux" "$BUILD_DIR/syslinux"
     tar xzf "$PKG_CACHE"/syslinux-*.apk -C "$BUILD_DIR/syslinux" 2>/dev/null || true
-    cp "$BUILD_DIR/syslinux"/usr/share/syslinux/isolinux.bin "$ISO_DIR/isolinux/" 2>/dev/null || true
-    cp "$BUILD_DIR/syslinux"/usr/share/syslinux/isohdpfx.bin "$ISO_DIR/isolinux/" 2>/dev/null || true
+    # Copy all ISOLINUX modules needed for boot
+    SYSLINUX_DIR="$BUILD_DIR/syslinux/usr/share/syslinux"
+    for mod in isolinux.bin ldlinux.c32 libutil.c32 libcom32.c32 isohdpfx.bin; do
+        cp "$SYSLINUX_DIR/$mod" "$ISO_DIR/isolinux/" 2>/dev/null || echo "  Warning: $mod not found in syslinux package"
+    done
+    cat > "$ISO_DIR/isolinux/isolinux.cfg" << ISOCFG
+DEFAULT sid
+LABEL sid
+    LINUX /boot/vmlinuz-sid
+    INITRD /boot/initramfs-sid.gz
+    APPEND console=tty0 quiet loglevel=3
+LABEL sid-safe
+    LINUX /boot/vmlinuz-sid
+    INITRD /boot/initramfs-sid.gz
+    APPEND console=tty0 nomodeset quiet loglevel=3
+ISOCFG
 fi
 
 ISO_NAME="sid-${VERSION}-live-${ARCH}.iso"
