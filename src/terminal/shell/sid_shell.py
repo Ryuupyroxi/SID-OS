@@ -29,7 +29,7 @@ class SIDShell(cmd.Cmd):
 
     intro = f"""
 {C['G']}╔══════════════════════════════════════════════════╗
-║       SID v0.5.0 - SUPER INTELLIGENT DISTRO        ║
+║       SID v0.5.1 - SUPER INTELLIGENT DISTRO        ║
 ║       ═══════════════════════════════════════     ║
 ║       Type anything - AI will understand          ║
 ║       Try: "what can you do?" or "show system"   ║
@@ -682,7 +682,7 @@ class SIDShell(cmd.Cmd):
             print(f"  RAM:    {mem}")
             print(f"  Kernel: {kernel}")
             print(f"  Uptime: {uptime}")
-            print(f"  Shell:  SID v0.5.0 | AI-First Mode")
+            print(f"  Shell:  SID v0.5.1 | AI-First Mode")
             if ai_stats:
                 print(f"  {C['D']}{ai_stats}{C['RESET']}")
         except Exception as e:

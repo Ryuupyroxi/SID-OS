@@ -63,7 +63,7 @@ class SIDInstaller:
         """Run the installation wizard."""
         print("\033[2J\033[H")
         print("\033[32m╔══════════════════════════════════════════╗\033[0m")
-        print("\033[32m║    SID OS v0.5.0 - Installation Wizard    ║\033[0m")
+        print("\033[32m║    SID OS v0.5.1 - Installation Wizard    ║\033[0m")
         print("\033[32m║    AI-First OS for Old Hardware          ║\033[0m")
         print("\033[32m╚══════════════════════════════════════════╝\033[0m\n")
 
@@ -372,7 +372,7 @@ class SIDInstaller:
 
         # Create GRUB entry
         boot_entry = """timeout=3
-menuentry "SID OS v0.5.0" {
+menuentry "SID OS v0.5.1" {
     linux /boot/vmlinuz-sid root={root} console=tty0 quiet loglevel=3
     initrd /boot/initramfs-sid.gz
 }

@@ -166,7 +166,7 @@ cat > "$ROOTFS_DIR/etc/profile.d/sid.sh" << 'SIDPROFILE'
 if [ "$(tty)" = "/dev/tty1" ]; then
     clear
     echo "====================================="
-    echo "  SID OS v0.5.0 - Super Intelligent Distro"
+    echo "  SID OS v0.5.1 - Super Intelligent Distro"
     echo "  Starting AI interface..."
     echo "====================================="
     sleep 1
@@ -228,7 +228,7 @@ mount -t devpts devpts /dev/pts
 clear
 echo ""
 echo "  ╔══════════════════════════════════════╗"
-echo "  ║    SID OS v0.5.0 - Super Intelligent ║"
+echo "  ║    SID OS v0.5.1 - Super Intelligent ║"
 echo "  ║    Distro                            ║"
 echo "  ╚══════════════════════════════════════╝"
 echo ""
@@ -293,7 +293,7 @@ cat > "$ISO_DIR/boot/grub/grub.cfg" << 'GRUB'
 set timeout=3
 set default=0
 
-menuentry "SID OS v0.5.0 - Super Intelligent Distro" {
+menuentry "SID OS v0.5.1 - Super Intelligent Distro" {
     linux /boot/vmlinuz-sid console=tty0 quiet loglevel=3
     initrd /boot/initramfs-sid.gz
 }
