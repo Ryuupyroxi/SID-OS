@@ -1,10 +1,9 @@
 # Build outputs
-*.iso
-*.iso.*
-*.img
-*.img.*
 build/output/
 build/iso/
+build/squashfs-root/
+build/rootfs/
+build/chroot/
 
 # Python
 __pycache__/
@@ -29,8 +28,3 @@ models/
 .env
 .env.local
 *.token
-
-# OS build artifacts
-build/squashfs-root/
-build/rootfs/
-build/chroot/
