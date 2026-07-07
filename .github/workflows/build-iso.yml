@@ -1,10 +1,10 @@
-name: Build SID OS Live ISO
+name: Build SID OS Portable Release
 on:
   push:
     tags: [ 'v*' ]
   workflow_dispatch:
 jobs:
-  build-sid-live:
+  build-portable:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -12,21 +12,16 @@ jobs:
       - name: Install build deps
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq xorriso squashfs-tools syslinux-common grub-pc-bin grub-efi-amd64-bin grub-common wget cpio gzip dosfstools mtools
-      
+          sudo apt-get install -y -qq xorriso squashfs-tools
+
       - name: Build portable tarball
         run: |
           mkdir -p build/output
           bash build/scripts/make-portable.sh build/output
           ls -lh build/output/
       
-      - name: Build SID OS Live ISO
-        run: |
-          bash build/scripts/build-live-iso.sh build/output 2>&1
-          ls -lh build/output/
-      
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: sid-artifacts
+          name: sid-portable
           path: build/output/
