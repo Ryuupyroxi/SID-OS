@@ -1,6 +1,6 @@
 ╔══════════════════════════════════════════════════╗
 ║            🕵️ CLASSIFIED: XANDER ONLY           ║
-║        SID OS v1.0.0 — Field Test Brief         ║
+║        SID OS v1.2.0 — Field Test Brief         ║
 ╚══════════════════════════════════════════════════╝
 
 Agent: Xander
@@ -12,8 +12,8 @@ Target: HP Pavilion dv6 (1225dx) — 4GB RAM
 ────────────────────────────────────────────
 
 1. Download the ISO from the Releases page
-   → https://github.com/Ryuupyroxi/SID-OS/releases/tag/v1.0.0
-   → File: sid-1.0.0-live-x86_64.iso
+   → https://github.com/Ryuupyroxi/SID-OS/releases/tag/v1.2.0
+   → File: sid-1.2.0-live-x86_64.iso
 
 2. Flash it to a USB (8GB+) with Rufus in DD Image mode
  (NOT ISO mode — this is critical, DD mode or bust)

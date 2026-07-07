@@ -1,6 +1,6 @@
 # ╔══════════════════════════════════════════╗
 # ║     SID - Super Intelligent Distro       ║
-# ║     v1.0.0 — AI-First CLI OS for Old Hardware            ║
+# ║     v1.2.0 — AI-First CLI OS for Old Hardware            ║
 # ╚══════════════════════════════════════════╝
 
 SID is a lightweight CLI-based Linux distribution for old hardware (4GB RAM target).  
@@ -38,7 +38,7 @@ Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Ryuupyroxi/SID-OS/main
 
 **Method C — Manual (if you already have Python):**
 ```batch
-cd sid-1.0.0-portable
+cd sid-1.2.0-portable
 python src\main.py --theme vt100
 ```
 
@@ -73,7 +73,7 @@ Download `sid-*-live-x86_64.iso` from the [Releases page](https://github.com/Ryu
 ```bash
 # Find your USB device (e.g. /dev/sdb) — be careful!
 lsblk
-sudo dd if=sid-1.0.0-live-x86_64.iso of=/dev/sdb bs=4M status=progress
+sudo dd if=sid-1.2.0-live-x86_64.iso of=/dev/sdb bs=4M status=progress
 ```
 
 **Boot & install:**

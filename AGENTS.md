@@ -1,4 +1,4 @@
-# SID OS - Super Intelligent Distro (v1.0.0)
+# SID OS - Super Intelligent Distro (v1.2.0)
 
 ## Architecture Overview
 
@@ -32,7 +32,7 @@ sid/
 └── test_sid.py             # 84-test validation suite
 ```
 
-## Key Features (v1.0.0)
+## Key Features (v1.2.0)
 
 ### AI & Intelligence
 - AI-First OS navigation - every command routes through AI
@@ -134,9 +134,9 @@ SID OS follows `vMAJOR.MINOR.BUGFIX` — nothing fancy.
 
 | Bump | When | Example |
 |------|------|---------|
-| **BUGFIX** | Bug fixes, small tweaks, docs | `v1.0.0` → `v1.0.1` |
-| **MINOR** | New features, non-breaking changes | `v1.0.0` → `v1.1.0` |
-| **MAJOR** | Breaking changes, stable releases | `v1.0.0` → `v2.0.0` |
+| **BUGFIX** | Bug fixes, small tweaks, docs | `v1.2.0` → `v1.0.1` |
+| **MINOR** | New features, non-breaking changes | `v1.2.0` → `v1.1.0` |
+| **MAJOR** | Breaking changes, stable releases | `v1.2.0` → `v2.0.0` |
 
 ### Pushing new version
 ```bash
@@ -145,11 +145,11 @@ git push origin v1.0.1
 ```
 
 ### Release naming
-- `v1.0.0` — First public release (Stable)
+- `v1.2.0` — First public release (Stable)
 - `v1.x.x` — Production-ready
 
 ### Version history
-- `v1.0.0` — First public release: bootable ISO, install guide, CI automation
+- `v1.2.0` — First public release: bootable ISO, install guide, CI automation
 - `v0.5.3` — Release candidate: bootable ISO with busybox initramfs
 - `v0.5.2` — Beta: portable tarball and ISO builder, Windows bootstrap, persistent memory
 - `v0.5.0` — Alpha: agentic framework, soul, retro themes, offline tools
@@ -171,18 +171,18 @@ This triggers `.github/workflows/build-iso.yml` which:
 ### Manual (build portable tarball locally)
 ```bash
 ./build/scripts/make-portable.sh
-# Output: build/output/sid-1.0.0-portable.tar.gz
+# Output: build/output/sid-1.2.0-portable.tar.gz
 ```
 
 ### Manual (build full ISO — requires x86_64 + build tools)
 ```bash
 ./build/scripts/build-sid.sh
-# Output: build/output/sid-1.0.0-x86_64.iso
+# Output: build/output/sid-1.2.0-x86_64.iso
 ```
 
 ### Portable tarball contents
 ```
-sid-1.0.0-portable/
+sid-1.2.0-portable/
 ├── sid              # Launcher: ./sid --theme vt100
 ├── sid-install      # Installer: sudo ./sid-install
 ├── sid-test         # Test suite: ./sid-test --verbose
@@ -201,11 +201,11 @@ sid-1.0.0-portable/
 ```bash
 # Dev: build locally (run from repo root)
 bash build/scripts/build-live-iso.sh
-# Output: build/output/sid-1.0.0-live-x86_64.iso
+# Output: build/output/sid-1.2.0-live-x86_64.iso
 
 # Release: tag + push triggers CI
-git tag -a v1.0.0 -m "description"
-git push origin v1.0.0
+git tag -a v1.2.0 -m "description"
+git push origin v1.2.0
 # CI builds, uploads artifact, publishes Release
 ```
 

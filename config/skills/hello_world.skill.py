@@ -8,7 +8,7 @@ class HelloWorldSkill(BaseSkill):
         super().__init__()
         self.metadata = SkillMetadata(
             name="hello_world",
-            version="1.0.0",
+            version="1.2.0",
             description="A simple hello world example skill",
             author="SID OS",
             dependencies=[]

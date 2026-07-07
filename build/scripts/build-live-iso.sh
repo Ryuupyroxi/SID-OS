@@ -4,7 +4,7 @@ set -eo pipefail
 
 # Auto-detect version from env, git tag, or fallback
 [ -z "${VERSION}" ] && [ -n "${GITHUB_REF_NAME}" ] && VERSION="${GITHUB_REF_NAME#v}"
-VERSION="${VERSION:-1.0.0}"
+VERSION="${VERSION:-1.2.0}"
 ALPINE_VERSION="3.24.1"
 ARCH="x86_64"
 ALPINE_MIRROR="https://dl-cdn.alpinelinux.org/alpine/v3.24"
@@ -61,7 +61,7 @@ install_pkg() {
     fi
 }
 
-for pkg in linux-lts python3 py3-pip ncurses-libs ncurses-terminfo readline sqlite-libs openssl ca-certificates eudev-libs dhcpcd tzdata doas syslinux; do
+for pkg in linux-lts python3 py3-pip ncurses-libs ncurses-terminfo readline sqlite-libs openssl ca-certificates eudev-libs dhcpcd tzdata doas syslinux openrc alpine-conf e2fsprogs; do
     install_pkg "$pkg" || true
 done
 
@@ -133,7 +133,7 @@ INIT
 cat > "$ROOTFS_DIR/etc/profile.d/sid.sh" << 'PROFILE'
 if [ "$(tty)" = "/dev/tty1" ]; then
     clear
-    echo "SID OS v1.0.0 - Super Intelligent Distro"
+    echo "SID OS v${VERSION} - Super Intelligent Distro"
     sleep 1
     sid
 fi
@@ -165,7 +165,7 @@ mount -t proc proc /proc
 mount -t sysfs sysfs /sys
 mount -t devtmpfs devtmpfs /dev
 clear
-echo "  SID OS v1.0.0 - booting..."
+echo "  SID OS v${VERSION} - booting..."
 for d in /dev/sr*; do [ -b "$d" ] && mount "$d" /mnt 2>/dev/null && [ -f /mnt/boot/sid.squashfs ] && break; done
 [ -f /mnt/boot/sid.squashfs ] || for d in /dev/sd*; do
     [ -b "$d" ] || continue
@@ -190,11 +190,11 @@ echo "  Initramfs: $(du -sh "$ISO_DIR/boot/initramfs-sid.gz" | cut -f1)"
 cat > "$ISO_DIR/boot/grub/grub.cfg" << 'GRUB'
 set timeout=3
 set default=0
-menuentry "SID OS v1.0.0" {
+menuentry "SID OS v${VERSION}" {
     linux /boot/vmlinuz-sid console=tty0 quiet loglevel=3
     initrd /boot/initramfs-sid.gz
 }
-menuentry "SID OS (Safe Mode)" {
+menuentry "SID OS v${VERSION} (Safe Mode)" {
     linux /boot/vmlinuz-sid console=tty0 nomodeset loglevel=3
     initrd /boot/initramfs-sid.gz
 }

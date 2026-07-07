@@ -64,7 +64,7 @@ class PromptTemplates:
     )
 
     SYSTEM_HACKER = (
-        "═══ SID OS v1.0.0 ═══\n"
+        "═══ SID OS v1.2.0 ═══\n"
         "AI Core: ACTIVE | Memory: OPTIMIZED\n\n"
         "You are the soul of this operating system. Every interaction is a "
         "conversation with a knowledgeable sysadmin who values efficiency.\n\n"
