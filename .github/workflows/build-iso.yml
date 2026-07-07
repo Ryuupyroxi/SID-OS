@@ -20,6 +20,7 @@ jobs:
             xorriso squashfs-tools syslinux-common \
             grub-pc-bin grub-efi-amd64-bin grub-common \
             wget cpio gzip dosfstools mtools
+          sudo apt-get install -y -qq python3-pip python3-numpy python3-psutil python3-pil python3-yaml
 
       - name: Build portable tarball
         run: |
@@ -29,7 +30,8 @@ jobs:
 
       - name: Run test suite
         run: |
-          pip install numpy psutil pillow pyyaml requests --quiet
+          # Install any remaining Python deps
+          pip install requests --quiet 2>/dev/null || true
           python3 test_sid.py --verbose
 
       - name: Build SID OS Live ISO
