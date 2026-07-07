@@ -96,10 +96,10 @@ chroot "$ROOTFS_DIR" /usr/bin/pip3 install --no-cache-dir \
 echo "  Packages installed ✓"
 
 # Unmount virtual filesystems
-umount "$ROOTFS_DIR/dev/pts" 2>/dev/null || true
-umount "$ROOTFS_DIR/dev" 2>/dev/null || true
-umount "$ROOTFS_DIR/sys" 2>/dev/null || true
-umount "$ROOTFS_DIR/proc" 2>/dev/null || true
+sudo umount "$ROOTFS_DIR/dev/pts" 2>/dev/null || true
+sudo umount "$ROOTFS_DIR/dev" 2>/dev/null || true
+sudo umount "$ROOTFS_DIR/sys" 2>/dev/null || true
+sudo umount "$ROOTFS_DIR/proc" 2>/dev/null || true
 
 # Step 4: Install SID OS
 echo "[4/6] Installing SID OS..."
