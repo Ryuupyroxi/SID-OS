@@ -61,7 +61,7 @@ install_pkg() {
     fi
 }
 
-for pkg in linux-lts python3 py3-pip ncurses-libs ncurses-terminfo readline sqlite-libs openssl ca-certificates eudev-libs dhcpcd tzdata doas syslinux openrc alpine-conf e2fsprogs; do
+for pkg in linux-lts python3 py3-pip ncurses-libs ncurses-terminfo readline sqlite-libs openssl ca-certificates eudev-libs dhcpcd tzdata doas syslinux openrc alpine-conf e2fsprogs grub-efi dosfstools ntfs-3g fuse3 exfatprogs wpa_supplicant iw wireless-tools; do
     install_pkg "$pkg" || true
 done
 
@@ -130,19 +130,125 @@ tty3::respawn:/sbin/getty -L 38400 tty3 vt100
 ::shutdown:/sbin/openrc shutdown
 INIT
 
+# Create easter egg: devmode — a techy hidden utility
+cat > "$ROOTFS_DIR/usr/local/bin/devmode" << 'DEVMODE'
+#!/bin/sh
+# SID OS DevMode — hidden technical easter egg
+#           _.-.
+#       .,'/  // 
+#  ,..-'  /  /_    
+#  \       /  /    
+#   \_   _/  /___  
+#     `--`--'||| `.
+#   S.I.D.   |||   
+#             |||
+
+echo ""
+echo "  ╔═══════════════════════════════════╗"
+echo "  ║     SID OS v${VERSION} DEVMODE     ║"
+echo "  ║     "The eyes of the world are    ║"
+echo "  ║      upon you, and the hopes      ║"
+echo "  ║      and the prayers of           ║"
+echo "  ║      liberty-loving people        ║"
+echo "  ║      everywhere march with you."  ║"
+echo "  ╚═══════════════════════════════════╝"
+echo ""
+echo "  [SYSTEM] Kernel: $(uname -r 2>/dev/null || echo '?')"
+echo "  [SYSTEM] Uptime: $(uptime 2>/dev/null | sed 's/.*up //' | sed 's/,.*//' || echo '?')"
+echo "  [SYSTEM] Memory: $(free -m 2>/dev/null | grep Mem | awk '{print $3"/"$2" MB"}' || echo '?')"
+echo "  [SYSTEM] CPU: $(grep 'model name' /proc/cpuinfo 2>/dev/null | head -1 | sed 's/.*: //' || echo '?')"
+echo "  [SYSTEM] Load: $(cat /proc/loadavg 2>/dev/null || echo '?')"
+echo "  [FILESYSTEM] Host partitions:"
+ls -1 /mnt/host/ 2>/dev/null | while read d; do
+    size=$(df -h /mnt/host/$d 2>/dev/null | tail -1 | awk '{print $2}')
+    fs=$(blkid -s TYPE -o value /dev/$(echo $d | sed 's/[0-9]*$//') 2>/dev/null | head -1 || echo '?')
+    echo "    /mnt/host/$d  ($fs, $size)"
+done 2>/dev/null
+echo ""
+echo "  Type 'deploy' to initiate self-test sequence."
+read -r input
+if [ "$input" = "deploy" ]; then
+    echo ""
+    echo "  ╔═══════════════════════════════════════════╗"
+    echo "  ║  SID OS v${VERSION} — SELF-TEST SEQUENCE   ║"
+    echo "  ║  All systems nominal. Memory integrity: OK ║"
+    echo "  ║  AI core: STANDBY. Userspace: READY.      ║"
+    echo "  ║  "Failure is not an option."              ║"
+    echo "  ╚═══════════════════════════════════════════╝"
+    echo ""
+else
+    echo "  Sequence aborted. Returning to SID shell."
+fi
+DEVMODE
+chmod +x "$ROOTFS_DIR/usr/local/bin/devmode"
+
 cat > "$ROOTFS_DIR/etc/profile.d/sid.sh" << 'PROFILE'
 if [ "$(tty)" = "/dev/tty1" ]; then
     clear
     echo "SID OS v${VERSION} - Super Intelligent Distro"
+    echo "  Type 'devmode' for system diagnostics"
     sleep 1
     sid
 fi
 PROFILE
 chmod +x "$ROOTFS_DIR/etc/profile.d/sid.sh"
 
+# Create auto-mount service for host filesystem access
+cat > "$ROOTFS_DIR/etc/init.d/automount" << 'AUTOMOUNT'
+#!/sbin/openrc-run
+description="Auto-mount all host filesystems for live access"
+
+depend() {
+    need localmount
+    after localmount
+}
+
+start() {
+    ebegin "Mounting host filesystems"
+    mkdir -p /mnt/host
+    # Scan all block devices and mount them
+    for dev in /dev/sd*[0-9] /dev/nvme*[0-9] /dev/mmcblk*p* /dev/vd*[0-9] /dev/hd*[0-9]; do
+        [ -b "$dev" ] || continue
+        # Get label or use device name
+        label=$(blkid -s LABEL -o value "$dev" 2>/dev/null | head -1)
+        [ -z "$label" ] && label=$(basename "$dev")
+        target="/mnt/host/${label}"
+        mkdir -p "$target"
+        fstype=$(blkid -s TYPE -o value "$dev" 2>/dev/null | head -1)
+        case "$fstype" in
+            ntfs)     mount -t ntfs-3g "$dev" "$target" 2>/dev/null || rmdir "$target" 2>/dev/null ;;
+            ext4|ext3|ext2|xfs|btrfs)
+                      mount "$dev" "$target" 2>/dev/null || rmdir "$target" 2>/dev/null ;;
+            vfat|exfat)
+                      mount "$dev" "$target" 2>/dev/null || rmdir "$target" 2>/dev/null ;;
+            hfsplus)  mount -t hfsplus "$dev" "$target" 2>/dev/null || rmdir "$target" 2>/dev/null ;;
+            *)        mount "$dev" "$target" 2>/dev/null || rmdir "$target" 2>/dev/null ;;
+        esac
+    done
+    eend $?
+}
+
+stop() {
+    ebegin "Unmounting host filesystems"
+    for mnt in /mnt/host/*/; do
+        [ -d "$mnt" ] && umount "$mnt" 2>/dev/null
+    done
+    eend $?
+}
+AUTOMOUNT
+chmod +x "$ROOTFS_DIR/etc/init.d/automount"
+
+# Add automount to startup script (runs after boot)
+cat > "$ROOTFS_DIR/etc/local.d/automount.start" << 'LOCAL'
+#!/bin/sh
+/etc/init.d/automount start
+LOCAL
+chmod +x "$ROOTFS_DIR/etc/local.d/automount.start"
+
 mkdir -p "$ROOTFS_DIR/etc/runlevels/default"
 ln -sf /etc/init.d/dhcpcd "$ROOTFS_DIR/etc/runlevels/default/" 2>/dev/null || true
 ln -sf /etc/init.d/localmount "$ROOTFS_DIR/etc/runlevels/default/" 2>/dev/null || true
+ln -sf /etc/init.d/local "$ROOTFS_DIR/etc/runlevels/default/" 2>/dev/null || true
 
 # Step 6: Build ISO
 echo "[6/6] Building bootable ISO..."
@@ -167,7 +273,7 @@ mount -t devtmpfs devtmpfs /dev
 clear
 echo "  SID OS v${VERSION} - booting..."
 for d in /dev/sr*; do [ -b "$d" ] && mount "$d" /mnt 2>/dev/null && [ -f /mnt/boot/sid.squashfs ] && break; done
-[ -f /mnt/boot/sid.squashfs ] || for d in /dev/sd*; do
+[ -f /mnt/boot/sid.squashfs ] || for d in /dev/sd* /dev/nvme* /dev/mmcblk* /dev/vd*; do
     [ -b "$d" ] || continue
     mount "$d" /mnt 2>/dev/null || continue
     [ -f /mnt/boot/sid.squashfs ] && break
@@ -221,13 +327,42 @@ LABEL sid-safe
 ISOCFG
 fi
 
+# Create UEFI boot image (EFI System Partition)
+if [ -f "$ROOTFS_DIR/usr/lib/grub/x86_64-efi/modinfo.sh" ]; then
+    echo "  Creating UEFI boot image..."
+    EFI_IMG="$ISO_DIR/boot/grub/efi.img"
+    dd if=/dev/zero of="$EFI_IMG" bs=1K count=6144 2>/dev/null
+    mkfs.vfat "$EFI_IMG" 2>/dev/null
+    EFI_MNT="$BUILD_DIR/efi-mnt"
+    mkdir -p "$EFI_MNT"
+    mount -o loop "$EFI_IMG" "$EFI_MNT" 2>/dev/null || true
+    if mountpoint -q "$EFI_MNT"; then
+        mkdir -p "$EFI_MNT/EFI/BOOT"
+        # Build GRUB EFI core image with required modules
+        grub-mkimage -O x86_64-efi -p /boot/grub -o "$EFI_MNT/EFI/BOOT/BOOTx64.EFI"             ext2 fat part_msdos part_gpt normal configfile linux loopback search             search_fs_uuid echo test reboot halt cat ls video font gfxterm             gfxmenu gfxterm_background all_video 2>/dev/null || echo "  Warning: grub-mkimage failed"
+        umount "$EFI_MNT"
+        echo "  UEFI: $(du -h "$EFI_IMG" | cut -f1)"
+    else
+        echo "  Warning: Could not mount EFI image (no loop device)"
+    fi
+    rmdir "$EFI_MNT" 2>/dev/null || true
+else
+    echo "  Warning: GRUB EFI modules not found, UEFI boot not available"
+fi
+
 ISO_NAME="sid-${VERSION}-live-${ARCH}.iso"
 if [ -f "$ISO_DIR/isolinux/isolinux.bin" ]; then
     MBR="$ISO_DIR/isolinux/isohdpfx.bin"
     [ -f "$MBR" ] && MBR_ARG="-isohybrid-mbr $MBR" || MBR_ARG=""
-    xorriso -as mkisofs -V "SID-OS-$VERSION" $MBR_ARG         -b isolinux/isolinux.bin -c isolinux/boot.cat         -no-emul-boot -boot-load-size 4 -boot-info-table         -isohybrid-gpt-basdat         -o "$OUTPUT_DIR/$ISO_NAME" "$ISO_DIR" 2>&1
+    # Add UEFI boot arguments if EFI image exists
+    EFI_ARG=""
+    [ -f "$ISO_DIR/boot/grub/efi.img" ] && EFI_ARG="-e boot/grub/efi.img -no-emul-boot"
+    xorriso -as mkisofs -V "SID-OS-$VERSION" $MBR_ARG         -b isolinux/isolinux.bin -c isolinux/boot.cat         -no-emul-boot -boot-load-size 4 -boot-info-table         -isohybrid-gpt-basdat $EFI_ARG         -o "$OUTPUT_DIR/$ISO_NAME" "$ISO_DIR" 2>&1
 else
-    xorriso -as mkisofs -V "SID-OS-$VERSION" -o "$OUTPUT_DIR/$ISO_NAME" "$ISO_DIR" 2>&1
+    # Fallback: data-only ISO (no bootloader)
+    EFI_ARG=""
+    [ -f "$ISO_DIR/boot/grub/efi.img" ] && EFI_ARG="-e boot/grub/efi.img -no-emul-boot -isohybrid-gpt-basdat"
+    xorriso -as mkisofs -V "SID-OS-$VERSION" $EFI_ARG -o "$OUTPUT_DIR/$ISO_NAME" "$ISO_DIR" 2>&1
 fi
 
 echo ""

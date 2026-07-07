@@ -1,6 +1,6 @@
 # SID OS — Quick Install Guide
 
-> **Version**: v1.2.0 | **Base**: Alpine 3.24.1  
+> **Version**: v1.2.0 | **Base**: Fork of Alpine Linux 3.24.1 | **Boot**: BIOS + UEFI  
 > **For people who've done this before. Need every detail? Read** `INSTALL.md`
 
 ---
@@ -48,6 +48,12 @@ udhcpc -i usb0
 ```
 
 Test: `ping -c 3 google.com`
+
+## Step 3.5: Host filesystem access
+After boot, all partitions are auto-mounted under `/mnt/host/`:
+```bash
+ls /mnt/host/   # See all detected drives
+```
 
 ## Step 4: Check your USB drive name
 

@@ -34,6 +34,12 @@ sid/
 
 ## Key Features (v1.2.0)
 
+- **Base**: Fork of **Alpine Linux 3.24.1**
+- **Boot**: BIOS (ISOLINUX) + UEFI (GRUB) hybrid ISO
+- **Host Access**: Auto-mounts NTFS/ext4/exfat/HFS+ under `/mnt/host/`
+- **WiFi**: `wifi-connect` helper included
+- **DevMode**: Hidden diagnostic terminal — type `devmode` at login
+
 ### AI & Intelligence
 - AI-First OS navigation - every command routes through AI
 - 20+ AI models across 3 RAM tiers (2GB/4GB/6GB)
@@ -218,7 +224,12 @@ git push origin v1.2.0
 6. mksquashfs rootfs → sid.squashfs
 7. Build initramfs with busybox + init script
 8. Copy kernel, squashfs, initramfs → ISO dir
-9. Get isolinux/syslinux for BIOS boot
+9. Get isolinux/syslinux for BIOS boot + GRUB EFI for UEFI boot
+10. Create EFI boot image with fat/vfat filesystem
+11. Install packages: openrc, alpine-conf, e2fsprogs, ntfs-3g, fuse3, exfatprogs
+12. Create auto-mount service for host filesystem access
+13. Add WiFi support (wpa_supplicant + wifi-connect helper)
+14. Add DevMode easter egg
 10. xorriso → bootable sid-*.iso
 
 ### Key files

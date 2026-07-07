@@ -76,6 +76,8 @@ Close Rufus. Leave the USB plugged in.
 
 ### Step 4: Boot from the USB
 
+> **UEFI users**: If your system uses UEFI (most laptops from 2012+), the ISO provides both BIOS and UEFI boot. You may need to disable **Secure Boot** in your BIOS settings for the UEFI boot to work.
+
 Click the Windows Start menu. Click the power icon. Click **Restart**.
 
 As soon as the screen goes black, start pressing the **F9** key once per second. Keep pressing until a boot menu appears with a list of devices.

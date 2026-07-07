@@ -71,3 +71,52 @@ This ISO was forged in fire. If it burns,
 tell me how. If it sings, tell me louder.
 
 — SID Command
+
+────────────────────────────────────────────
+ ADDITIONAL TESTS — v1.2.0 BOOT FIXES
+────────────────────────────────────────────
+
+[ ] ISO boots from USB without "ldlinux.c32" error
+[ ] ISOLINUX boot menu appears (2 options: normal + safe mode)
+[ ] Normal boot reaches "localhost login:" prompt
+[ ] Safe mode boot (nomodeset) works on problematic GPUs
+[ ] After login, SID auto-launches on tty1
+[ ] `setup-alpine` runs from live environment (if needed)
+[ ] Keyboard works during Alpine setup
+[ ] USB tethering (usb0) works
+[ ] OpenRC services start cleanly (no hangs at sysinit)
+[ ] ext4 formatting works during install (e2fsprogs)
+[ ] UEFI boot: system boots via GRUB (test on UEFI hardware)
+[ ] Host FS: partitions visible under /mnt/host/
+[ ] Host FS: NTFS partition accessible (read/write)
+[ ] Host FS: ext4 partition accessible
+[ ] WiFi: `wifi-connect list` scans networks
+[ ] DevMode: type `devmode` at login prompt
+[ ] DevMode: shows kernel, CPU, memory, partitions
+[ ] Poweroff/reboot from live session
+
+────────────────────────────────────────────
+ FUTURE TEST IDEAS (not yet implemented)
+────────────────────────────────────────────
+
+[✅] UEFI boot path — implemented in v1.2.0
+[ ] Persistent storage on live USB (casper/overlay)
+[ ] Automated install without tethering (WiFi setup)
+[ ] Full disk encryption (LUKS) during install
+[ ] Multi-language keyboard support at boot
+[ ] Network install from the live ISO (wget SID tarball)
+[ ] GPU driver detection + auto-config
+[ ] Audio device detection
+[ ] Suspend/resume from live session
+[ ] Boot from USB 2.0 vs 3.0 ports (timing differences)
+
+────────────────────────────────────────────
+ KNOWN LIMITATIONS (v1.2.0)
+────────────────────────────────────────────
+
+- UEFI Secure Boot may need to be disabled
+- WiFi requires manual config via `wifi-connect` (no GUI)
+- No persistent live USB overlay (reboot loses changes)
+- No full-disk encryption in installer
+- Minimal package set — some tools need `apk add`
+- System uses tmpfs for root if squashfs not found

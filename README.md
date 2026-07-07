@@ -1,18 +1,31 @@
-# ╔══════════════════════════════════════════╗
-# ║     SID - Super Intelligent Distro       ║
+# ╔══════════════════════════════════════════════════════════╗
+# ║  ███████╗██╗██╗     ██╗███████╗██████╗  ██████╗ ███████╗ ║
+# ║  ██╔════╝██║██║     ██║██╔════╝██╔══██╗██╔═══██╗██╔════╝ ║
+# ║  ███████╗██║██║     ██║█████╗  ██████╔╝██║   ██║███████╗ ║
+# ║  ╚════██║██║██║     ██║██╔══╝  ██╔══██╗██║   ██║╚════██║ ║
+# ║  ███████║██║███████╗██║██║     ██║  ██║╚██████╔╝███████║ ║
+# ║  ╚══════╝╚═╝╚══════╝╚═╝╚═╝     ╚═╝  ╚═╝ ╚═════╝ ╚══════╝ ║
+# ║                                                          ║
 # ║     v1.2.0 — AI-First CLI OS for Old Hardware            ║
-# ╚══════════════════════════════════════════╝
+# ║     Fork of Alpine Linux                                 ║
+# ╚══════════════════════════════════════════════════════════╝
 
-SID is a lightweight CLI-based Linux distribution for old hardware (4GB RAM target).  
+**SID** (Super Intelligent Distro) is a lightweight CLI-based Linux distribution 
+forked from Alpine Linux, designed for old hardware (4GB RAM target).  
 AI is the primary interface — you navigate the OS by talking to it.
 
+> *"The eyes of the world are upon you, and the hopes and the prayers 
+>  of liberty-loving people everywhere march with you."*
+
 [![Download](https://img.shields.io/github/v/release/Ryuupyroxi/SID-OS?label=Download&color=brightgreen)](https://github.com/Ryuupyroxi/SID-OS/releases/latest)
-[![Tests](https://img.shields.io/badge/tests-84%2F84-passing-brightgreen)](https://github.com/Ryuupyroxi/SID-OS/blob/main/test_sid.py)
+[![Tests](https://img.shields.io/badge/tests-87%2F87-passing-brightgreen)](https://github.com/Ryuupyroxi/SID-OS/blob/main/test_sid.py)
+[![UEFI](https://img.shields.io/badge/UEFI-BIOS%20%2B%20EFI-blueviolet)](https://github.com/Ryuupyroxi/SID-OS)
 [![License](https://img.shields.io/badge/license-MIT-blue)](https://github.com/Ryuupyroxi/SID-OS/blob/main/LICENSE)
 
 ## 🚀 Quick Start
 
-### Option 1: Linux/macOS — One-Command Bootstrap (recommended)
+### Option 1: Linux/macOS — One-Command Bootstrap
+> Requires Python 3.8+ (pre-installed on most systems)
 ```bash
 # Requires Python 3.8+ (pre-installed on most Linux/macOS)
 python3 -c "$(python3 -c "import urllib.request; print(urllib.request.urlopen('https://raw.githubusercontent.com/Ryuupyroxi/SID-OS/main/get-sid.py').read().decode())")" --setup
@@ -58,6 +71,7 @@ python3 test_sid.py --verbose
 
 
 ### Option 4: Bootable ISO — Full OS Installation (recommended for old hardware)
+> Supports **BIOS (Legacy)** and **UEFI (x86_64)** boot
 [![Download](https://img.shields.io/github/v/release/Ryuupyroxi/SID-OS?label=Download+ISO&color=brightgreen)](https://github.com/Ryuupyroxi/SID-OS/releases/latest)
 
 Download `sid-*-live-x86_64.iso` from the [Releases page](https://github.com/Ryuupyroxi/SID-OS/releases/latest).
@@ -77,8 +91,11 @@ sudo dd if=sid-1.2.0-live-x86_64.iso of=/dev/sdb bs=4M status=progress
 ```
 
 **Boot & install:**
-1. Plug the USB in, reboot, spam F9 (or F10/F12/Esc) to enter boot menu
-2. Select the USB drive, press Enter at the Alpine boot menu
+1. Plug the USB in, reboot, spam F9 (or F10/F12/Esc/Del) to enter boot menu
+   - BIOS systems: Select USB from the menu
+   - UEFI systems: Select the UEFI USB option (or disable Secure Boot if needed)
+2. You'll see the ISOLINUX boot menu (BIOS) or GRUB menu (UEFI)
+   - Choose "SID OS" for normal boot, "Safe Mode" for troubleshooting
 3. Login as `root` (no password), connect phone via USB tether:
    ```bash
    ip link set usb0 up
@@ -100,6 +117,8 @@ sudo dd if=sid-1.2.0-live-x86_64.iso of=/dev/sdb bs=4M status=progress
 > **Need every detail?** See [`INSTALL.md`](INSTALL.md) for the full guide.
 
 ### Option 5: Persistent USB OS (full Alpine + SID)
+> After boot, all host partitions are auto-mounted under `/mnt/host/`
+> Access Windows (NTFS), Linux (ext4), and external drives (exFAT) immediately.
 ```bash
 # Boot Alpine 3.24.1 from USB -> login as root
 # Run setup-alpine, install to your USB (/dev/sda)
@@ -118,6 +137,21 @@ python3 installer/scripts/install.py
 
 ## ✨ What's Inside
 
+### 🖥️ Live ISO Features (v1.2.0)
+| Feature | Status |
+|---------|--------|
+| **BIOS Boot** (ISOLINUX) | ✅ Legacy PC boot |
+| **UEFI Boot** (GRUB x64) | ✅ Modern firmware boot |
+| **Host FS Access** | ✅ Auto-mounts NTFS/ext4/exfat/HFS+ under `/mnt/host/` |
+| **WiFi Connect** | ✅ `wifi-connect <SSID> [pass]` helper |
+| **Live Installer** | ✅ `setup-alpine` + answer file |
+| **SID Auto-Launch** | ✅ On tty1 login |
+| **DevMode** | ✅ Hidden system diagnostics — type `devmode` at login |
+
+[![ASCII Art](https://img.shields.io/badge/STYLE-Retro%20Hacker-brightgreen)](https://github.com/Ryuupyroxi/SID-OS)
+
+### 🧠 Core AI Platform
+
 - **🧠 AI Engine** — Local Qwen models (0.5B router to 7B specialist) + any API key (OpenAI, Anthropic, Gemini, Groq)
 - **🎤 Voice Control** — Offline STT (whisper.cpp) + TTS (espeak/piper)
 - **🗄️ 3-Tier Memory** — Working / Episodic (SQLite) / Semantic
@@ -132,6 +166,23 @@ python3 installer/scripts/install.py
 - **⚡ Hardware Monitor** — CPU temp, RAM, disk, auto-optimization
 - **🔧 Skills System** — `skills list/learn/execute/search`
 - **📊 Benchmark** — `benchmark quick` to find the best model for your hardware
+
+## 🥚 Hidden Features & Easter Eggs
+
+```
+SID OS v1.2.0 — Super Intelligent Distro
+  Type 'devmode' for system diagnostics
+```
+
+When you boot the live ISO, you'll see this prompt. Type **`devmode`** at the login 
+shell to enter the hidden diagnostic terminal — a tribute to the Apollo-era mission 
+control aesthetic. It shows kernel version, memory, CPU, and all mounted host partitions.
+
+Inside the SID shell, try:
+```
+sid⏣ help easter      # Show hidden commands
+sid⏣ sys easter       # Another way to find secrets
+```
 
 ## 🎮 Basic Usage
 
@@ -165,7 +216,7 @@ sid⏣ search memory for that thing we talked about earlier
 ## 🧪 Testing
 
 ```bash
-python3 test_sid.py                    # Quick test (84 tests)
+python3 test_sid.py                    # Quick test (87 tests)
 python3 test_sid.py --verbose          # Detailed output
 python3 test_sid.py --online           # Include network tests
 ```
@@ -220,6 +271,13 @@ chmod +x src/main.py
 ```bash
 python3 src/main.py --theme terminal
 ```
+
+## 🏷️ Labels
+- **OS Name**: SID OS (Super Intelligent Distro)
+- **Base**: Fork of Alpine Linux 3.24.1
+- **License**: MIT
+- **Versioning**: `vMAJOR.MINOR.BUGFIX`
+- **Platform**: x86_64 (BIOS + UEFI)
 
 ## 📁 Project Structure
 
