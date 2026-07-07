@@ -1,30 +1,35 @@
 name: Build SID OS Live ISO
 on:
   push:
-    tags:
-      - 'v*'
+    tags: [ 'v*' ]
   workflow_dispatch:
 jobs:
   build-sid-live:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      
       - name: Build portable tarball
-        run: mkdir -p build/output && bash build/scripts/make-portable.sh build/output && ls -lh build/output/
-      - name: Build Alpine Docker image
-        run: docker build -t sid-iso -f- . << 'DOCKER'
-FROM alpine:3.20
-RUN apk add --no-cache alpine-base busybox linux-lts python3 py3-pip musl ncurses-libs xorriso squashfs-tools cpio
-RUN mkdir -p /build && cd /build && cp -a /github/workspace /build/sid-source
-RUN cd /build/sid-source && bash build/scripts/make-portable.sh build/output 2>&1
-RUN cd /build/sid-source && bash build/scripts/build-live-iso.sh build/output 2>&1
-DOCKER
-      - name: Extract ISO from Docker build
         run: |
+          mkdir -p build/output
+          bash build/scripts/make-portable.sh build/output
+          ls -lh build/output/
+      
+      - name: Build ISO via Docker
+        run: |
+          docker build -t sid-iso -f- . << 'DOCKER'
+          FROM alpine:3.20
+          RUN apk add --no-cache alpine-base busybox linux-lts python3 py3-pip musl ncurses-libs xorriso squashfs-tools cpio wget
+          RUN mkdir -p /build/sid-source
+          COPY . /build/sid-source/
+          RUN cd /build/sid-source && mkdir -p build/output && bash build/scripts/make-portable.sh build/output 2>&1
+          RUN cd /build/sid-source && bash build/scripts/build-live-iso.sh build/output 2>&1
+          DOCKER
           docker create --name sid-tmp sid-iso
           docker cp sid-tmp:/build/output/. build/output/ 2>/dev/null || true
-          docker rm sid-tmp
+          docker rm sid-tmp 2>/dev/null || true
           ls -lh build/output/
+      
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
