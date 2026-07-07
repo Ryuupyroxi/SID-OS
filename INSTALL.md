@@ -7,6 +7,45 @@
 > **Starting from**: Windows 10 on the HP
 
 ---
+---
+
+## Quick Method (recommended)
+
+Skip the 20-prompt setup-alpine by using the answer file. Same result, zero typing.
+
+### What you need
+
+Same as the full method — Alpine ISO, Rufus, USB drive, phone tether.
+
+### Steps
+
+**1-3:** Same as Sections 1-3 — download Alpine, write USB with Rufus (DD mode), boot, login as root, connect tether.
+
+**4. Download and run the answer file:**
+
+```bash
+wget -O /tmp/sid-answers.conf https://raw.githubusercontent.com/Ryuupyroxi/SID-OS/main/installer/sid-answers.conf
+setup-alpine -f /tmp/sid-answers.conf
+```
+
+The installer will still prompt you for:
+- **Root password** (type it twice)
+- **Mirror number** (pick the closest one)
+
+Everything else is automated.
+
+**5.** When done: `poweroff` → unplug USB → wait 10s → replug → reboot.
+
+**6.** Login as `root` with the password you set. Then:
+
+```bash
+apk add curl python3
+curl -sL https://raw.githubusercontent.com/Ryuupyroxi/SID-OS/main/get-sid.py | python3
+```
+
+---
+
+
 
 ## What you're building
 
