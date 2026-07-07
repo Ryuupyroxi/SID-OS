@@ -84,7 +84,7 @@ python3 installer/scripts/install.py
 - **🔀 Router Model** — Tiny 468MB Qwen2.5-0.5B always-on conductor for intent routing
 - **🤖 Agentic Framework** — Hermes-inspired skill learning & tool use
 - **💾 Soul File** — Persistent personality (`/etc/sid/soul.json`)
-- **🖥️ 19 Retro Themes** — VT100, Apple II, C64, NeXTSTEP, etc.
+- **🖥️ 18 Retro Themes** — VT100, Apple II, C64, NeXTSTEP, etc.
 - **🌐 Web Viewer** — CLI browser with auto-offline cache
 - **🎨 Image Tools** — Generation, editing, format conversion
 - **📦 Offline Storage** — Web/wiki compression for offline access
