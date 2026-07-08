@@ -53,6 +53,8 @@ class SIDShell(cmd.Cmd):
         self._ai_mode_active = False
         self._auto_route = True  # Automatically route through AI
         self._direct_mode = False  # True = normal shell, False = AI-first
+        self._assistant = AnimatedAssistant("idle")
+        self._assistant_enabled = False
         self._load_history()
 
     def _load_history(self):
@@ -284,6 +286,7 @@ class SIDShell(cmd.Cmd):
             print(f"  {C['G']}/config{C['RESET']}   - Show AI configuration")
             print(f"  {C['G']}/memory{C['RESET']}   - Show memory stats")
             print(f"  {C['G']}/voice{C['RESET']}    - Voice input mode")
+            print(f"  {C['G']}config set assistant on{C['RESET']}  - Animated terminal mascot")
             print(f"  {C['G']}/clear{C['RESET']}    - Clear screen")
             print(f"  {C['G']}exit{C['RESET']}      - Return to shell\n")
             print(f"  {C['A']}Or just type naturally. I understand commands like:{C['RESET']}")
@@ -558,6 +561,17 @@ class SIDShell(cmd.Cmd):
                     self.ai.set_api_key(value, endpoint)
                 print(f"{C['G']}✓ API key configured. Using online AI.{C['RESET']}")
             
+            elif key == "assistant":
+                if value in ("on", "1", "true", "yes"):
+                    self._assistant_enabled = True
+                    self._assistant.enabled = True
+                    self._assistant.state = "idle"
+                elif value in ("off", "0", "false", "no"):
+                    self._assistant_enabled = False
+                    self._assistant.enabled = False
+                else:
+                    print(f"{C['Y']}Usage: config set assistant on|off{C['RESET']}")
+                return True
             elif key == "theme" and self.theme_manager:
                 if self.theme_manager.set_theme(value):
                     print(f"{C['G']}✓ Theme set to: {value}{C['RESET']}")
@@ -683,6 +697,8 @@ class SIDShell(cmd.Cmd):
             print(f"  Kernel: {kernel}")
             print(f"  Uptime: {uptime}")
             print(f"  Shell:  SID v1.2.0 | AI-First Mode")
+            asst = "ON" if self._assistant_enabled else "OFF"
+            print(f"  Mascot: {asst} (config set assistant on|off)")
             if ai_stats:
                 print(f"  {C['D']}{ai_stats}{C['RESET']}")
         except Exception as e:
