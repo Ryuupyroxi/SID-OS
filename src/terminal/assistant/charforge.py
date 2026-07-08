@@ -110,6 +110,38 @@ class CharForge:
         else:
             return self._gen_procedural(name, outdir, f"character based on {name}")
 
+    def create_from_parts(self, parts: dict, name: Optional[str] = None,
+                          description: str = "", resolution: int = 256) -> str:
+        """Create a character from modular parts.
+        
+        Head, eyes, mouth, body, accessory variants available.
+        See charparts.PartsLibrary.list_parts() for options.
+        Uses PIL when available (fast, high-res), falls back gracefully.
+        
+        Args:
+            parts: Parts manifest dict e.g. {"head": "cat", "eyes": "anime", ...}
+            name: Character name (auto-generated if not set)
+            description: Text description
+            resolution: Pixels per frame (64-512)
+        """
+        from .charparts import CharacterCompositor, PartsLibrary
+        
+        # Validate parts
+        issues = PartsLibrary.validate(parts)
+        if issues:
+            print(f"  ⚠️ Parts issues: {"; ".join(issues)}")
+            print(f"  Falling back to procedural generation")
+            return self.create_from_description(description or str(parts), name, resolution)
+        
+        if name is None:
+            name = "-".join(v for k, v in parts.items() if v != "none") or "parts-char"
+            name = name[:40]
+        
+        cc = CharacterCompositor(resolution=resolution)
+        spritesheet, meta = cc.compose(name, parts, description or name)
+        return os.path.join(CHARS_DIR, name)
+
+
     def list_characters(self) -> list:
         """List all available characters (built-in + custom)."""
         chars = set()
