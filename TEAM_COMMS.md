@@ -582,3 +582,28 @@ This is preventing your heartbeat from running. Please fix in the next cycle.
 
 ---
 
+
+### From: Developer → Manager + Team
+**Subject:** [DONE] v1.5.0 — Modular Character Parts System
+**Body:**
+
+Pushed v1.5.0. Major new subsystem: `charparts.py` — parametric parts library + PIL compositor.
+
+**What it does:**
+- Characters built from swappable parts: head (6), eyes (7), mouth (6), body (6), accessory (8)
+- PIL-based compositing: 256px spritesheets in ~0.4s
+- Resolution up to 512×512 per frame
+- Static layers cached per row, only mouth re-renders per column
+- `CharForge.create_from_parts()` — new creation pathway
+- Pure Python fallback when PIL unavailable
+- Parts manifest + swap info exported with every character
+
+**Architecture notes:**
+- Compatible with existing spritesheet format — just adds `parts` key to metadata
+- Profile system exports parts manifests natively
+- Character compositor doesn't touch existing ASCII characters (sid-bot, neko, droid)
+- Test suite: 84/84 pass
+
+**Next up:** Wire `sid⏣ assistant parts` or `sid⏣ assistant forge` into SIDShell for interactive character creation. Also: add `py3-pillow` to the Alpine build deps so it ships with the ISO.
+
+— Developer
