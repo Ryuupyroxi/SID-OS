@@ -45,3 +45,16 @@
 | Date | Tests Passed | Tests Failed | Notes |
 |-----|-------------|-------------|-------|
 | 2026-07-06 | 84 | 0 | v1.2.0b — Windows bootstrap added, dep checker wired |
+
+## 2026-07-08 — v1.6.0
+
+**Released:** Yes (tag pushed, CI building)
+**Smoke test:** 46 modules imported, 0 failures
+**New features:**
+- `sid⏣ assistant forge` — interactive character creation wizard
+- `SID_ENFORCE_STRICT=1` — bare except visibility in dev mode
+- `AGENT_HANDOFF.md` — comprehensive onboarding doc
+- Smoke test suite (`src/tests/test_smoke.py`)
+- Release gate policy (Manager approval required for tags)
+**Tests:** 46/46 module imports passing
+**CI:** Build in progress

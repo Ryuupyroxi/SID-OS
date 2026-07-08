@@ -153,3 +153,26 @@ Skills at `~/.shared-skills/` — available to any Codex agent:
 3. GUI overlay renderer — designed but not implemented (planned for v2.x)
 4. `sid_shell.py` has ~30 pyflakes warnings (unused imports, assigned-but-unused vars)
 5. Test coverage — 84/87 pass, no smoke test for SIDShell init
+
+---
+
+
+## Release Process (Manager-Controlled Gate)
+
+Since v1.6.0, all releases require Manager approval before tag push.
+
+**Release workflow:**
+1. Feature work commits to `main` freely — no gate
+2. When ready to release, post in team comms with proposed version
+3. Manager runs pre-flight audit:
+   - Version strings consistent across all files
+   - CI build passing (GitHub Actions)
+   - Test suite pass rate
+   - CHANGELOG entry present
+   - Breaking changes documented
+4. Manager approves → tag + push tag → CI builds Release
+5. Manager confirms Release published correctly
+
+**Violations:** Tags pushed without approval will be deleted and flagged.
+
+**Current release candidate:** v1.6.0 (ed01b2b) — awaiting Manager audit.
