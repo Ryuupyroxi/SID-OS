@@ -28,7 +28,7 @@ from pathlib import Path
 from typing import Optional
 
 CHARS_DIR = "/etc/sid/characters"
-FRAME_W, FRAME_H = 64, 64  # px per frame
+FRAME_W, FRAME_H = 128, 128  # px per frame (max 512, use .create(resolution=N))
 COLS, ROWS = 6, 5           # spritesheet grid
 
 STATE_NAMES = ["idle", "thinking", "listening", "speaking", "error"]
@@ -74,7 +74,7 @@ class CharForge:
 
     # ── Public API ────────────────────────────────────────────
 
-    def create_from_description(self, description: str, name: Optional[str] = None) -> str:
+    def create_from_description(self, description: str, name: Optional[str] = None, resolution: int = 128) -> str:
         """Main entry: create a character from a natural language description.
         
         Example:
@@ -235,7 +235,7 @@ class CharForge:
 
     # ── Procedural generator ──────────────────────────────────
 
-    def _gen_procedural(self, name: str, outdir: str, description: str = "") -> str:
+    def _gen_procedural(self, name: str, outdir: str, description: str = "", resolution: int = 128) -> str:
         """Generate a spritesheet procedurally — works everywhere, no deps.
         
         Creates a character with colored face, eyes, and animated mouth shapes.
@@ -255,7 +255,10 @@ class CharForge:
         face_g = max(60, min(255, face_g))
         face_b = max(60, min(255, face_b))
         
-        sw, sh = FRAME_W * COLS, FRAME_H * ROWS
+        # Support configurable resolution up to 512×512 per frame
+        fw = min(max(resolution, 32), 512)
+        fh = fw  # square frames
+        sw, sh = fw * COLS, fh * ROWS
         pixels = bytearray()
         
         for row in range(ROWS):
@@ -263,14 +266,14 @@ class CharForge:
             cycle = MOUTH_CYCLES.get(state, {"frames": COLS, "mouth": [0]})
             n_frames = cycle["frames"]
             
-            for fy in range(FRAME_H):
+            for fy in range(fh):
                 for col in range(COLS):
                     mouth_size = cycle["mouth"][col % len(cycle["mouth"])]
-                    for fx in range(FRAME_W):
-                        cx, cy = fx - FRAME_W//2, fy - FRAME_H//2
+                    for fx in range(fw):
+                        cx, cy = fx - fw//2, fy - fh//2
                         dist = (cx*cx + cy*cy) ** 0.5
                         
-                        if dist < FRAME_W//3:  # Face circle
+                        if dist < fw//3:  # Face circle
                             r, g, b = face_r, face_g, face_b
                             
                             # Skin highlight (top-left)

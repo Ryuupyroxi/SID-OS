@@ -1,6 +1,8 @@
 """Character data model + template registry.
 Supports ASCII art templates and sprite-sheet based characters."""
 
+import os
+import json
 from typing import Optional
 
 # ── Frame Types ───────────────────────────────────────────────
