@@ -301,6 +301,135 @@ class SIDShell(cmd.Cmd):
         else:
             print(f"{C['A']}Unknown AI command: /{action}{C['RESET']}")
 
+    def do_assistant(self, arg):
+        """Character and animation control: assistant <command> [args]
+        
+        Commands:
+          list                    - Show available characters
+          use <name>              - Set active character
+          create <description>    - Create character from description
+          parts <head=cat eyes=anime ...>  - Create from modular parts
+          swap <char> <part> <variant>     - Swap a part on a char
+          on|off                  - Enable/disable mascot
+          list-parts              - Show available part variants
+        
+        Examples:
+          assistant create "a cool cat with sunglasses"
+          assistant parts head=cat eyes=anime mouth=smile body=hoodie
+          assistant swap sid-cat eyes surprised
+          assistant use sid-bot
+          assistant on
+        """
+        args_list = shlex.split(arg) if arg else ["help"]
+        cmd = args_list[0].lower() if args_list else "help"
+        rest = args_list[1:] if len(args_list) > 1 else []
+        
+        if cmd == "list":
+            chars = AssistantController.list_chars()
+            print(f"\n{C['C']}Available Characters:{C['RESET']}")
+            for c in chars:
+                marker = " ▶" if c == self._assistant.character.name else ""
+                print(f"  {C['G']}•{C['RESET']} {c}{marker}")
+        
+        elif cmd == "use":
+            if not rest:
+                print(f"{C['A']}Usage: assistant use <name>{C['RESET']}")
+                return
+            name = rest[0]
+            try:
+                self._assistant.character = name
+                print(f"{C['G']}✓ Active character: {name}{C['RESET']}")
+            except Exception as e:
+                print(f"{C['RED']}✖ Could not switch: {e}{C['RESET']}")
+        
+        elif cmd == "create":
+            desc = " ".join(rest) if rest else "a friendly character"
+            print(f"{C['A']}Creating character from description...{C['RESET']}")
+            try:
+                from terminal.assistant.charforge import CharForge
+                result = CharForge().create_from_description(desc)
+                print(f"{C['G']}✓ Created: {result}{C['RESET']}")
+                # Refresh character list
+                import terminal.assistant.character as charmod
+                charmod.discover_characters()
+            except Exception as e:
+                print(f"{C['RED']}✖ Error: {e}{C['RESET']}")
+        
+        elif cmd == "parts":
+            if not rest:
+                print(f"{C['A']}Usage: assistant parts head=cat eyes=anime body=hoodie{C['RESET']}")
+                return
+            # Parse key=value pairs
+            parts = {}
+            for item in rest:
+                if "=" in item:
+                    k, v = item.split("=", 1)
+                    parts[k.strip()] = v.strip()
+            if not parts:
+                print(f"{C['RED']}✖ No valid parts specified. Use key=value format.{C['RESET']}")
+                return
+            try:
+                from terminal.assistant.charforge import CharForge
+                desc = " ".join(f"{k}={v}" for k, v in parts.items())
+                print(f"{C['A']}Creating character from parts: {parts}{C['RESET']}")
+                result = CharForge().create_from_parts(parts, description=desc)
+                print(f"{C['G']}✓ Created: {result}{C['RESET']}")
+                import terminal.assistant.character as charmod
+                charmod.discover_characters()
+            except Exception as e:
+                print(f"{C['RED']}✖ Error: {e}{C['RESET']}")
+        
+        elif cmd == "swap":
+            if len(rest) < 3:
+                print(f"{C['A']}Usage: assistant swap <name> <part> <variant>{C['RESET']}")
+                return
+            name, part, variant = rest[0], rest[1], rest[2]
+            print(f"{C['A']}Swapping {part} → {variant} for {name}...{C['RESET']}")
+            # Load existing manifest and re-compose
+            import os, json
+            char_dir = f"/etc/sid/characters/{name}"
+            parts_file = os.path.join(char_dir, "parts.json")
+            meta_file = os.path.join(char_dir, "metadata.json")
+            if not os.path.isfile(parts_file) or not os.path.isfile(meta_file):
+                print(f"{C['RED']}✖ Character '{name}' has no parts manifest. Only parts-based characters support swapping.{C['RESET']}")
+                return
+            with open(parts_file) as f:
+                manifest = json.load(f)
+            if part not in manifest.get("manifest", {}):
+                print(f"{C['RED']}✖ Unknown part: {part}. Available: {list(manifest.get('manifest', {}).keys())}{C['RESET']}")
+                return
+            manifest["manifest"][part] = variant
+            from terminal.assistant.charparts import CharacterCompositor
+            with open(meta_file) as f:
+                meta = json.load(f)
+            resolution = meta.get("resolution", 256)
+            cc = CharacterCompositor(resolution=resolution)
+            cc.compose(name, manifest["manifest"], description=meta.get("description", ""), colors=manifest.get("colors"))
+            print(f"{C['G']}✓ Swapped {part} → {variant} for {name}{C['RESET']}")
+        
+        elif cmd == "list-parts":
+            try:
+                from terminal.assistant.charparts import PartsLibrary
+                parts = PartsLibrary.list_parts()
+                print(f"\n{C['C']}Available Part Variants:{C['RESET']}")
+                for ptype, variants in parts.items():
+                    print(f"  {C['G']}{ptype}:{C['RESET']} {', '.join(variants)}")
+            except Exception as e:
+                print(f"{C['RED']}✖ {e}{C['RESET']}")
+        
+        elif cmd in ("on", "1", "enable"):
+            self._assistant.enabled = True
+            self._assistant.state = "idle"
+            print(f"{C['G']}✓ Assistant mascot enabled{C['RESET']}")
+        
+        elif cmd in ("off", "0", "disable"):
+            self._assistant.enabled = False
+            print(f"{C['G']}✓ Assistant mascot disabled{C['RESET']}")
+        
+        else:
+            print(f"{C['A']}Usage: assistant <list|use|create|parts|swap|on|off|list-parts>{C['RESET']}")
+
+
     def do_shell(self, arg):
         """Execute a shell command: shell <command>"""
         if not arg:
@@ -1189,6 +1318,152 @@ class SIDShell(cmd.Cmd):
         
         else:
             print(f"{C['A']}Usage: cache <status|clear|list|stats>{C['RESET']}")
+
+    def do_doctor(self, arg):
+        """Run system health diagnostics: doctor [check]
+        
+        Validates all core modules, dependencies, and configurations.
+        
+        Subchecks:
+          modules   - Verify all core module imports
+          deps      - Check required system dependencies
+          chars     - Validate character registry integrity
+          config    - Check config files exist and are valid
+          all       - Run all checks (default)
+        
+        Usage: doctor [modules|deps|chars|config|all]
+        """
+        check = arg.strip().lower() if arg else "all"
+        passed = 0
+        failed = 0
+        skipped = 0
+        
+        def ok(msg):
+            nonlocal passed
+            passed += 1
+            print(f"  {C['G']}✓{C['RESET']} {msg}")
+        
+        def fail(msg):
+            nonlocal failed
+            failed += 1
+            print(f"  {C['RED']}✖{C['RESET']} {msg}")
+        
+        def skip(msg):
+            nonlocal skipped
+            skipped += 1
+            print(f"  {C['A']}─{C['RESET']} {msg}")
+        
+        print(f"\n{C['C']}═══ SID OS Health Check ═══{C['RESET']}\n")
+        
+        # Module imports
+        if check in ("all", "modules"):
+            print(f"{C['BOLD']}[Modules]{C['RESET']}")
+            core_modules = [
+                "terminal.assistant.charforge",
+                "terminal.assistant.charparts", 
+                "terminal.assistant.character",
+                "terminal.assistant.controller",
+                "terminal.assistant.renderer",
+                "tools.profile",
+                "memory",
+                "voice",
+            ]
+            for mod_name in core_modules:
+                try:
+                    import importlib
+                    importlib.import_module(mod_name)
+                    ok(mod_name)
+                except Exception as e:
+                    fail(f"{mod_name}: {e}")
+            print()
+        
+        # Dependencies
+        if check in ("all", "deps"):
+            print(f"{C['BOLD']}[Dependencies]{C['RESET']}")
+            # Check PIL
+            try:
+                from PIL import Image
+                ok(f"Pillow {Image.__version__}")
+            except ImportError:
+                skip("Pillow (optional — install py3-pillow for high-res sprites)")
+            
+            # Check chafa
+            import shutil
+            if shutil.which("chafa"):
+                ok("chafa (terminal image render)")
+            else:
+                skip("chafa (optional terminal image render)")
+            
+            # Check numpy
+            try:
+                import numpy
+                ok(f"NumPy {numpy.__version__}")
+            except ImportError:
+                skip("NumPy (optional — for AI acceleration)")
+            
+            # Check git
+            if shutil.which("git"):
+                ok("git")
+            else:
+                fail("git not found")
+            print()
+        
+        # Character registry
+        if check in ("all", "chars"):
+            print(f"{C['BOLD']}[Characters]{C['RESET']}")
+            try:
+                from terminal.assistant.character import list_characters
+                chars = list_characters()
+                ok(f"{len(chars)} characters loaded: {', '.join(chars[:6])}" + ("..." if len(chars) > 6 else ""))
+            except Exception as e:
+                fail(f"Character registry: {e}")
+            
+            # Validate spritesheets
+            import os
+            chars_dir = "/etc/sid/characters"
+            if os.path.isdir(chars_dir):
+                valid = 0
+                broken = 0
+                for name in os.listdir(chars_dir):
+                    meta = os.path.join(chars_dir, name, "metadata.json")
+                    spr = os.path.join(chars_dir, name, "spritesheet.png")
+                    if os.path.isfile(meta) and os.path.isfile(spr):
+                        valid += 1
+                    elif os.path.isfile(meta):
+                        broken += 1
+                if valid:
+                    ok(f"{valid} spritesheet characters valid")
+                if broken:
+                    fail(f"{broken} characters missing spritesheets")
+            else:
+                skip("No spritesheet characters directory")
+            print()
+        
+        # Config files
+        if check in ("all", "config"):
+            print(f"{C['BOLD']}[Configuration]{C['RESET']}")
+            config_dir = "config"
+            if os.path.isdir(config_dir):
+                for fname in sorted(os.listdir(config_dir)):
+                    fpath = os.path.join(config_dir, fname)
+                    if fname.endswith(".json"):
+                        try:
+                            with open(fpath) as f:
+                                json.load(f)
+                            ok(f"{fname}")
+                        except Exception as e:
+                            fail(f"{fname}: {e}")
+            else:
+                skip("config directory not found")
+            print()
+        
+        # Summary
+        total = passed + failed + skipped
+        print(f"{C['C']}═══ Results: {passed}✓ / {failed}✖ / {skipped}─ ═══{C['RESET']}")
+        if failed > 0:
+            return True
+        return False
+
 
     def do_benchmark(self, arg):
         """Run hardware benchmark for AI model recommendations.

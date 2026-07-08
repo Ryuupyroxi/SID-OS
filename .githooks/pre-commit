@@ -1,0 +1,40 @@
+#!/bin/bash
+# SID OS Pre-commit hook — runs pyflakes + syntax check on staged .py files
+echo "🔍 SID OS Pre-commit hook: checking staged files..."
+
+STAGED=$(git diff --cached --name-only --diff-filter=ACMR | grep '\.py$')
+if [ -z "$STAGED" ]; then
+    exit 0
+fi
+
+HAS_ERRORS=0
+
+for f in $STAGED; do
+    if [ ! -f "$f" ]; then
+        continue
+    fi
+    
+    # Python syntax check
+    python3 -m py_compile "$f" 2>/dev/null
+    if [ $? -ne 0 ]; then
+        echo "  ❌ SYNTAX ERROR: $f"
+        python3 -m py_compile "$f" 2>&1 | sed 's/^/    /'
+        HAS_ERRORS=1
+        continue
+    fi
+    
+    # pyflakes check
+    pyflakes "$f" 2>/dev/null
+    if [ $? -ne 0 ]; then
+        echo "  ⚠️  Warnings in $f:"
+        pyflakes "$f" 2>&1 | sed 's/^/    /'
+    fi
+done
+
+if [ $HAS_ERRORS -ne 0 ]; then
+    echo "❌ Pre-commit hook FAILED — fix syntax errors before committing"
+    exit 1
+fi
+
+echo "  ✅ All staged Python files pass syntax check"
+exit 0

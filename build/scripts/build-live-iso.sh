@@ -60,7 +60,7 @@ install_pkg() {
     fi
 }
 
-for pkg in linux-lts linux-firmware python3 py3-pip ncurses-libs ncurses-terminfo readline bash sqlite-libs openssl ca-certificates eudev-libs dhcpcd tzdata doas sudo syslinux openrc alpine-conf e2fsprogs grub-efi dosfstools ntfs-3g fuse3 exfatprogs wpa_supplicant iw wireless-tools htop lm-sensors; do
+for pkg in linux-lts linux-firmware python3 py3-pip py3-pillow ncurses-libs ncurses-terminfo readline bash sqlite-libs openssl ca-certificates eudev-libs dhcpcd tzdata doas sudo syslinux openrc alpine-conf e2fsprogs grub-efi dosfstools ntfs-3g fuse3 exfatprogs wpa_supplicant iw wireless-tools htop lm-sensors; do
     install_pkg "$pkg" || true
 done
 

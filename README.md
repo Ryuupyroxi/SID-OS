@@ -349,3 +349,42 @@ MIT — free for everyone.
 - [llama.cpp](https://github.com/ggerganov/llama.cpp) — CPU-optimized LLM inference  
 - [whisper.cpp](https://github.com/ggerganov/whisper.cpp) — Offline speech recognition  
 - [SQLite](https://sqlite.org/) — Lightweight persistent storage
+
+
+## 🧩 Modular Character Parts (v1.5.0+)
+
+Characters are now built from **swappable modular parts** — mix and match to create unique assistants.
+
+| Part | Available Variants |
+|---|---|
+| **Head** | round, square, oval, cat, robot, alien |
+| **Eyes** | round, anime, happy, narrow, angry, sleepy, surprised |
+| **Mouth** | smile, neutral, open, surprised, pout, fangs |
+| **Body** | simple, hoodie, cloak, robot, suit, collar |
+| **Accessory** | glasses, hat, headphones, crown, bowtie, scarf, monocle |
+
+Fast compositing via PIL — 256px spritesheets in under half a second.
+
+**Commands:**
+```
+sid⏣ assistant list                    # See available characters
+sid⏣ assistant use <name>              # Switch active character
+sid⏣ assistant create "description"    # Generate from description
+sid⏣ assistant parts head=cat eyes=anime body=hoodie  # Build from parts
+sid⏣ assistant swap <char> <part> <variant>           # Swap a part
+sid⏣ assistant list-parts              # See all variants
+sid⏣ assistant on|off                  # Toggle mascot
+sid⏣ doctor                            # System health check
+```
+
+Characters export as `.sidchar` files via the profile system, preserving their full parts manifest for later editing.
+
+### Creating Your Own
+```python
+from terminal.assistant.charforge import CharForge
+forge = CharForge()
+forge.create_from_parts({
+    "head": "cat", "eyes": "anime", "mouth": "smile",
+    "body": "hoodie", "accessory": "glasses"
+}, "sid-cat", resolution=256)
+```
