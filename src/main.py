@@ -195,7 +195,7 @@ def main():
                         from terminal.ui.voice_button import VoiceButton
                         vb = VoiceButton(on_text=lambda t: ai.process(t) if ai else None)
                         threading.Thread(target=vb.show, daemon=True).start()
-                    except:
+except Exception:
                         pass
                 print("\033[32m✓\033[0m")
             else:
@@ -210,7 +210,7 @@ def main():
         hw_monitor.start()
         if ai:
             ai._hardware_context.update(hw_monitor.get_stats())
-    except:
+except Exception:
         hw_monitor = None
 
     # Start optimizer
@@ -218,7 +218,7 @@ def main():
         from system.optimizer.engine import Optimizer
         optimizer = Optimizer(hw_monitor if 'hw_monitor' in dir() else None)
         optimizer.start()
-    except:
+except Exception:
         optimizer = None
 
     # Quick setup mode
@@ -234,7 +234,7 @@ def main():
                 print(f"\033[32m[SID] Using model: {ai.model_manager.current_model_name}\033[0m")
             else:
                 print(f"\033[33m[SID] No model found. Run: install quick {tier}\033[0m")
-        except:
+except Exception:
             pass
 
     # Set signal handler for clean shutdown
@@ -251,7 +251,7 @@ def main():
         if 'vb' in dir():
             try:
                 vb.hide()
-            except:
+except Exception:
                 pass
         sys.exit(0)
     

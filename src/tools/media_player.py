@@ -107,7 +107,7 @@ class MediaPlayer:
             try:
                 self._process.terminate()
                 self._process.wait(timeout=3)
-            except:
+except Exception:
                 self._process.kill()
             self._process = None
         self._playing = False

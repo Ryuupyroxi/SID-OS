@@ -63,7 +63,7 @@ class OfflineCache:
         try:
             urllib.request.urlopen("http://clients3.google.com/generate_204", timeout=3)
             self._online = True
-        except:
+except Exception:
             self._online = False
 
     @property
@@ -189,7 +189,7 @@ class OfflineCache:
         def worker(url):
             try:
                 self.fetch_with_cache(url, max_age=7*86400)
-            except:
+except Exception:
                 pass
         
         threads = []
@@ -243,7 +243,7 @@ class OfflineCache:
             conn2.isolation_level = None
             conn2.execute("VACUUM")
             conn2.close()
-        except:
+except Exception:
             pass
 
     def _make_key(self, url: str) -> str:

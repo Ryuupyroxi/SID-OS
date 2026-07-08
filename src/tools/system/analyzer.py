@@ -29,7 +29,7 @@ class SystemAnalyzer:
                 capture_output=True, text=True, timeout=5
             ).stdout.strip()
             report["cpu_usage"] = f"{cpu}%"
-        except:
+except Exception:
             report["cpu_usage"] = "N/A"
 
         # Memory
@@ -39,7 +39,7 @@ class SystemAnalyzer:
                 capture_output=True, text=True, timeout=5
             ).stdout.strip()
             report["memory"] = mem
-        except:
+except Exception:
             report["memory"] = "N/A"
 
         # Top processes
@@ -49,7 +49,7 @@ class SystemAnalyzer:
                 capture_output=True, text=True, timeout=5
             ).stdout.strip().split('\n')
             report["top_processes"] = procs[:3]
-        except:
+except Exception:
             report["top_processes"] = []
 
         # Disk I/O
@@ -59,7 +59,7 @@ class SystemAnalyzer:
                 capture_output=True, text=True, timeout=10
             ).stdout.strip()
             report["disk_io"] = io[:200]
-        except:
+except Exception:
             report["disk_io"] = "N/A"
 
         return report
@@ -76,7 +76,7 @@ class SystemAnalyzer:
             ).stdout.strip()
             if int(updates) > 0:
                 issues.append(f"{updates} pending updates")
-        except:
+except Exception:
             pass
 
         # Check firewall
@@ -87,7 +87,7 @@ class SystemAnalyzer:
             ).stdout.strip()
             if not fw:
                 issues.append("Firewall not active")
-        except:
+except Exception:
             pass
 
         # Check SSH config
@@ -97,7 +97,7 @@ class SystemAnalyzer:
                 content = ssh_config.read_text()
                 if "PermitRootLogin yes" in content:
                     issues.append("Root SSH login enabled")
-        except:
+except Exception:
             pass
 
         return issues

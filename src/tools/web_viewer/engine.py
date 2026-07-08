@@ -39,7 +39,7 @@ class WebViewerEngine:
         try:
             urllib.request.urlopen("http://clients3.google.com/generate_204", timeout=3)
             return True
-        except:
+except Exception:
             return False
 
     def view(self, url: str, force_refresh: bool = False) -> Dict:
@@ -179,7 +179,7 @@ class WebViewerEngine:
             try:
                 meta = json.loads(f.read_text())
                 pages.append(meta)
-            except:
+except Exception:
                 pass
         return sorted(pages, key=lambda x: x.get("cached_at", 0), reverse=True)
 

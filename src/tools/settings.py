@@ -21,7 +21,7 @@ class SettingsManager:
         if self.settings_path.exists():
             try:
                 self.data = json.loads(self.settings_path.read_text())
-            except:
+except Exception:
                 self.data = self._defaults()
         else:
             self.data = self._defaults()

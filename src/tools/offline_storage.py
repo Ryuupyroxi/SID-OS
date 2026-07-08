@@ -286,12 +286,12 @@ class OfflineStorage:
         # Try zlib first
         try:
             return zlib.decompress(data).decode('utf-8')
-        except:
+except Exception:
             pass
         # Try gzip
         try:
             return gzip.decompress(data).decode('utf-8')
-        except:
+except Exception:
             pass
         return data.decode('utf-8', errors='replace')
 

@@ -75,7 +75,7 @@ class SemanticMemory:
             conn2.isolation_level = None
             conn2.execute("VACUUM")
             conn2.close()
-        except:
+except Exception:
             pass
 
     def count(self) -> int:

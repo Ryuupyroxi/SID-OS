@@ -102,7 +102,7 @@ class FileBrowserHandler(BaseHTTPRequestHandler):
                         "permissions": oct(stat.st_mode)[-3:],
                         "ext": entry.suffix.lower(),
                     })
-                except:
+except Exception:
                     pass
 
             self._send_json({
@@ -140,7 +140,7 @@ class FileBrowserHandler(BaseHTTPRequestHandler):
                             "size": stat.st_size,
                             "modified": stat.st_mtime,
                         })
-                    except:
+except Exception:
                         pass
                     
                     if len(results) >= 50:
@@ -178,7 +178,7 @@ class FileBrowserHandler(BaseHTTPRequestHandler):
             if p.is_file() and p.suffix.lower() in ['.txt', '.md', '.py', '.sh', '.json', '.xml', '.yaml', '.yml', '.cfg', '.conf', '.ini', '.log', '.csv']:
                 try:
                     info["preview"] = p.read_text(encoding='utf-8', errors='replace')[:2000]
-                except:
+except Exception:
                     pass
 
             self._send_json(info)
@@ -196,7 +196,7 @@ class FileBrowserHandler(BaseHTTPRequestHandler):
                 "used": total - free,
                 "percent": ((total - free) / total * 100) if total else 0
             }
-        except:
+except Exception:
             return {}
 
     def _serve_interface(self):
@@ -433,7 +433,7 @@ class BrowserFileExplorer:
                     "port": self.port,
                     "root": str(self.root)
                 }
-            except:
+except Exception:
                 return {"status": "started_but_unreachable", "port": self.port}
         except Exception as e:
             return {"error": str(e)}
@@ -461,7 +461,7 @@ class BrowserFileExplorer:
                 subprocess.Popen([browser, url], 
                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
                 return True
-            except:
+except Exception:
                 continue
         print(f"[SID] Open {url} in your browser")
         return False

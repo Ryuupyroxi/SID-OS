@@ -50,7 +50,7 @@ class AgentLoop:
         result = self.ai.process(prompt)
         try:
             return json.loads(result.get("response", "{}"))
-        except:
+except Exception:
             return {"steps": [{"action": "direct", "description": task}], "reasoning": result.get("response", "")}
 
     def _execute_step(self, step: Dict) -> Dict:

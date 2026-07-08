@@ -75,7 +75,7 @@ class HardwareMonitor:
             try:
                 data = json.loads(self.config_path.read_text())
                 self.config.update(data)
-            except:
+except Exception:
                 pass
 
     def on(self, event: str, callback: Callable):
@@ -85,7 +85,7 @@ class HardwareMonitor:
         for cb in self._callbacks.get(event, []):
             try:
                 cb(**data)
-            except:
+except Exception:
                 pass
 
     def start(self):
@@ -136,7 +136,7 @@ class HardwareMonitor:
                 s.cpu_temp = self._get_cpu_temp()
                 s.cpu_cores = os.cpu_count() or 0
                 s.cpu_governor = self._read_governor()
-            except:
+except Exception:
                 pass
 
             # RAM
@@ -146,7 +146,7 @@ class HardwareMonitor:
                 s.ram_free = mem.get('free', 0)
                 s.ram_used = s.ram_total - s.ram_free
                 s.ram_percent = (s.ram_used / max(s.ram_total, 1)) * 100
-            except:
+except Exception:
                 pass
 
             # Disk
@@ -155,7 +155,7 @@ class HardwareMonitor:
                 for k, v in disk.items():
                     setattr(s, f"disk_{k}", v)
                 s.disk_percent = (s.disk_used / max(s.disk_total, 1)) * 100
-            except:
+except Exception:
                 pass
 
             # System
@@ -163,7 +163,7 @@ class HardwareMonitor:
                 s.uptime = self._read_uptime()
                 load = os.getloadavg()
                 s.load_1m, s.load_5m, s.load_15m = load
-            except:
+except Exception:
                 pass
 
             # Store history (keep last 100)
@@ -228,7 +228,7 @@ class HardwareMonitor:
                 capture_output=True, text=True, timeout=5
             )
             return result.stdout.strip() or "Unknown CPU"
-        except:
+except Exception:
             return "Unknown CPU"
 
     def _get_cpu_usage(self) -> float:
@@ -248,7 +248,7 @@ class HardwareMonitor:
             idle2 = parts2[3]
             total2 = sum(parts2)
             return (1 - (idle2 - idle) / max(total2 - total, 1)) * 100
-        except:
+except Exception:
             return 0.0
 
     def _get_cpu_temp(self) -> float:
@@ -257,7 +257,7 @@ class HardwareMonitor:
                 temp = int(p.read_text().strip()) / 1000
                 if 0 < temp < 120:  # Sanity check
                     return temp
-            except:
+except Exception:
                 continue
         return 0.0
 
@@ -267,7 +267,7 @@ class HardwareMonitor:
                 gov = cpu / "cpufreq/scaling_governor"
                 if gov.exists():
                     return gov.read_text().strip()
-        except:
+except Exception:
             pass
         return "unknown"
 
@@ -278,7 +278,7 @@ class HardwareMonitor:
                 if gov.exists():
                     gov.write_text(governor)
             return True
-        except:
+except Exception:
             return False
 
     def _read_meminfo(self) -> Dict:
@@ -304,21 +304,21 @@ class HardwareMonitor:
                 "used": int(parts[2]),
                 "free": int(parts[3]),
             }
-        except:
+except Exception:
             return {"total": 0, "used": 0, "free": 0}
 
     def _read_uptime(self) -> int:
         try:
             with open("/proc/uptime") as f:
                 return int(float(f.read().split()[0]))
-        except:
+except Exception:
             return 0
 
     def _clear_caches(self):
         try:
             with open("/proc/sys/vm/drop_caches", "w") as f:
                 f.write("3")
-        except:
+except Exception:
             pass
 
     def _clean_temp(self):

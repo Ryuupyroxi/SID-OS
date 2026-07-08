@@ -19,7 +19,7 @@ class FileManager:
                 capture_output=True, text=True, timeout=10
             )
             return result.stdout.strip().split('\n') if result.stdout else []
-        except:
+except Exception:
             return []
 
     def organize(self, path: str = ".") -> str:

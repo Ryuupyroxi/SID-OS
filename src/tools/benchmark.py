@@ -21,7 +21,7 @@ class HardwareBenchmark:
         if self.registry_path.exists():
             try:
                 return json.loads(self.registry_path.read_text())
-            except:
+except Exception:
                 pass
         return {"ram_tiers": {}, "recommended": {}}
 
@@ -60,7 +60,7 @@ class HardwareBenchmark:
                 capture_output=True, text=True, timeout=5
             )
             info["model"] = result.stdout.strip()
-        except:
+except Exception:
             pass
         
         try:
@@ -71,13 +71,13 @@ class HardwareBenchmark:
             flags = result.stdout.strip()
             info["features"] = [f for f in ["avx2", "avx", "sse4_2", "sse4_1", "neon", "fma"] 
                               if f in flags.lower()]
-        except:
+except Exception:
             pass
         
         try:
             result = subprocess.run(["uname", "-m"], capture_output=True, text=True, timeout=5)
             info["arch"] = result.stdout.strip()
-        except:
+except Exception:
             pass
         
         return info
@@ -93,7 +93,7 @@ class HardwareBenchmark:
                 "percent_used": mem.percent,
                 "swap_mb": psutil.swap_memory().total // (1024 * 1024) if hasattr(psutil, 'swap_memory') else 0,
             }
-        except:
+except Exception:
             pass
         
         # Fallback to /proc/meminfo
@@ -109,7 +109,7 @@ class HardwareBenchmark:
                     "available_mb": data.get("MemAvailable", 0),
                     "swap_mb": data.get("SwapTotal", 0),
                 }
-        except:
+except Exception:
             return {"total_mb": 0}
 
     def _bench_cpu_speed(self) -> Dict:
@@ -150,7 +150,7 @@ class HardwareBenchmark:
         # Cleanup
         try:
             os.unlink(test_file)
-        except:
+except Exception:
             pass
         
         write_speed = (64 / max(write_duration, 0.001))  # MB/s

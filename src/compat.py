@@ -102,7 +102,7 @@ def is_admin() -> bool:
         try:
             import ctypes
             return ctypes.windll.shell32.IsUserAnAdmin() != 0
-        except:
+except Exception:
             return False
     return os.geteuid() == 0
 

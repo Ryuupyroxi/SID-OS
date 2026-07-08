@@ -32,21 +32,21 @@ class ImageTools:
         try:
             subprocess.run(["convert", "--version"], capture_output=True, timeout=5)
             backends["imagemagick"] = True
-        except:
+except Exception:
             pass
         
         # Check for FFmpeg
         try:
             subprocess.run(["ffmpeg", "-version"], capture_output=True, timeout=5)
             backends["ffmpeg"] = True
-        except:
+except Exception:
             pass
         
         # Check for Pillow
         try:
             from PIL import Image
             backends["python_pil"] = True
-        except:
+except Exception:
             pass
         
         return backends
@@ -140,7 +140,7 @@ class ImageTools:
             
             if Path(output).exists():
                 return {"success": True, "path": output, "engine": "imagemagick"}
-        except:
+except Exception:
             pass
         
         return {"success": False}
@@ -248,7 +248,7 @@ class ImageTools:
                 info["dimensions"] = f"{img.width}x{img.height}"
                 info["mode"] = img.mode
                 info["format"] = img.format
-        except:
+except Exception:
             pass
         
         # Try ImageMagick
@@ -258,7 +258,7 @@ class ImageTools:
             )
             if result.stdout:
                 info["detail"] = result.stdout.strip()
-        except:
+except Exception:
             pass
         
         return info

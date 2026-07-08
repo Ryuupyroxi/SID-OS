@@ -273,7 +273,7 @@ class ModelManager:
             try:
                 urllib.request.urlopen("http://127.0.0.1:8787/health", timeout=5)
                 return True
-            except:
+except Exception:
                 # Try alternative health check
                 try:
                     req = urllib.request.Request(
@@ -283,7 +283,7 @@ class ModelManager:
                     )
                     urllib.request.urlopen(req, timeout=5)
                     return True
-                except:
+except Exception:
                     return False
         except Exception as e:
             print(f"[SID] Server start error: {e}")
@@ -451,13 +451,13 @@ class ModelManager:
             result = subprocess.run(["nvidia-smi"], capture_output=True, text=True, timeout=5)
             if result.returncode == 0:
                 return True
-        except:
+except Exception:
             pass
         try:
             result = subprocess.run(["vulkaninfo"], capture_output=True, text=True, timeout=5)
             if result.returncode == 0:
                 return True
-        except:
+except Exception:
             pass
         return False
 
@@ -490,10 +490,10 @@ class ModelManager:
             try:
                 self._llama_process.terminate()
                 self._llama_process.wait(timeout=5)
-            except:
+except Exception:
                 try:
                     self._llama_process.kill()
-                except:
+except Exception:
                     pass
             self._llama_process = None
         self._llama_python = None

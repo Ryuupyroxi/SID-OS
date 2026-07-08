@@ -66,7 +66,7 @@ class BootManager:
             elif step == "network":
                 subprocess.run(["systemctl", "start", "networking"], capture_output=True)
             return True
-        except:
+except Exception:
             return False
 
     def _start_daemon(self, name: str):

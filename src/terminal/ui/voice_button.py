@@ -101,7 +101,7 @@ class VoiceButton:
             
             if text and self.on_text:
                 self.on_text(text)
-        except:
+except Exception:
             pass
         finally:
             os.unlink(tmp.name)

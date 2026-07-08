@@ -18,7 +18,7 @@ class SearchEngine:
                 capture_output=True, text=True, timeout=30
             )
             return result.stdout.strip().split('\n') if result.stdout else []
-        except:
+except Exception:
             return []
 
     def text(self, query: str, path: str = ".") -> Dict[str, List[str]]:
@@ -30,7 +30,7 @@ class SearchEngine:
             )
             lines = result.stdout.strip().split('\n') if result.stdout else []
             return {"results": lines[:50], "total": len(lines)}
-        except:
+except Exception:
             return {"results": [], "total": 0}
 
     def ai_search(self, query: str, context: str = "") -> str:

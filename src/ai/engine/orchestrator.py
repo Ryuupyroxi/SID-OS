@@ -176,7 +176,7 @@ class AIOrchestrator:
                         self._hardware_context["ram_total_mb"] = total_mb
                         self._hardware_context["ram_tier"] = self.config.ram_tier
                         break
-        except:
+except Exception:
             pass  # Use defaults
 
     def _load_config(self) -> AIConfig:
@@ -463,7 +463,7 @@ class AIOrchestrator:
                 response = self.model_manager.generate(messages, max_tokens=128, temperature=0.7, top_p=0.9)
                 if response and not response.startswith("Error"):
                     return response
-            except:
+except Exception:
                 pass
         
         # Fallback: templated responses for common intents

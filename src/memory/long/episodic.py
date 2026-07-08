@@ -75,7 +75,7 @@ class EpisodicMemory:
         conn2.isolation_level = None  # Auto-commit mode
         try:
             conn2.execute("VACUUM")
-        except:
+except Exception:
             pass
         conn2.close()
 

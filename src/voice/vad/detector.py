@@ -29,7 +29,7 @@ class VADDetector:
             import webrtcvad
             vad = webrtcvad.Vad(2)  # Aggressiveness 0-3
             return vad.is_speech(frame, 16000)
-        except:
+except Exception:
             return self._detect_energy(frame)
 
     def _detect_energy(self, frame: bytes) -> bool:

@@ -61,13 +61,13 @@ class SIDShell(cmd.Cmd):
     def _load_history(self):
         try:
             readline.read_history_file(self._history_file)
-        except:
+except Exception:
             pass
 
     def _save_history(self):
         try:
             readline.write_history_file(self._history_file)
-        except:
+except Exception:
             pass
 
     def precmd(self, line):
@@ -191,10 +191,10 @@ class SIDShell(cmd.Cmd):
             for i in range(max(0, hlen - 5), hlen):
                 try:
                     history.append(readline.get_history_item(i))
-                except:
+except Exception:
                     pass
             context['recent_commands'] = history
-        except:
+except Exception:
             pass
 
         return context
@@ -385,7 +385,7 @@ class SIDShell(cmd.Cmd):
                 if result.returncode == 0:
                     print(f"{C['G']}✓ {name} installed via {pkg_manager}{C['RESET']}")
                     return
-            except:
+except Exception:
                 continue
         
         print(f"{C['RED']}Failed to install {name}. Try a different package name.{C['RESET']}")
@@ -720,7 +720,7 @@ class SIDShell(cmd.Cmd):
                 print(f"  CPU Temp: {color}{c:.1f}°C {bar}{C['RESET']}")
             else:
                 print(f"  {C['A']}Temperature: N/A (no sensors){C['RESET']}")
-        except:
+except Exception:
             print(f"  {C['A']}Temperature: N/A{C['RESET']}")
 
     def _show_memory(self):
@@ -746,20 +746,20 @@ class SIDShell(cmd.Cmd):
                                 if m.name and m.name in self.ai.model_manager.current_model_name:
                                     print(f"  {C['D']}AI Model: {m.name} ({m.ram_required}MB RAM){C['RESET']}")
                                     break
-        except:
+except Exception:
             subprocess.run(["free", "-h"])
 
     def _show_disk(self):
         try:
             subprocess.run(["df", "-h", "/", "--output=source,size,used,avail,pcent,target"], 
                          capture_output=False)
-        except:
+except Exception:
             subprocess.run(["df", "-h", "/"])
 
     def _show_processes(self):
         try:
             subprocess.run(["ps", "aux", "--sort=-%mem", "|", "head", "-15"])
-        except:
+except Exception:
             subprocess.run(["ps", "aux", "|", "head", "-15"])
 
     def _optimize_system(self):
@@ -771,14 +771,14 @@ class SIDShell(cmd.Cmd):
             with open("/proc/sys/vm/drop_caches", "w") as f:
                 f.write("3")
             print(f"  {C['G']}✓{C['RESET']} Memory caches cleared")
-        except:
+except Exception:
             pass
         
         # Clean temp files
         try:
             subprocess.run(["rm", "-rf", "/tmp/*"], capture_output=True)
             print(f"  {C['G']}✓{C['RESET']} Temp files cleaned")
-        except:
+except Exception:
             pass
         
         # Optimize AI memory
@@ -794,11 +794,11 @@ class SIDShell(cmd.Cmd):
             subprocess.run(["apt-get", "update"], capture_output=False, timeout=120)
             subprocess.run(["apt-get", "upgrade", "-y", "--quiet=2"], capture_output=True, timeout=300)
             print(f"{C['G']}✓ System updated{C['RESET']}")
-        except:
+except Exception:
             try:
                 subprocess.run(["apk", "update"], capture_output=False, timeout=60)
                 print(f"{C['G']}✓ System updated{C['RESET']}")
-            except:
+except Exception:
                 print(f"{C['A']}No package manager found for updates{C['RESET']}")
 
     def do_help(self, arg):

@@ -33,7 +33,7 @@ class Optimizer:
             try:
                 self._run_optimizations()
                 time.sleep(60)  # Run every minute
-            except:
+except Exception:
                 time.sleep(60)
 
     def _run_optimizations(self):
@@ -81,7 +81,7 @@ class Optimizer:
                 ["sysctl", "-w", f"{key}={value}"],
                 capture_output=True, timeout=5
             )
-        except:
+except Exception:
             pass
 
     def get_profile(self) -> Dict:
@@ -107,5 +107,5 @@ class Optimizer:
                 gov = cpu / "cpufreq/scaling_governor"
                 if gov.exists():
                     gov.write_text(governor)
-        except:
+except Exception:
             pass
