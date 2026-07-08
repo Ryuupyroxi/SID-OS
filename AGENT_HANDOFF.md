@@ -125,6 +125,8 @@ Skills at `~/.shared-skills/` — available to any Codex agent:
 |---|---|
 | v1.0.0 | First public release, bootable ISO + portable tarball |
 | v1.2.0 | UEFI boot, host FS auto-mount, WiFi, DevMode easter egg |
+| v1.6.1 | Boot initramfs rewrite — rootdelay, emergency shell, 4 boot modes |
+| v1.6.0 | Smoke test, forge wizard, strict mode, agent handoff doc |
 | v1.2.1 | Modular animated assistant — 3 ASCII chars, 6 render backends |
 | v1.2.2 | Profile export/import system |
 | v1.3.0 | Spritesheet generator, frame caching, tests |

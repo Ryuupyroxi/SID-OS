@@ -30,7 +30,7 @@ class SIDShell(cmd.Cmd):
 
     intro = f"""
 {C['G']}╔══════════════════════════════════════════════════╗
-║       SID v1.2.0 - SUPER INTELLIGENT DISTRO        ║
+║       SID v1.6.1 - SUPER INTELLIGENT DISTRO        ║
 ║       ═══════════════════════════════════════     ║
 ║       Type anything - AI will understand          ║
 ║       Try: "what can you do?" or "show system"   ║
@@ -927,7 +927,7 @@ class SIDShell(cmd.Cmd):
             print(f"  RAM:    {mem}")
             print(f"  Kernel: {kernel}")
             print(f"  Uptime: {uptime}")
-            print(f"  Shell:  SID v1.2.0 | AI-First Mode")
+            print(f"  Shell:  SID v1.6.1 | AI-First Mode")
             asst = "ON" if self._assistant_enabled else "OFF"
             print(f"  Mascot: {asst} (config set assistant on|off)")
             if ai_stats:

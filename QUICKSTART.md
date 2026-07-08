@@ -1,6 +1,6 @@
 # SID OS — Quick Install Guide
 
-> **Version**: v1.2.0 | **Base**: Fork of Alpine Linux 3.24.1 | **Boot**: BIOS + UEFI  
+> **Version**: v1.6.1 | **Base**: Fork of Alpine Linux 3.24.1 | **Boot**: BIOS + UEFI  
 > **For people who've done this before. Need every detail? Read** `INSTALL.md`
 
 ---

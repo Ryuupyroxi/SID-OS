@@ -5,7 +5,7 @@ set -eo pipefail
 
 # Auto-detect version from env, git tag, or fallback
 [ -z "${VERSION}" ] && [ -n "${GITHUB_REF_NAME}" ] && VERSION="${GITHUB_REF_NAME#v}"
-VERSION="${VERSION:-1.2.0}"
+VERSION="${VERSION:-1.6.1}"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 OUTPUT_DIR="${1:-$PROJECT_DIR/build/output}"

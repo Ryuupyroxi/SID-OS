@@ -28,7 +28,7 @@ class BootManager:
     def boot(self) -> bool:
         """Execute boot sequence."""
         print("\033[2J\033[H")  # Clear screen
-        print("\033[32mSID v1.2.0 - Super Intelligent Distro\033[0m")
+        print("\033[32mSID v1.6.1 - Super Intelligent Distro\033[0m")
         print("\033[2mInitializing...\033[0m\n")
 
         for msg, step in self.BOOT_STEPS:

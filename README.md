@@ -6,7 +6,7 @@
 # ║  ███████║██║███████╗██║██║     ██║  ██║╚██████╔╝███████║ ║
 # ║  ╚══════╝╚═╝╚══════╝╚═╝╚═╝     ╚═╝  ╚═╝ ╚═════╝ ╚══════╝ ║
 # ║                                                          ║
-# ║     v1.2.0 — AI-First CLI OS for Old Hardware            ║
+# ║     v1.6.1 — AI-First CLI OS for Old Hardware            ║
 # ║     Fork of Alpine Linux                                 ║
 # ╚══════════════════════════════════════════════════════════╝
 
@@ -51,7 +51,7 @@ Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Ryuupyroxi/SID-OS/main
 
 **Method C — Manual (if you already have Python):**
 ```batch
-cd sid-1.2.0-portable
+cd sid-1.6.1-portable
 python src\main.py --theme vt100
 ```
 
@@ -87,7 +87,7 @@ Download `sid-*-live-x86_64.iso` from the [Releases page](https://github.com/Ryu
 ```bash
 # Find your USB device (e.g. /dev/sdb) — be careful!
 lsblk
-sudo dd if=sid-1.2.0-live-x86_64.iso of=/dev/sdb bs=4M status=progress
+sudo dd if=sid-1.6.1-live-x86_64.iso of=/dev/sdb bs=4M status=progress
 ```
 
 **Boot & install:**
@@ -137,7 +137,7 @@ python3 installer/scripts/install.py
 
 ## ✨ What's Inside
 
-### 🖥️ Live ISO Features (v1.2.0)
+### 🖥️ Live ISO Features (v1.6.1)
 | Feature | Status |
 |---------|--------|
 | **BIOS Boot** (ISOLINUX) | ✅ Legacy PC boot |
@@ -170,7 +170,7 @@ python3 installer/scripts/install.py
 ## 🥚 Hidden Features & Easter Eggs
 
 ```
-SID OS v1.2.0 — Super Intelligent Distro
+SID OS v1.6.1 — Super Intelligent Distro
   Type 'devmode' for system diagnostics
 ```
 

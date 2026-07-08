@@ -1,7 +1,7 @@
 # SID OS — Persistent Memory
 
 ## Current Versions
-- SID OS: v1.2.0
+- SID OS: v1.6.1
 - Alpine: 3.24.1
 - Versions in: `src/__init__.py`, `get-sid.py`, `get-sid.ps1`, `get-sid.bat`, `README.md`, `AGENTS.md`, build scripts, config, installer
 

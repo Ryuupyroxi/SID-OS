@@ -16,7 +16,7 @@ echo "[$TIME] === HEARTBEAT $BEAT ===" >> "$LOG"
 cd "$SID_DIR" 2>/dev/null || { echo "  FAIL: cannot cd to $SID_DIR" >> "$LOG"; exit 1; }
 
 # ── 1. Sync code ──
-git fetch origin 2>/dev/null
+timeout 15 git fetch origin 2>/dev/null || true
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "main")
 echo "  Branch: $CURRENT_BRANCH @ $(git rev-parse HEAD | head -c 12)" >> "$LOG"
 
@@ -24,7 +24,7 @@ echo "  Branch: $CURRENT_BRANCH @ $(git rev-parse HEAD | head -c 12)" >> "$LOG"
 BEHIND=$(git rev-list --count HEAD..origin/"$CURRENT_BRANCH" 2>/dev/null || echo 0)
 if [ "$BEHIND" -gt 0 ]; then
     echo "  Behind origin by $BEHIND commits — pulling" >> "$LOG"
-    git pull origin "$CURRENT_BRANCH" 2>/dev/null
+    git pull origin "$CURRENT_BRANCH" 2>/dev/null || true
 fi
 
 # ── 2. Check active task ──
@@ -118,50 +118,4 @@ from terminal.assistant.character import list_characters
 from terminal.assistant.renderer import detect_best_renderer
 print(f'  Characters: {len(list_characters())}')
 print(f'  Renderer: {detect_best_renderer()}')
-" >> "$LOG" 2>&1 || echo "  WARN: health check failed" >> "$LOG"
-
-# ── 7. Trim log ──
-tail -40 "$LOG" > "$LOG.tmp" 2>/dev/null && mv "$LOG.tmp" "$LOG" 2>/dev/null
-echo "  === end beat $BEAT ===" >> "$LOG"
-
-
-# ── Generate agent context file ──────────────────────────
-# Written to /tmp/sid-{agent}-context.md so agent wakes up with relevant state
-AGENT="coder"
-CTX="/tmp/sid-${AGENT}-context.md"
-TASKS="/etc/sid/team/tasks"
-AGENTS="/etc/sid/team/agents"
-
-{
-    echo "# ${AGENT} context — $(date -u '+%Y-%m-%d %H:%M UTC')"
-    echo ""
-    echo "## Mandate"
-    echo "Coder: implement fixes via PRs referencing issues. Do NOT file bugs or design features."
-    echo ""
-    echo "## Open tasks"
-    if [ -d "$TASKS" ]; then
-        for tf in "$TASKS"/*.task; do
-            [ -f "$tf" ] || continue
-            s=$(grep "^STATUS:" "$tf" 2>/dev/null | cut -d: -f2- | tr -d ' ')
-            a=$(grep "^ASSIGNEE:" "$tf" 2>/dev/null | cut -d: -f2- | tr -d ' ')
-            [ "$a" = "$AGENT" ] || continue
-            echo "- $(basename "$tf" .task): $s"
-            grep "^DESCRIPTION:" "$tf" 2>/dev/null | cut -d: -f2-
-        done
-    fi
-    echo ""
-    echo "## Other agents"
-    for oa in debugger coder developer manager; do
-        [ "$oa" = "$AGENT" ] && continue
-        lf="${AGENTS}/${oa}/log.md"
-        last="(no log)"
-        [ -f "$lf" ] && last=$(grep "^## " "$lf" 2>/dev/null | head -1 || echo "(no entries)")
-        echo "- $oa: $last"
-    done
-    echo ""
-    echo "## Recent work log"
-    lf="${AGENTS}/${AGENT}/log.md"
-    if [ -f "$lf" ]; then
-        grep -A2 "^## " "$lf" 2>/dev/null | head -12
-    fi
-} > "$CTX"
+" >> "$LOG"

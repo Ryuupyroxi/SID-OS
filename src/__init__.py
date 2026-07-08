@@ -1,4 +1,4 @@
 """SID - Super Intelligent Distro
 An AI-powered lightweight Linux distribution for old hardware.
 """
-__version__ = "1.2.0"
+__version__ = "1.6.1"
