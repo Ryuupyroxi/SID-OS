@@ -290,6 +290,7 @@ class SIDShell(cmd.Cmd):
             print(f"  {C['G']}/memory{C['RESET']}   - Show memory stats")
             print(f"  {C['G']}/voice{C['RESET']}    - Voice input mode")
             print(f"  {C['G']}config set assistant on{C['RESET']}  - Animated terminal mascot")
+            print(f"  {C['G']}assistant help{C['RESET']} - Character management commands")
             print(f"  {C['G']}/clear{C['RESET']}    - Clear screen")
             print(f"  {C['G']}exit{C['RESET']}      - Return to shell\n")
             print(f"  {C['A']}Or just type naturally. I understand commands like:{C['RESET']}")
@@ -483,6 +484,38 @@ class SIDShell(cmd.Cmd):
             except Exception as e:
                 print(f"{C['RED']}✖ Forge error: {e}{C['RESET']}")
         
+        elif cmd == "show":
+            name = rest[0] if rest else self._assistant.character.name
+            try:
+                from terminal.assistant.character import load_character
+                char = load_character(name)
+                print(f"\n{C['C']}Character: {char.display_name}{C['RESET']}")
+                print(f"  Type: {char.char_type}")
+                print(f"  States: {[s for s in ['idle','thinking','listening','speaking','error'] if char.frames(s)]}")
+                print(f"  Frames: {', '.join(f'{s}={len(char.frames(s))}' for s in ['idle','thinking','listening','speaking','error'] if char.frames(s))}")
+                # Render idle frame
+                if char.frames("idle"):
+                    print(f"\n{C['D']}Preview (idle):{C['RESET']}")
+                    for line in char.frames("idle")[0]:
+                        print(f"  {line}")
+            except Exception as e:
+                print(f"{C['RED']}✖ {e}{C['RESET']}")
+        
+        elif cmd == "random":
+            from terminal.assistant.charparts import PartsLibrary
+            from terminal.assistant.charforge import CharForge
+            rp = PartsLibrary.random_character()
+            print(f"{C['A']}Creating random character: {rp}{C['RESET']}")
+            try:
+                result = CharForge().create_from_parts(rp, description="random character")
+                import terminal.assistant.character as charmod
+                charmod.discover_characters()
+                name = "-".join(rp.values())
+                self._assistant.character = name
+                print(f"{C['G']}✓ Random character created & activated: {name}{C['RESET']}")
+            except Exception as e:
+                print(f"{C['RED']}✖ {e}{C['RESET']}")
+        
         elif cmd in ("on", "1", "enable"):
             self._assistant.enabled = True
             self._assistant.state = "idle"
@@ -493,7 +526,7 @@ class SIDShell(cmd.Cmd):
             print(f"{C['G']}✓ Assistant mascot disabled{C['RESET']}")
         
         else:
-            print(f"{C['A']}Usage: assistant <list|use|create|parts|swap|forge|on|off|list-parts>{C['RESET']}")
+            print(f"{C['A']}Usage: assistant <list|use|create|parts|swap|forge|show|random|on|off|list-parts>{C['RESET']}")
 
 
     def do_shell(self, arg):

@@ -244,6 +244,18 @@ def export_character(character_name: str, output_path: Optional[str] = None) -> 
                 export_data = dict(char_data)
                 export_data["source"] = "spritesheet.png"
                 json.dump(export_data, f, indent=2)
+            
+            # Export parts.json if it exists (modular characters)
+            char_dir = os.path.dirname(src) if src else ""
+            parts_path = os.path.join(char_dir, "parts.json")
+            if parts_path and os.path.isfile(parts_path):
+                shutil.copy2(parts_path, os.path.join(tmpdir, "parts.json"))
+            
+            # Export .cache directory
+            cache_dir = os.path.join(char_dir, ".cache")
+            if cache_dir and os.path.isdir(cache_dir):
+                shutil.copytree(cache_dir, os.path.join(tmpdir, ".cache"),
+                              dirs_exist_ok=True, ignore_dangling_symlinks=True)
         
         with tarfile.open(output_path, "w:gz") as tar:
             tar.add(tmpdir, arcname=character_name)
@@ -305,8 +317,33 @@ def import_character(char_path: str, merge: bool = True) -> str:
             print(f"  Character exists — saving as '{name}'")
         
         if char_data.get("type") == "spritesheet" and os.path.isfile(sprite_path):
-            shutil.copy2(sprite_path, sprite_dst)
-            char_data["source"] = sprite_dst
+            # Use directory-based layout for new characters
+            char_dir = os.path.join(chars_dir, name)
+            os.makedirs(char_dir, exist_ok=True)
+            
+            # Copy spritesheet into directory
+            dir_sprite = os.path.join(char_dir, "spritesheet.png")
+            shutil.copy2(sprite_path, dir_sprite)
+            char_data["source"] = dir_sprite
+            
+            # Restore parts.json if included in the import
+            parts_src = os.path.join(tmpdir, char_name, "parts.json")
+            if os.path.isfile(parts_src):
+                shutil.copy2(parts_src, os.path.join(char_dir, "parts.json"))
+            
+            # Restore .cache if included
+            cache_src = os.path.join(tmpdir, char_name, ".cache")
+            if os.path.isdir(cache_src):
+                cache_dst = os.path.join(char_dir, ".cache")
+                os.makedirs(cache_dst, exist_ok=True)
+                for item in os.listdir(cache_src):
+                    item_path = os.path.join(cache_src, item)
+                    if os.path.isfile(item_path):
+                        shutil.copy2(item_path, os.path.join(cache_dst, item))
+            
+            # Write metadata
+            with open(os.path.join(char_dir, "metadata.json"), "w") as f:
+                json.dump(char_data, f, indent=2)
             with open(json_dst, "w") as f:
                 json.dump(char_data, f, indent=2)
             print(f"  ✅ Character '{name}' installed (spritesheet)")
