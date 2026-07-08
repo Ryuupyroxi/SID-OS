@@ -229,6 +229,20 @@ class ChafaRenderer(ASCIIRenderer):
         except Exception:
             pass
 
+    def render_char(self, char, state, frame_idx=0, y_offset=None):
+        """Render a character frame by converting image->ASCII on-the-fly."""
+        frames = char.frames(state)
+        if not frames:
+            return 0
+        idx = frame_idx % len(frames)
+        frame = frames[idx]
+        if frame and os.path.isfile(frame[0]):
+            self.render_frame(frame, y_offset)
+        return max(len(frame), 1)
+
+    def can_render_images(self):
+        return True
+
 
 class CatimgRenderer(ASCIIRenderer):
     """Convert PNG to ASCII using catimg."""
@@ -248,3 +262,17 @@ class CatimgRenderer(ASCIIRenderer):
                 super().render_frame(art_lines, y_offset)
         except Exception:
             pass
+
+    def render_char(self, char, state, frame_idx=0, y_offset=None):
+        """Render a character frame by converting image->ASCII on-the-fly."""
+        frames = char.frames(state)
+        if not frames:
+            return 0
+        idx = frame_idx % len(frames)
+        frame = frames[idx]
+        if frame and os.path.isfile(frame[0]):
+            self.render_frame(frame, y_offset)
+        return max(len(frame), 1)
+
+    def can_render_images(self):
+        return True

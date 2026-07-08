@@ -5,9 +5,10 @@ Characters: ASCII art templates or sprite-sheet images with mouth-shape frames."
 from .character import Character, CHARACTERS, list_characters
 from .controller import AssistantController
 from .renderer import get_renderer, ASCIIRenderer, BaseRenderer
+from .charforge import CharForge
 
 __all__ = [
-    "Character", "CHARACTERS", "list_characters",
+    "Character", "CHARACTERS", "list_characters", "CharForge",
     "AssistantController",
-    "get_renderer", "ASCIIRenderer", "BaseRenderer",
+    "get_renderer", "ASCIIRenderer", "BaseRenderer", "CharForge",
 ]

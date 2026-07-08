@@ -239,15 +239,61 @@ class Character:
         return list(self.data.get("states", {}).keys())
 
 
+
+def discover_characters() -> dict:
+    """Scan /etc/sid/characters/ for spritesheet characters and register them."""
+    chars_dir = "/etc/sid/characters"
+    discovered = {}
+    if not os.path.isdir(chars_dir):
+        return discovered
+    
+    for name in sorted(os.listdir(chars_dir)):
+        meta_path = os.path.join(chars_dir, name, "metadata.json")
+        if os.path.isfile(meta_path):
+            try:
+                with open(meta_path) as f:
+                    meta = json.load(f)
+                if meta.get("type") == "spritesheet":
+                    # Fix source path if relative
+                    src = meta.get("source", "")
+                    if src and not os.path.isabs(src):
+                        meta["source"] = os.path.join(chars_dir, name, src)
+                    discovered[name] = meta
+                    print(f"  📥 Discovered character: {name}")
+            except (json.JSONDecodeError, KeyError):
+                pass
+    
+    # Also check for .json files directly in chars_dir
+    for fname in sorted(os.listdir(chars_dir)):
+        if fname.endswith(".json"):
+            fpath = os.path.join(chars_dir, fname)
+            try:
+                with open(fpath) as f:
+                    data = json.load(f)
+                char_name = data.get("name", os.path.splitext(fname)[0])
+                if char_name not in CHARACTERS and char_name not in discovered:
+                    discovered[char_name] = data
+            except (json.JSONDecodeError, KeyError):
+                pass
+    
+    for name, data in discovered.items():
+        CHARACTERS[name] = data
+    
+    return discovered
+
 def load_character(name: str) -> Character:
-    """Load a character by name from the registry."""
+    """Load a character by name from the registry.
+    Auto-discovers spritesheet characters from /etc/sid/characters/."""
     if name not in CHARACTERS:
-        name = "sid-bot"
+        discover_characters()  # Scan filesystem
+        if name not in CHARACTERS:
+            name = "sid-bot"
     return Character(name, CHARACTERS[name])
 
 
 def list_characters() -> list[str]:
-    """Get all available character names."""
+    """Get all available character names (built-in + discovered from filesystem)."""
+    discover_characters()
     return list(CHARACTERS.keys())
 
 
