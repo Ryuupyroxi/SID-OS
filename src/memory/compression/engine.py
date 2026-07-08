@@ -1,6 +1,5 @@
 """Memory compression engine - extracts and condenses knowledge."""
 import re
-from typing import Dict, List, Optional
 
 class MemoryCompressor:
     """Extracts and compresses knowledge from interactions."""

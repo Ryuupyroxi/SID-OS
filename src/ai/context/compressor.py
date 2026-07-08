@@ -1,13 +1,8 @@
 """SID Context Compressor - Intelligent context compression for small models.
 Uses multiple techniques to maximize limited context windows."""
 import re
-import json
-import math
 import hashlib
-from typing import List, Dict, Any, Optional, Tuple
-from dataclasses import dataclass, field
-from collections import OrderedDict
-
+from dataclasses import dataclass
 @dataclass
 class CompressedContext:
     """Represents a compressed conversation context."""
@@ -18,10 +13,8 @@ class CompressedContext:
     key_points: List[str]
     active_context: List[Dict]
     compression_ratio: float
-
 class ContextCompressor:
     """Multi-strategy context compression engine."""
-
     def __init__(self, max_tokens: int = 8192, compression_ratio: float = 0.5):
         self.max_tokens = max_tokens
         self.compression_ratio = compression_ratio
@@ -31,7 +24,6 @@ class ContextCompressor:
             self._deduplicate_context,
             self._trim_redundant,
         ]
-
     def compress(self, conversation: List[Dict]) -> List[Dict]:
         """Compress a conversation to fit within context window.
         
@@ -43,34 +35,25 @@ class ContextCompressor:
         """
         if len(conversation) <= 4:
             return conversation
-
         compressed = list(conversation)
-
         for strategy in self.strategies:
             compressed = strategy(compressed)
             if len(compressed) <= 4:
                 break
-
         return compressed
-
     def _summarize_older(self, conversation: List[Dict]) -> List[Dict]:
         """Summarize older messages while keeping recent ones intact."""
         if len(conversation) <= 4:
             return conversation
-
         # Keep last 4 messages intact
         recent = conversation[-4:]
         older = conversation[:-4]
-
         if not older:
             return conversation
-
         # Create compressed representation
         summary = self._generate_summary(older)
         compressed_older = [{"role": "system", "content": f"[Previous conversation summary]: {summary}"}]
-
         return compressed_older + recent
-
     def _extract_key_points(self, conversation: List[Dict]) -> List[Dict]:
         """Extract and condense key information from messages."""
         result = []
@@ -86,12 +69,10 @@ class ContextCompressor:
             else:
                 result.append(msg)
         return result
-
     def _deduplicate_context(self, conversation: List[Dict]) -> List[Dict]:
         """Remove duplicate or highly similar messages."""
         if not conversation:
             return conversation
-
         seen_hashes = set()
         result = []
         for msg in conversation:
@@ -103,14 +84,11 @@ class ContextCompressor:
             elif msg["role"] == "system":
                 # Always keep system messages
                 result.append(msg)
-
         return result
-
     def _trim_redundant(self, conversation: List[Dict]) -> List[Dict]:
         """Remove redundant system prompts and overly long messages."""
         result = []
         system_count = 0
-
         for msg in conversation:
             if msg["role"] == "system":
                 system_count += 1
@@ -125,36 +103,28 @@ class ContextCompressor:
                 result.append(msg)
             else:
                 result.append(msg)
-
         return result
-
     def _generate_summary(self, messages: List[Dict]) -> str:
         """Create a compact summary of messages."""
         total_chars = sum(len(m["content"]) for m in messages)
         user_messages = sum(1 for m in messages if m["role"] == "user")
         assistant_messages = sum(1 for m in messages if m["role"] == "assistant")
-
         # Extract key topics and patterns
         topics = self._extract_topics(messages)
-
         summary_parts = [
             f"({user_messages} user messages, {assistant_messages} assistant responses)",
             f"topics: {', '.join(topics[:5])}",
         ]
-
         return " | ".join(summary_parts)
-
     def _extract_important(self, text: str) -> List[str]:
         """Extract important sentences from text."""
         # Split into sentences
         sentences = re.split(r'[.!?]+', text)
         important = []
-
         for s in sentences:
             s = s.strip()
             if len(s) < 20:
                 continue
-
             # Score sentence importance
             score = 0
             # Longer sentences with specific info
@@ -166,12 +136,9 @@ class ContextCompressor:
                 score += 1
             if s.endswith('?'):
                 score += 1
-
             if score >= 1:
                 important.append(s.strip())
-
         return important[:5]
-
     def _extract_topics(self, messages: List[Dict]) -> List[str]:
         """Extract main topics from conversation."""
         all_text = " ".join(m["content"] for m in messages)
@@ -180,7 +147,6 @@ class ContextCompressor:
         freq = {}
         for k in keywords:
             freq[k] = freq.get(k, 0) + 1
-
         # Return most frequent meaningful words
         stop_words = {'this', 'that', 'with', 'from', 'have', 'been', 'will', 'what', 'when', 'where', 'which', 'their', 'there', 'about', 'would', 'could', 'should', 'into', 'than', 'then', 'also', 'just', 'like', 'over', 'such', 'only', 'even', 'very', 'still', 'your', 'some', 'them', 'than', 'well', 'more', 'also', 'other', 'after', 'before'}
         sorted_words = sorted(
@@ -188,19 +154,16 @@ class ContextCompressor:
             key=lambda x: -x[1]
         )
         return [w for w, _ in sorted_words[:8]]
-
     def _fuzzy_hash(self, text: str) -> str:
         """Create a fuzzy hash for similarity detection."""
         # Normalize: lowercase, remove punctuation, sort words
         normalized = re.sub(r'[^\w\s]', '', text.lower())
         words = sorted(set(normalized.split()[:20]))
         return hashlib.md5(" ".join(words).encode()).hexdigest()[:16]
-
     def analyze(self, conversation: List[Dict]) -> CompressedContext:
         """Analyze and compress, returning detailed stats."""
         original = len(conversation)
         compressed = self.compress(conversation)
-
         return CompressedContext(
             tokens_saved=original - len(compressed),
             original_length=original,

@@ -3,7 +3,6 @@ This is the 'soul file' that defines who SID is, how it behaves,
 and what it remembers about each user."""
 import json
 import time
-import os
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field, asdict

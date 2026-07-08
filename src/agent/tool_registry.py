@@ -1,8 +1,6 @@
 """Tool Registry - Dynamic tool registration and execution for AI use."""
 from typing import Dict, List, Optional, Any, Callable
 from dataclasses import dataclass, field
-import json
-
 @dataclass
 class ToolDefinition:
     """Definition of a tool the AI can use."""

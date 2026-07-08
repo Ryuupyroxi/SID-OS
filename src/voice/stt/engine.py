@@ -1,8 +1,6 @@
 """Speech-to-Text engine supporting multiple backends."""
 import os
 import subprocess
-import tempfile
-from pathlib import Path
 from typing import Optional
 
 class STTEngine:

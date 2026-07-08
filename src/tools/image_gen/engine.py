@@ -1,6 +1,6 @@
 """Image Generation Engine - Local and cloud-based image generation."""
 from pathlib import Path
-from typing import Optional, Dict, List
+, Dict, List
 
 class ImageGenEngine:
     """Generate images using local models (Stable Diffusion) or APIs."""

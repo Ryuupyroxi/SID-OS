@@ -1,6 +1,5 @@
 """Working memory - short-term conversation context."""
 from collections import deque
-from typing import List, Dict, Any
 
 class WorkingMemory:
     """Short-term working memory with FIFO eviction."""

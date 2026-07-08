@@ -1,6 +1,5 @@
 """SID Theme Manager - Iconic CLI computer themes.
 Each theme recreates the look and feel of a legendary computer terminal."""
-from typing import Dict, Tuple, Optional, List
 import shutil
 
 class Theme:

@@ -8,9 +8,7 @@ Key techniques:
 - Structured context framing for better recall
 - Progressive disclosure: surface-level first, depth on request
 - Memory anchors: tie new info to previously established context"""
-import os
 from pathlib import Path
-from typing import Dict, List, Optional
 
 class PromptTemplates:
     """Memory-optimized prompt templates using smart wording."""

@@ -1,7 +1,4 @@
 """AI-powered code assistant for writing, reviewing, and debugging code."""
-from typing import Optional, Dict, List
-from pathlib import Path
-
 class CodeAssistant:
     """AI code assistant for development tasks."""
 

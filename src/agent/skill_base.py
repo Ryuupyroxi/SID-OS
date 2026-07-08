@@ -1,8 +1,5 @@
 """Base class for all SID skills."""
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Callable, Any
-import json
-
 @dataclass
 class SkillMetadata:
     """Metadata about a skill."""

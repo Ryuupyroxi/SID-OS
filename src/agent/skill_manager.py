@@ -1,10 +1,9 @@
 """Skill Manager - Dynamic skill loading, learning, and execution."""
 import os
-import json
 import importlib
 import inspect
 from pathlib import Path
-from typing import Dict, List, Optional, Any, Callable
+from typing import Dict, List, Optional
 from .skill_base import BaseSkill, SkillMetadata
 
 class SkillManager:
