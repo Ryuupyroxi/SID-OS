@@ -276,6 +276,8 @@ class SIDShell(cmd.Cmd):
 
         elif action == "voice":
             self._handle_voice_input()
+        elif action == "profile":
+            self._handle_profile()
 
         elif action == "clear":
             print(C['CLR'], end='')
