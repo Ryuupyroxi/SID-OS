@@ -123,3 +123,45 @@ print(f'  Renderer: {detect_best_renderer()}')
 # ── 7. Trim log ──
 tail -40 "$LOG" > "$LOG.tmp" 2>/dev/null && mv "$LOG.tmp" "$LOG" 2>/dev/null
 echo "  === end beat $BEAT ===" >> "$LOG"
+
+
+# ── Generate agent context file ──────────────────────────
+# Written to /tmp/sid-{agent}-context.md so agent wakes up with relevant state
+AGENT="coder"
+CTX="/tmp/sid-${AGENT}-context.md"
+TASKS="/etc/sid/team/tasks"
+AGENTS="/etc/sid/team/agents"
+
+{
+    echo "# ${AGENT} context — $(date -u '+%Y-%m-%d %H:%M UTC')"
+    echo ""
+    echo "## Mandate"
+    echo "Coder: implement fixes via PRs referencing issues. Do NOT file bugs or design features."
+    echo ""
+    echo "## Open tasks"
+    if [ -d "$TASKS" ]; then
+        for tf in "$TASKS"/*.task; do
+            [ -f "$tf" ] || continue
+            s=$(grep "^STATUS:" "$tf" 2>/dev/null | cut -d: -f2- | tr -d ' ')
+            a=$(grep "^ASSIGNEE:" "$tf" 2>/dev/null | cut -d: -f2- | tr -d ' ')
+            [ "$a" = "$AGENT" ] || continue
+            echo "- $(basename "$tf" .task): $s"
+            grep "^DESCRIPTION:" "$tf" 2>/dev/null | cut -d: -f2-
+        done
+    fi
+    echo ""
+    echo "## Other agents"
+    for oa in debugger coder developer manager; do
+        [ "$oa" = "$AGENT" ] && continue
+        lf="${AGENTS}/${oa}/log.md"
+        last="(no log)"
+        [ -f "$lf" ] && last=$(grep "^## " "$lf" 2>/dev/null | head -1 || echo "(no entries)")
+        echo "- $oa: $last"
+    done
+    echo ""
+    echo "## Recent work log"
+    lf="${AGENTS}/${AGENT}/log.md"
+    if [ -f "$lf" ]; then
+        grep -A2 "^## " "$lf" 2>/dev/null | head -12
+    fi
+} > "$CTX"
