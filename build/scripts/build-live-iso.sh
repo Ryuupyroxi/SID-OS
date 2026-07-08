@@ -1,4 +1,3 @@
-#!/bin/bash
 # SID OS Live ISO Builder - Builds a complete bootable Alpine + SID OS image
 set -eo pipefail
 
@@ -61,7 +60,7 @@ install_pkg() {
     fi
 }
 
-for pkg in linux-lts python3 py3-pip ncurses-libs ncurses-terminfo readline sqlite-libs openssl ca-certificates eudev-libs dhcpcd tzdata doas syslinux openrc alpine-conf e2fsprogs grub-efi dosfstools ntfs-3g fuse3 exfatprogs wpa_supplicant iw wireless-tools; do
+for pkg in linux-lts linux-firmware python3 py3-pip ncurses-libs ncurses-terminfo readline bash sqlite-libs openssl ca-certificates eudev-libs dhcpcd tzdata doas sudo syslinux openrc alpine-conf e2fsprogs grub-efi dosfstools ntfs-3g fuse3 exfatprogs wpa_supplicant iw wireless-tools htop lm-sensors; do
     install_pkg "$pkg" || true
 done
 
@@ -265,28 +264,112 @@ rm -rf "$INIT_DIR" && mkdir -p "$INIT_DIR/bin" "$INIT_DIR/dev" "$INIT_DIR/proc" 
 cp "$ROOTFS_DIR/bin/busybox" "$INIT_DIR/bin/"
 ln -s busybox "$INIT_DIR/bin/sh"
 cat > "$INIT_DIR/init" << 'INIT2'
-#!/bin/sh
+#!/bin/busybox sh
+# SID OS Initramfs — finds squashfs, mounts rootfs, switches
 /bin/busybox --install -s
+
+# Mount essentials
 mount -t proc proc /proc
 mount -t sysfs sysfs /sys
 mount -t devtmpfs devtmpfs /dev
+mknod /dev/console c 5 1 2>/dev/null
+
+# Boot splash
 clear
-echo "  SID OS v${VERSION} - booting..."
-for d in /dev/sr*; do [ -b "$d" ] && mount "$d" /mnt 2>/dev/null && [ -f /mnt/boot/sid.squashfs ] && break; done
-[ -f /mnt/boot/sid.squashfs ] || for d in /dev/sd* /dev/nvme* /dev/mmcblk* /dev/vd*; do
+echo ""
+echo "  ╔══════════════════════════════════════╗"
+echo "  ║     SID OS v${VERSION} - Booting...     ║"
+echo "  ╚══════════════════════════════════════╝"
+echo ""
+
+# Rootdelay: wait for slow USB devices (old BIOS needs this)
+if grep -q "rootdelay=" /proc/cmdline 2>/dev/null; then
+    delay=$(cat /proc/cmdline | tr ' ' '\n' | grep rootdelay= | cut -d= -f2)
+    delay=${delay:-5}
+elif grep -q "rootwait" /proc/cmdline 2>/dev/null; then
+    delay=10
+else
+    delay=0
+fi
+if [ "$delay" -gt 0 ] 2>/dev/null; then
+    echo "  Waiting ${delay}s for USB devices..."
+    sleep "$delay"
+fi
+
+# Show detected block devices for debugging
+echo "  Scanning for boot devices:"
+ls /dev/sd* /dev/sr* /dev/nvme* /dev/mmcblk* /dev/vd* 2>/dev/null | tr '\n' ' ' && echo ""
+
+# Try to find and mount sid.squashfs
+FOUND=0
+for d in /dev/sr*; do
     [ -b "$d" ] || continue
-    mount "$d" /mnt 2>/dev/null || continue
-    [ -f /mnt/boot/sid.squashfs ] && break
+    mount -t iso9660 -o ro "$d" /mnt 2>/dev/null || mount "$d" /mnt 2>/dev/null || continue
+    if [ -f /mnt/boot/sid.squashfs ]; then FOUND=1; break; fi
     umount /mnt 2>/dev/null
 done
-if [ -f /mnt/boot/sid.squashfs ]; then
+
+# Try partitions on all block devices (slowest first = USB)
+if [ "$FOUND" -eq 0 ]; then
+    for d in /dev/sd* /dev/nvme* /dev/mmcblk* /dev/vd*; do
+        [ -b "$d" ] || continue
+        # Skip whole devices, only try partitions
+        case "$d" in
+            *[0-9]) ;;     # has digit = partition
+            /dev/nvme*) 
+                case "$d" in
+                    *p[0-9]*) ;;  # nvme0n1p1 = partition
+                    *) continue;;
+                esac;;
+            /dev/mmcblk*)
+                case "$d" in
+                    *p[0-9]*) ;;  # mmcblk0p1 = partition
+                    *) continue;;
+                esac;;
+            *) continue;;  # skip whole disk devices like /dev/sda
+        esac
+        mount "$d" /mnt 2>/dev/null || continue
+        if [ -f /mnt/boot/sid.squashfs ]; then FOUND=2; break; fi
+        umount /mnt 2>/dev/null
+    done
+fi
+
+# Also try whole devices (for dd-written ISOs without partition table)
+if [ "$FOUND" -eq 0 ]; then
+    for d in /dev/sd*; do
+        [ -b "$d" ] || continue
+        case "$d" in
+            *[0-9]) continue;;  # skip partitions, already tried
+        esac
+        mount "$d" /mnt 2>/dev/null || continue
+        if [ -f /mnt/boot/sid.squashfs ]; then FOUND=3; break; fi
+        umount /mnt 2>/dev/null
+    done
+fi
+
+if [ "$FOUND" -gt 0 ]; then
+    echo "  Found boot device (method $FOUND)"
     mkdir -p /rootfs
     mount -o loop /mnt/boot/sid.squashfs /rootfs
     umount /mnt 2>/dev/null
+    echo "  Root filesystem mounted, switching..."
 else
+    echo ""
+    echo "  ⚠ ERROR: Could not find SID OS boot device!"
+    echo "  Expected: /boot/sid.squashfs on USB or CDROM"
+    echo "  Devices found:"
+    ls -la /dev/sd* /dev/sr* /dev/nvme* /dev/mmcblk* /dev/vd* 2>/dev/null || echo "    (none)"
+    echo ""
+    echo "  Booting to emergency shell..."
     mount -t tmpfs tmpfs /rootfs
+    mkdir -p /rootfs/dev /rootfs/proc /rootfs/sys /rootfs/bin
+    cp /bin/busybox /rootfs/bin/
+    echo '#!/bin/sh' > /rootfs/init
+    echo 'exec /bin/sh' >> /rootfs/init
+    chmod +x /rootfs/init
 fi
-exec switch_root /rootfs /sbin/init
+
+exec switch_root /rootfs /init
 INIT2
 chmod +x "$INIT_DIR/init"
 cd "$INIT_DIR"
@@ -297,13 +380,22 @@ cat > "$ISO_DIR/boot/grub/grub.cfg" << 'GRUB'
 set timeout=3
 set default=0
 menuentry "SID OS v${VERSION}" {
-    linux /boot/vmlinuz-sid console=tty0 quiet loglevel=3
+    linux /boot/vmlinuz-sid console=tty0 rootdelay=10 quiet loglevel=3
+    initrd /boot/initramfs-sid.gz
+}
+menuentry "SID OS v${VERSION} (ATI-safe nomodeset)" {
+    linux /boot/vmlinuz-sid console=tty0 rootdelay=10 nomodeset radeon.modeset=0 quiet loglevel=3
+    initrd /boot/initramfs-sid.gz
+}
+menuentry "SID OS v${VERSION} (Verbose)" {
+    linux /boot/vmlinuz-sid console=tty0 rootdelay=15 loglevel=7
     initrd /boot/initramfs-sid.gz
 }
 menuentry "SID OS v${VERSION} (Safe Mode)" {
-    linux /boot/vmlinuz-sid console=tty0 nomodeset loglevel=3
+    linux /boot/vmlinuz-sid console=tty0 rootdelay=10 nomodeset acpi=off loglevel=3
     initrd /boot/initramfs-sid.gz
 }
+
 GRUB
 
 if ls "$PKG_CACHE"/syslinux-*.apk 1>/dev/null 2>&1; then
@@ -314,16 +406,43 @@ if ls "$PKG_CACHE"/syslinux-*.apk 1>/dev/null 2>&1; then
     for mod in isolinux.bin ldlinux.c32 libutil.c32 libcom32.c32 isohdpfx.bin; do
         cp "$SYSLINUX_DIR/$mod" "$ISO_DIR/isolinux/" 2>/dev/null || echo "  Warning: $mod not found in syslinux package"
     done
+    # Create boot message
+    cat > "$ISO_DIR/isolinux/boot.msg" << BOOTMSG
+╔══════════════════════════════════════╗
+║        SID OS v${VERSION}               ║
+║  Super Intelligent Distro (Alpine)   ║
+╚══════════════════════════════════════╝
+
+Boot options:
+  sid           - Normal boot (default, 10s USB delay)
+  sid-nomodeset - ATI/nVidia safe mode (no KMS)
+  sid-verbose   - Verbose boot (debug)
+  sid-safe      - Safe mode (ACPI off, no KMS)
+
+Press TAB to edit, ENTER to boot.
+BOOTMSG
     cat > "$ISO_DIR/isolinux/isolinux.cfg" << ISOCFG
 DEFAULT sid
+TIMEOUT 100
+PROMPT 1
+DISPLAY boot.msg
+
 LABEL sid
     LINUX /boot/vmlinuz-sid
     INITRD /boot/initramfs-sid.gz
-    APPEND console=tty0 quiet loglevel=3
+    APPEND console=tty0 rootdelay=10 quiet loglevel=3
+LABEL sid-nomodeset
+    LINUX /boot/vmlinuz-sid
+    INITRD /boot/initramfs-sid.gz
+    APPEND console=tty0 rootdelay=10 nomodeset radeon.modeset=0 quiet loglevel=3
+LABEL sid-verbose
+    LINUX /boot/vmlinuz-sid
+    INITRD /boot/initramfs-sid.gz
+    APPEND console=tty0 rootdelay=15 loglevel=7
 LABEL sid-safe
     LINUX /boot/vmlinuz-sid
     INITRD /boot/initramfs-sid.gz
-    APPEND console=tty0 nomodeset quiet loglevel=3
+    APPEND console=tty0 rootdelay=10 nomodeset acpi=off loglevel=3
 ISOCFG
 fi
 
