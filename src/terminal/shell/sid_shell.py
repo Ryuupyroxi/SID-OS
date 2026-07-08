@@ -992,7 +992,6 @@ except Exception:
         print(f"{C['A']}🎤 Listening for 5 seconds... (Ctrl+C to cancel){C['RESET']}")
         try:
             if self.voice.stt.start_stream():
-                import time
                 time.sleep(5)
                 text = self.voice.stt.stop_stream()
                 if text and text != "[STT unavailable - install whisper.cpp]":

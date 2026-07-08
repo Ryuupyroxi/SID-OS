@@ -276,7 +276,6 @@ def import_character(char_path: str, merge: bool = True) -> str:
         char_name = entries[0] if entries else "imported"
         char_dir = os.path.join(tmpdir, char_name)
         
-        meta_path = os.path.join(char_dir, "metadata.json")
         char_json_path = os.path.join(char_dir, "character.json")
         sprite_path = os.path.join(char_dir, "spritesheet.png")
         
