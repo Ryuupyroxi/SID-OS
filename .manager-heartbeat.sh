@@ -74,3 +74,33 @@ done
 [ -n "${m:-}" ] && [ "$m" -gt 0 ] && log "Msgs: $m"
 
 log "Done ($(( $(date +%s) - BEAT ))s)"
+
+# ── Android notification on event changes ─────────────────
+notify() {
+    local title="$1" msg="$2" urgency="${3:-normal}"
+    termux-notification -t "SID OS ${title}" -c "${msg}" --priority "${urgency}" --alert-once 2>/dev/null || true
+}
+NOTIFY_STATE="/tmp/sid-notify-state"
+touch "$NOTIFY_STATE"
+PREV_PENDING=$(grep "PENDING:" "$NOTIFY_STATE" 2>/dev/null | cut -d: -f2 || echo "-1")
+PREV_ACTIVE=$(grep "ACTIVE:" "$NOTIFY_STATE" 2>/dev/null | cut -d: -f2 || echo "-1")
+if [ "$PREV_PENDING" != "-1" ] && [ "$PENDING" -lt "$PREV_PENDING" ] 2>/dev/null; then
+    notify "📋 Task claimed" "Pending: $PENDING (was $PREV_PENDING)" "normal"
+fi
+if [ "$PREV_ACTIVE" != "-1" ] && [ "$ACTIVE" -gt "$PREV_ACTIVE" ] 2>/dev/null; then
+    notify "🔧 Agent active" "$ACTIVE task(s) now in progress" "high"
+fi
+echo "PENDING:$PENDING" > "$NOTIFY_STATE"
+echo "ACTIVE:$ACTIVE" >> "$NOTIFY_STATE"
+# Stale lock notification (once per task)
+find "$TASKS" -name "*.task" | while read -r tf; do
+    s=$(grep "^STATUS:" "$tf" 2>/dev/null | cut -d: -f2- | tr -d ' ')
+    lb=$(grep "^LOCKED_BY:" "$tf" 2>/dev/null | cut -d: -f2- | tr -d ' ')
+    la=$(grep "^LOCKED_AT:" "$tf" 2>/dev/null | cut -d: -f2- | tr -d ' ')
+    [ "$s" = "active" ] && [ -n "$lb" ] && [ -n "$la" ] || continue
+    le=$(date -d "$la" +%s 2>/dev/null || echo 0)
+    age=$(( ($(date +%s) - le) / 60 ))
+    if [ "$age" -gt 60 ] && [ "$age" -lt 65 ]; then
+        notify "⚠️ Stalled" "$(basename "$tf" .task) locked by ${lb} ${age}m" "high"
+    fi
+done
