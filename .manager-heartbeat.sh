@@ -81,6 +81,7 @@ notify() {
     termux-notification -t "SID OS ${title}" -c "${msg}" --priority "${urgency}" --alert-once 2>/dev/null || true
     # Speak aloud for high urgency, keep under 80 chars
     if [ "${urgency}" = "high" ] && [ -n "$speech" ]; then
+        # Moto Z4 TTS: ~7s init, ~3s speech. Keep under 6 words.
         timeout 10 termux-tts-speak "${speech}" 2>/dev/null || true
     fi
 }
@@ -92,7 +93,7 @@ if [ "$PREV_PENDING" != "-1" ] && [ "$PENDING" -lt "$PREV_PENDING" ] 2>/dev/null
     notify "📋 Task" "Agent claimed 1 task, $PENDING remaining" "normal"
 fi
 if [ "$PREV_ACTIVE" != "-1" ] && [ "$ACTIVE" -gt "$PREV_ACTIVE" ] 2>/dev/null; then
-    notify "🔧 Agent active" "$ACTIVE task(s) now claimed" "high" "Task claimed by agent."
+    notify "🔧 Agent active" "$ACTIVE task(s) now claimed" "high" "Agent claimed a task."
 fi
 echo "PENDING:$PENDING" > "$NOTIFY_STATE"
 echo "ACTIVE:$ACTIVE" >> "$NOTIFY_STATE"
@@ -106,6 +107,6 @@ find "$TASKS" -name "*.task" | while read -r tf; do
     age=$(( ($(date +%s) - le) / 60 ))
     if [ "$age" -gt 60 ] && [ "$age" -lt 65 ]; then
         tn=$(basename "$tf" .task)
-        notify "⚠️ Stalled" "${tn} locked ${age}m" "high" "Task stalled. ${tn} locked ${age} minutes."
+        notify "⚠️ Stalled" "${tn} locked ${age}m" "high" "Task stalled, ${age} minutes."
     fi
 done
