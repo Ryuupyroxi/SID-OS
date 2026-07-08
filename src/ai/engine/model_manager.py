@@ -289,25 +289,6 @@ class ModelManager:
             print(f"[SID] Server start error: {e}")
             return False
 
-    def load_router_model(self) -> bool:
-        """Load the small router model (always kept in RAM if possible)."""
-        if self.router_loaded:
-            return True
-
-        router_path = self.model_paths.get("sid-router-0.5b")
-        if not router_path:
-            for name, path in self.model_paths.items():
-                if any(x in name.lower() for x in ['qwen', 'tiny', '0.5b', 'router']):
-                    router_path = path
-                    break
-        
-        if router_path:
-            self.router_model = router_path
-            self.router_loaded = True
-            return True
-        
-        return False
-
     def set_api_mode(self, api_key: str, endpoint: str = ""):
         """Configure API-based inference."""
         self._api_enabled = True

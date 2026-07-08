@@ -1,4 +1,5 @@
 """Character frame generator — auto-create characters using AI image gen.
+import os
 Takes a photo or prompt, generates mouth-shape frames, outputs a template."""
 
 SPRITESHEET_TEMPLATE = '''{

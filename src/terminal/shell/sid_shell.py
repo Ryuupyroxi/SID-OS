@@ -11,6 +11,7 @@ import threading
 import readline
 import subprocess
 import signal
+from terminal.assistant.controller import AssistantController
 from pathlib import Path
 from typing import Optional, Dict, List, Callable, Any, Union
 from datetime import datetime
@@ -53,7 +54,7 @@ class SIDShell(cmd.Cmd):
         self._ai_mode_active = False
         self._auto_route = True  # Automatically route through AI
         self._direct_mode = False  # True = normal shell, False = AI-first
-        self._assistant = AnimatedAssistant("idle")
+        self._assistant = AssistantController("sid-bot")
         self._assistant_enabled = False
         self._load_history()
 
