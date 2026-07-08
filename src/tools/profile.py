@@ -255,7 +255,8 @@ def export_character(character_name: str, output_path: Optional[str] = None) -> 
     return output_path
 
 
-def import_character(char_path: str) -> str:
+def import_character(char_path: str, merge: bool = True) -> str:
+    """Import a .sidchar file. merge=True means don't overwrite existing charset."""
     """Import a .sidchar file into the character registry.
     
     Example:
@@ -289,17 +290,28 @@ def import_character(char_path: str) -> str:
         chars_dir = DATA_PATHS.get("characters_dir", "/etc/sid/characters")
         Path(chars_dir).mkdir(parents=True, exist_ok=True)
         
+        # Check for existing character
+        sprite_dst = os.path.join(chars_dir, f"{name}.png")
+        json_dst = os.path.join(chars_dir, f"{name}.json")
+        if merge and (os.path.isfile(json_dst) or os.path.isfile(sprite_dst)):
+            # Append _imported suffix to avoid overwrite
+            import_count = 1
+            while os.path.isfile(json_dst) or os.path.isfile(sprite_dst):
+                alt_name = f"{name}_imported_{import_count}"
+                json_dst = os.path.join(chars_dir, f"{alt_name}.json")
+                sprite_dst = os.path.join(chars_dir, f"{alt_name}.png")
+                import_count += 1
+            name = os.path.splitext(os.path.basename(json_dst))[0]
+            print(f"  Character exists — saving as '{name}'")
+        
         if char_data.get("type") == "spritesheet" and os.path.isfile(sprite_path):
-            # Copy spritesheet, fix source path
-            sprite_dst = os.path.join(chars_dir, f"{name}.png")
             shutil.copy2(sprite_path, sprite_dst)
             char_data["source"] = sprite_dst
-            with open(os.path.join(chars_dir, f"{name}.json"), "w") as f:
+            with open(json_dst, "w") as f:
                 json.dump(char_data, f, indent=2)
             print(f"  ✅ Character '{name}' installed (spritesheet)")
         else:
-            # ASCII character — save JSON
-            with open(os.path.join(chars_dir, f"{name}.json"), "w") as f:
+            with open(json_dst, "w") as f:
                 json.dump(char_data, f, indent=2)
             print(f"  ✅ Character '{name}' installed (ASCII template)")
         
@@ -409,6 +421,16 @@ def main():
             print("Usage: profile char-import <file.sidchar>")
             return
         import_character(sys.argv[2])
+    elif cmd == "list":
+        chars_dir = DATA_PATHS.get("characters_dir", "/etc/sid/characters")
+        if os.path.isdir(chars_dir):
+            print(f"Installed characters in {chars_dir}:")
+            for fname in sorted(os.listdir(chars_dir)):
+                fpath = os.path.join(chars_dir, fname)
+                size = os.path.getsize(fpath)
+                print(f"  {fname} ({size} bytes)")
+        else:
+            print("No custom characters installed.")
     elif cmd == "dry-run":
         if len(sys.argv) < 3:
             print("Usage: profile dry-run <file.sidprofile>")
