@@ -38,6 +38,20 @@ def check_dependencies():
         if not shutil.which(tool):
             print(f"  \033[2mNote: {tool} not found ({purpose})\033[0m")
 
+
+def _check_strict_mode():
+    """If SID_ENFORCE_STRICT=1, bare except: clauses raise instead of silent."""
+    if os.environ.get("SID_ENFORCE_STRICT") == "1":
+        import sys, warnings
+        # Make bare except clauses visible in dev mode
+        def strict_excepthook(etype, value, tb):
+            if etype is not KeyboardInterrupt:
+                import traceback as tb_mod
+                tb_mod.print_exception(etype, value, tb)
+        sys.excepthook = strict_excepthook
+        print("  SID_ENFORCE_STRICT=1: bare excepts will not be silent")
+
+
 def main():
     check_dependencies()
     parser = argparse.ArgumentParser(

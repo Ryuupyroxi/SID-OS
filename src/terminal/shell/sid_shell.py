@@ -417,6 +417,72 @@ class SIDShell(cmd.Cmd):
             except Exception as e:
                 print(f"{C['RED']}✖ {e}{C['RESET']}")
         
+        elif cmd == "forge":
+            """Interactive character forge wizard."""
+            try:
+                from terminal.assistant.charparts import PartsLibrary, CharacterCompositor
+                from terminal.assistant.charforge import CharForge
+                import os, json
+                
+                parts = PartsLibrary.list_parts()
+                choices = {}
+                
+                print(f"\n{C['C']}═══ Character Forge ═══{C['RESET']}")
+                print(f"Build your character step by step.\n")
+                
+                for ptype in ["head", "eyes", "mouth", "body", "accessory"]:
+                    variants = parts.get(ptype, [])
+                    if not variants:
+                        continue
+                    print(f"{C['G']}{ptype.upper()}:{C['RESET']}")
+                    for i, v in enumerate(variants, 1):
+                        print(f"  {C['BOLD']}[{i}]{C['RESET']} {v}")
+                    try:
+                        sel = input(f"\nSelect {ptype} [1-{len(variants)}] (Enter=skip): ").strip()
+                        if sel and sel.isdigit() and 1 <= int(sel) <= len(variants):
+                            choices[ptype] = variants[int(sel) - 1]
+                    except (EOFError, KeyboardInterrupt):
+                        print()
+                        return
+                    print()
+                
+                if not choices:
+                    print(f"{C['A']}No parts selected, using defaults{C['RESET']}")
+                    choices = PartsLibrary.random_character()
+                
+                try:
+                    res_input = input(f"Resolution? 64 / 128 / 256 / 512 [256]: ").strip()
+                    resolution = int(res_input) if res_input.isdigit() else 256
+                    resolution = min(max(resolution, 64), 512)
+                except (EOFError, KeyboardInterrupt):
+                    resolution = 256
+                
+                try:
+                    desc = input(f"Description? [optional]: ").strip()
+                except (EOFError, KeyboardInterrupt):
+                    desc = ""
+                
+                print(f"\n{C['A']}Forging character...{C['RESET']}")
+                cc = CharacterCompositor(resolution=resolution)
+                spritesheet, meta = cc.compose("-".join(choices.values()), choices, desc)
+                
+                print(f"\n{C['G']}✓ Character created!{C['RESET']}")
+                print(f"  File: {spritesheet}")
+                print(f"  Parts: {choices}")
+                
+                # Offer to activate
+                try:
+                    activate = input(f"\nSet as active character? [Y/n]: ").strip().lower()
+                    if activate in ("", "y", "yes"):
+                        name = "-".join(choices.values())
+                        self._assistant.character = name
+                        print(f"{C['G']}✓ Active: {name}{C['RESET']}")
+                except (EOFError, KeyboardInterrupt):
+                    pass
+                
+            except Exception as e:
+                print(f"{C['RED']}✖ Forge error: {e}{C['RESET']}")
+        
         elif cmd in ("on", "1", "enable"):
             self._assistant.enabled = True
             self._assistant.state = "idle"
@@ -427,7 +493,7 @@ class SIDShell(cmd.Cmd):
             print(f"{C['G']}✓ Assistant mascot disabled{C['RESET']}")
         
         else:
-            print(f"{C['A']}Usage: assistant <list|use|create|parts|swap|on|off|list-parts>{C['RESET']}")
+            print(f"{C['A']}Usage: assistant <list|use|create|parts|swap|forge|on|off|list-parts>{C['RESET']}")
 
 
     def do_shell(self, arg):
