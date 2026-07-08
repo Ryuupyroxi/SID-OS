@@ -105,14 +105,14 @@ class CharForge:
         print(f"  🎨 Generating character '{name}' from prompt via imagegen...")
         print(f"     Prompt: {prompt}")
         try:
-        from imagegen import generate_image
-        img = generate_image(f"front-facing character portrait from {photo_path}")
-        img.save(os.path.join(outdir, "base.png"))
-        print(f"  ✅ imagegen generated base portrait")
-    except Exception as e:
-        print(f"  ⚠️ imagegen failed: {e}")
-        return CharForge._gen_procedural(name, outdir)
-        return CharForge._gen_procedural(name, outdir)
+            from imagegen import generate_image
+            img = generate_image(f"front-facing character portrait from {name}")
+            img.save(os.path.join(outdir, "base.png"))
+            print(f"  ✅ imagegen generated base portrait")
+            return outdir
+        except Exception as e:
+            print(f"  ⚠️ imagegen failed: {e}, using procedural fallback")
+            return CharForge._gen_procedural(name, outdir)
 
     @staticmethod
     def _gen_procedural(name: str, outdir: str) -> str:
