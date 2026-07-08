@@ -648,3 +648,96 @@ if __name__ == "__main__":
         except Exception as e:
             self.log(FAIL, "Agent System", str(e)[:80])
             if self.verbose: traceback.print_exc()
+
+# ── Animated Assistant Tests ──────────────────────────────────
+
+import sys
+import os
+import tempfile
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+class TestAssistant:
+    """Test the animated assistant system."""
+
+    def test_character_loading(self):
+        """All stock characters load without errors."""
+        from src.terminal.assistant.character import load_character, list_characters
+        chars = list_characters()
+        assert len(chars) >= 3, f"Expected ≥3 characters, got {len(chars)}"
+        for name in chars:
+            c = load_character(name)
+            assert c.name == name
+            # Check required states exist
+            for state in ["idle", "thinking", "listening", "speaking", "error"]:
+                frames = c.frames(state)
+                assert len(frames) > 0, f"{name} has no frames for {state}"
+
+    def test_controller_state_machine(self):
+        """Controller state transitions work."""
+        from src.terminal.assistant.controller import AssistantController
+        a = AssistantController("sid-bot")
+        assert a.state == "idle"
+        a.state = "thinking"
+        assert a.state == "thinking"
+        a.state = "speaking"
+        assert a.state == "speaking"
+        a.tick()  # Should not crash
+        a.state = "idle"
+        assert a.state == "idle"
+
+    def test_renderer_detection(self):
+        """Renderer detection doesn't crash."""
+        from src.terminal.assistant.controller import AssistantController
+        best = AssistantController.best_renderer()
+        assert best in ["ascii", "kitty", "iterm2", "sixel", "chafa", "catimg"]
+
+    def test_character_list(self):
+        """list_characters returns all."""
+        from src.terminal.assistant.controller import AssistantController
+        chars = AssistantController.list_chars()
+        assert "sid-bot" in chars
+        assert "neko" in chars
+        assert "droid" in chars
+
+    def test_indicator(self):
+        """Indicator labels don't fail."""
+        from src.terminal.assistant.controller import AssistantController
+        a = AssistantController("sid-bot")
+        lbl = a.indicator()
+        assert "sid-bot" in lbl or "[" in lbl
+
+
+class TestProfile:
+    """Test the profile export/import system."""
+
+    def test_export_import_cycle(self):
+        """Export then import a profile (dry-run)."""
+        from src.tools.profile import export_profile, import_profile
+        with tempfile.NamedTemporaryFile(suffix=".sidprofile", delete=False) as f:
+            tmppath = f.name
+        try:
+            export_profile(tmppath, include_memory=False, include_skills=False, include_characters=False)
+            assert os.path.isfile(tmppath)
+            assert os.path.getsize(tmppath) > 50
+            # Dry-run import
+            summary = import_profile(tmppath, dry_run=True)
+            assert "config" in summary
+        finally:
+            os.unlink(tmppath)
+
+    def test_character_export_import(self):
+        """Export then import a character."""
+        from src.tools.profile import export_character, import_character
+        with tempfile.NamedTemporaryFile(suffix=".sidchar", delete=False) as f:
+            tmppath = f.name
+        try:
+            export_character("sid-bot", tmppath)
+            assert os.path.isfile(tmppath)
+            assert os.path.getsize(tmppath) > 50
+        finally:
+            os.unlink(tmppath)
+
+    def test_list_characters_standalone(self):
+        from src.terminal.assistant import list_characters
+        chars = list_characters()
+        assert len(chars) >= 3
