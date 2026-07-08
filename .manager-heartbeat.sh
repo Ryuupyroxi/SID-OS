@@ -81,7 +81,7 @@ notify() {
     termux-notification -t "SID OS ${title}" -c "${msg}" --priority "${urgency}" --alert-once 2>/dev/null || true
     # Speak aloud for high urgency, keep under 80 chars
     if [ "${urgency}" = "high" ] && [ -n "$speech" ]; then
-        timeout 5 termux-tts-speak "${speech}" 2>/dev/null || true
+        timeout 10 termux-tts-speak "${speech}" 2>/dev/null || true
     fi
 }
 NOTIFY_STATE="/tmp/sid-notify-state"
