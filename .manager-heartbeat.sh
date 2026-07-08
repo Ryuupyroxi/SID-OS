@@ -1,13 +1,13 @@
 #!/bin/bash
 # Manager Heartbeat — runs every 30min
-# Silent monitor: checks GitHub pipeline, flags stalls, does NOT write noise to TEAM_COMMS.md
+# Silent monitor: checks GitHub pipeline, flags stalls, does NOT write noise to /etc/sid/team/comms.md
 
 set -euo pipefail
 export PATH="/usr/bin:/bin:/usr/local/bin"
 
 SID_DIR="/root/SID-OS"
 LOG="/tmp/sid-manager-beat.log"
-COMMS="${SID_DIR}/TEAM_COMMS.md"
+COMMS="/etc/sid/team/comms.md"
 GH_REPO="Ryuupyroxi/SID-OS"
 NOW=$(date -u '+%Y-%m-%d %H:%M UTC')
 BEAT=$(date +%s)
@@ -56,7 +56,7 @@ if [ -n "$READY" ]; then
     echo "$READY" | while read -r l; do log "  $l"; done
 fi
 
-# 4. Check for Manager-direct messages in TEAM_COMMS.md
+# 4. Check for Manager-direct messages in /etc/sid/team/comms.md
 if [ -f "$COMMS" ]; then
     MSGS=$(awk '/From:.*→ Manager/{p=1} p{print; if(/^---/){p=0}}' "$COMMS" 2>/dev/null | grep -c "Status:" || true)
     [ "$MSGS" -gt 0 ] && log "Messages for Manager: $MSGS"

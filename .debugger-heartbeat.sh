@@ -2,12 +2,12 @@
 # Debugger Heartbeat — runs every 30 minutes (managed by Manager)
 # Debugger: finds, isolates, and logs errors/bugs as GitHub issues. Automated QA heartbeat.
 # SID OS Team Heartbeat — runs every 30min via cron
-# Lightweight: checks TEAM_COMMS.md for messages, logs status heartbeat
+# Lightweight: checks /etc/sid/team/comms.md for messages, logs status heartbeat
 
 cd /root/SID-OS || exit 1
 
 HEARTBEAT_LOG="/tmp/sid-heartbeat.log"
-COMMS_FILE="TEAM_COMMS.md"
+COMMS_FILE="/etc/sid/team/comms.md"
 LAST_RUN_FILE="/tmp/sid-last-heartbeat"
 
 log() { echo "[$(date '+%Y-%m-%d %H:%M UTC')] $*" >> "$HEARTBEAT_LOG"; }
@@ -27,7 +27,7 @@ count_new() {
     echo "$count"
 }
 
-# ── Count open issues referenced in TEAM_COMMS.md ───────────
+# ── Count open issues referenced in /etc/sid/team/comms.md ───────────
 count_open_issues() {
     local n
     n=$(grep -c '**Status:** Open' "$COMMS_FILE" 2>/dev/null)
@@ -47,7 +47,7 @@ log "Open issues in comms: $issue_count"
 git_status=$(timeout 3 git status --porcelain 2>/dev/null | head -5 || echo "")
 [[ -n "$git_status" ]] && log "Uncommitted: $(echo "$git_status" | wc -l) file(s)" || log "Repo clean"
 
-# Append heartbeat to TEAM_COMMS.md
+# Append heartbeat to /etc/sid/team/comms.md
 {
     echo ""
     echo "---"

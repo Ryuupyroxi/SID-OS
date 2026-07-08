@@ -28,3 +28,5 @@ models/
 .env
 .env.local
 *.token
+TEAM_COMMS.md
+/etc/sid/team/

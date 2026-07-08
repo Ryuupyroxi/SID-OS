@@ -8,7 +8,7 @@ export PATH="/usr/bin:/bin:/usr/local/bin"
 
 SID_DIR="/root/SID-OS"
 LOG="/tmp/sid-developer-beat.log"
-COMMS="${SID_DIR}/TEAM_COMMS.md"
+COMMS="/etc/sid/team/comms.md"
 GH_REPO="Ryuupyroxi/SID-OS"
 NOW=$(date -u '+%Y-%m-%d %H:%M UTC')
 
@@ -54,7 +54,7 @@ if [ -n "$NEEDS_REVIEW" ]; then
     echo "$NEEDS_REVIEW" | while read -r l; do log "  $l"; done
 fi
 
-# 3. Check TEAM_COMMS.md for Developer-directed messages
+# 3. Check /etc/sid/team/comms.md for Developer-directed messages
 if [ -f "$COMMS" ]; then
     MSGS=$(awk '/→ Developer/{p=1} p{print; if(/^---/){p=0}}' "$COMMS" 2>/dev/null | grep -c "Status:" || true)
     [ "$MSGS" -gt 0 ] && log "Messages for Developer: $MSGS"

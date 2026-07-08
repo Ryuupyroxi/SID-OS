@@ -40,9 +40,9 @@ if [ -f "$TASK_LOCK" ]; then
     fi
 fi
 
-# ── 3. Check TEAM_COMMS.md for teammate messages ──
+# ── 3. Check /etc/sid/team/comms.md for teammate messages ──
 cd "$SID_DIR"
-TEAM_COMMS="TEAM_COMMS.md"
+TEAM_COMMS="/etc/sid/team/comms.md"
 if [ -f "$TEAM_COMMS" ]; then
     # Get all messages not yet acknowledged by Developer
     NEW_FROM_DEBUGGER=$(awk '/From: Debugger/{p=1} p{print; if(/^$|^---/){p=0}}' "$TEAM_COMMS" 2>/dev/null | grep -c "Status: Open")
