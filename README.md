@@ -279,6 +279,35 @@ python3 src/main.py --theme terminal
 - **Versioning**: `vMAJOR.MINOR.BUGFIX`
 - **Platform**: x86_64 (BIOS + UEFI)
 
+
+
+## 🎭 Animated Assistant Mascot
+
+A terminal-based animated character that sits above your prompt:
+
+```
+sid⏣ config set assistant on       # Enable mascot
+sid⏣ config set assistant off      # Disable
+sid⏣ config set character neko     # Switch character
+```
+
+Characters react to AI state: idle → thinking (eye narrow) → speaking (mouth animates).
+Built-in: **sid-bot**, **neko** (cat), **droid**. Add custom ones via `.sidchar` files.
+
+## 💾 Profile Export/Import
+
+Share your entire SID OS assistant — settings, soul, memories, skills, and characters:
+
+```
+sid⏣ profile export                 # Export everything to .sidprofile
+sid⏣ profile import <file>          # Import from .sidprofile
+sid⏣ profile share <character>      # Export a character as .sidchar
+sid⏣ profile load <file.sidchar>    # Import a shared character
+sid⏣ profile dry-run <file>         # Preview import without writing
+```
+
+Share `.sidchar` files with other SID OS users — they get your character instantly.
+
 ## 📁 Project Structure
 
 ```
