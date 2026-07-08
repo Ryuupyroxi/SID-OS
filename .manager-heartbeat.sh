@@ -77,18 +77,22 @@ log "Done ($(( $(date +%s) - BEAT ))s)"
 
 # ── Android notification on event changes ─────────────────
 notify() {
-    local title="$1" msg="$2" urgency="${3:-normal}"
+    local title="$1" msg="$2" urgency="${3:-normal}" speech="$4"
     termux-notification -t "SID OS ${title}" -c "${msg}" --priority "${urgency}" --alert-once 2>/dev/null || true
+    # Speak aloud for high urgency, keep under 80 chars
+    if [ "${urgency}" = "high" ] && [ -n "$speech" ]; then
+        timeout 5 termux-tts-speak "${speech}" 2>/dev/null || true
+    fi
 }
 NOTIFY_STATE="/tmp/sid-notify-state"
 touch "$NOTIFY_STATE"
 PREV_PENDING=$(grep "PENDING:" "$NOTIFY_STATE" 2>/dev/null | cut -d: -f2 || echo "-1")
 PREV_ACTIVE=$(grep "ACTIVE:" "$NOTIFY_STATE" 2>/dev/null | cut -d: -f2 || echo "-1")
 if [ "$PREV_PENDING" != "-1" ] && [ "$PENDING" -lt "$PREV_PENDING" ] 2>/dev/null; then
-    notify "📋 Task claimed" "Pending: $PENDING (was $PREV_PENDING)" "normal"
+    notify "📋 Task" "Agent claimed 1 task, $PENDING remaining" "normal"
 fi
 if [ "$PREV_ACTIVE" != "-1" ] && [ "$ACTIVE" -gt "$PREV_ACTIVE" ] 2>/dev/null; then
-    notify "🔧 Agent active" "$ACTIVE task(s) now in progress" "high"
+    notify "🔧 Agent active" "$ACTIVE task(s) now claimed" "high" "Task claimed by agent."
 fi
 echo "PENDING:$PENDING" > "$NOTIFY_STATE"
 echo "ACTIVE:$ACTIVE" >> "$NOTIFY_STATE"
@@ -101,6 +105,7 @@ find "$TASKS" -name "*.task" | while read -r tf; do
     le=$(date -d "$la" +%s 2>/dev/null || echo 0)
     age=$(( ($(date +%s) - le) / 60 ))
     if [ "$age" -gt 60 ] && [ "$age" -lt 65 ]; then
-        notify "⚠️ Stalled" "$(basename "$tf" .task) locked by ${lb} ${age}m" "high"
+        tn=$(basename "$tf" .task)
+        notify "⚠️ Stalled" "${tn} locked ${age}m" "high" "Task stalled. ${tn} locked ${age} minutes."
     fi
 done
