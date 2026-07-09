@@ -10,26 +10,47 @@ from .character import Character
 
 
 def detect_best_renderer() -> str:
-    """Auto-detect the best available renderer for this terminal."""
-    # Check Kitty protocol
+    """Auto-detect the best available renderer for this terminal.
+    
+    Priority: kitty > iterm2 > sixel > chafa > catimg > img2txt > ascii
+    """
+    # Kitty protocol — best image quality
     if os.environ.get("KITTY_WINDOW_ID"):
         return "kitty"
-    # Check iTerm2
+    
+    # iTerm2 inline images
     if os.environ.get("TERM_PROGRAM") == "iTerm.app":
         return "iterm2"
-    # Check sixel (xterm, mlterm, etc.)
+    
+    # WezTerm — also supports Kitty protocol
+    if os.environ.get("TERM_PROGRAM") == "WezTerm":
+        return "kitty"
+    
+    # Sixel-capable terminals
     term = os.environ.get("TERM", "")
-    if "xterm" in term or "sixel" in term:
-        # Test if sixel is supported by checking terminal response
+    sixel_terms = ["sixel", "mlterm", "xterm-sixel"]
+    if any(t in term for t in sixel_terms):
         return "sixel"
-    # Check if chafa is available for image→ASCII
+    
+    # foot terminal supports sixel
+    if os.environ.get("TERM_PROGRAM") == "foot":
+        return "sixel"
+    
+    # VTE-based terminals (GNOME Terminal, Tilix, etc.) with VTE >= 52
+    vte_ver = os.environ.get("VTE_VERSION", "")
+    if vte_ver and vte_ver.isdigit() and int(vte_ver) >= 52:
+        # VTE 52+ supports sixel, but not all build with it
+        pass  # Fall through to chafa check
+    
+    # Image conversion tools
     if shutil.which("chafa"):
         return "chafa"
     if shutil.which("catimg"):
         return "catimg"
     if shutil.which("img2txt"):
         return "img2txt"
-    # Fallback: ASCII art
+    
+    # Fallback: ASCII art — always works
     return "ascii"
 
 

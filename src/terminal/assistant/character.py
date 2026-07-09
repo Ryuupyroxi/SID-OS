@@ -117,39 +117,35 @@ CHARACTERS = {
 
 def load_spritesheet(name: str, data: dict) -> dict:
     """Load a spritesheet character: slice PNG into frame cache.
-    Returns a dict of {state: [frame_paths]} for the renderer.
+    Returns a dict of {state: [[frame_path]]} for the renderer.
     """
-    import struct
-    
     source = data.get("source", "")
     if not source or not os.path.isfile(source):
         raise FileNotFoundError(f"Spritesheet not found: {source}")
     
-    grid = data.get("grid", {"cols": 6, "rows": 5})
     state_rows = data.get("state_rows", {})
     frames_per = data.get("frames_per_state", {})
-    cols, rows = grid["cols"], grid["rows"]
     
-    # Use cached frames if already loaded
     cache_dir = os.path.join(os.path.dirname(source), ".cache", name)
-    if os.path.isdir(cache_dir) and len(os.listdir(cache_dir)) > 0:
-        result = {}
-        for state in state_rows:
-            result[state] = []
-            n = frames_per.get(state, 1)
-            for i in range(n):
-                fp = os.path.join(cache_dir, f"{state}_{i:02d}.png")
-                if os.path.isfile(fp):
-                    result[state].append([fp])
-        if result:
-            return result
     
-    # Need to slice — requires PIL or can use PNG chunk parsing
-    # For now, return paths to the full spritesheet and let renderer handle it
+    # If cache is empty, slice the spritesheet now
+    has_cache = os.path.isdir(cache_dir) and any(
+        f.endswith(".png") for f in os.listdir(cache_dir) if not f.endswith(".ref")
+    )
+    if not has_cache:
+        cache_spritesheet_frames(name, data)
+    
+    # Load cached frames
     result = {}
-    for state, row_idx in state_rows.items():
+    for state in state_rows:
+        result[state] = []
         n = frames_per.get(state, 1)
-        result[state] = [[source]] * n  # renderer will slice by grid coords
+        for i in range(n):
+            fp = os.path.join(cache_dir, f"{state}_{i:02d}.png")
+            if os.path.isfile(fp):
+                result[state].append([fp])
+            else:
+                result[state].append([source])
     
     return result
 

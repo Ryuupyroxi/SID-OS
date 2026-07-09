@@ -1,12 +1,15 @@
 """Character frame generator — auto-create characters using AI image gen.
-import os
-Takes a photo or prompt, generates mouth-shape frames, outputs a template."""
+Takes a photo or prompt, generates mouth-shape frames, outputs a template.
 
-SPRITESHEET_TEMPLATE = '''{
+Now wired to CharForge for procedural generation with optional imagegen.
+"""
+
+import os
+import json
+
+SPRITESHEET_TEMPLATE = {
     "type": "spritesheet",
-    "name": "%(name)s",
-    "source": "%(source)s",
-    "grid": {"cols": %(cols)d, "rows": %(rows)d},
+    "grid": {"cols": 6, "rows": 5},
     "state_rows": {
         "idle": 0,
         "thinking": 1,
@@ -33,64 +36,147 @@ SPRITESHEET_TEMPLATE = '''{
         "half": [1, 3],
         "open": [4, 5]
     }
-}'''
+}
 
 
-def generate_from_photo(photo_path: str, name: str, output_dir: str = "/etc/sid/characters"):
-    """Generate a character spritesheet from a photo using AI image generation.
-    
+def generate_from_photo(photo_path: str, name: str, output_dir: str = "/etc/sid/characters") -> str:
+    """Generate a character spritesheet from a photo using CharForge + imagegen.
+
     Pipeline:
-    1. Take the photo as reference
-    2. Call imagegen to create a clean front-facing character portrait
-    3. Define mouth regions and generate frame variants
-    4. Compose into a sprite sheet
-    5. Output metadata JSON + PNG
-    
-    Usage:
-        generate_from_photo("photo.jpg", "my-friend")
-        # Output: /etc/sid/characters/my-friend/
-        #   spritesheet.png
-        #   metadata.json
-    
-    This is a pipeline definition. Actual implementation depends on
-    the imagegen skill being available in the runtime environment.
-    """
-    raise NotImplementedError(
-        "Photo-to-character generation requires the imagegen skill.\n"
-        "Run inside Codex with `imagegen` installed:\n\n"
-        "  from src.terminal.assistant.generator import generate_from_photo\n"
-        "  generate_from_photo('photo.png', 'my-char')\n\n"
-        "This will produce a spritesheet + metadata you can load."
-    )
-
-
-def generate_from_prompt(prompt: str, name: str, output_dir: str = "/etc/sid/characters"):
-    """Generate a character from a text prompt using AI image generation.
-    
-    Pipeline:
-    1. Send prompt to imagegen (e.g. "cute pixel-art robot assistant")
-    2. Generate base character portrait  
+    1. Accept photo path → use CharForge imagegen pipeline
+    2. Generate base character portrait with color extraction
     3. Generate mouth-shape variants as individual frames
     4. Arrange into sprite sheet grid
     5. Output metadata JSON + PNG
-    
-    Usage:
-        generate_from_prompt("retro-futuristic AI assistant", "my-ai")
+    6. Auto-register into character registry
+
+    Args:
+        photo_path: Path to a front-facing photo
+        name: Character name
+        output_dir: Where to save the character
+
+    Returns:
+        Path to the generated character directory
     """
-    raise NotImplementedError(
-        "Prompt-to-character generation requires the imagegen skill.\n"
-        "Run inside Codex with `imagegen` installed."
-    )
+    if not os.path.isfile(photo_path):
+        raise FileNotFoundError(f"Photo not found: {photo_path}")
+
+    from terminal.assistant.charforge import CharForge
+    forge = CharForge(imagegen_available=True)
+
+    result = forge.create_from_photo(photo_path, name)
+
+    if result and os.path.isdir(result):
+        from terminal.assistant.character import discover_characters
+        discover_characters()
+
+    return result
+
+
+def generate_from_prompt(prompt: str, name: str = "", output_dir: str = "/etc/sid/characters") -> str:
+    """Generate a character from a text prompt using CharForge.
+
+    Pipeline:
+    1. Send prompt to CharForge (procedural or imagegen)
+    2. Generate base character portrait
+    3. Generate mouth-shape variants
+    4. Arrange into sprite sheet grid
+    5. Output metadata JSON + PNG
+    6. Auto-register into character registry
+
+    Args:
+        prompt: Text description (e.g. "a cute robot with blue eyes")
+        name: Character name (auto-generated if empty)
+        output_dir: Where to save the character
+
+    Returns:
+        Path to the generated character directory
+    """
+    from terminal.assistant.charforge import CharForge
+    forge = CharForge()
+
+    if not name:
+        import hashlib
+        name = "char-" + hashlib.md5(prompt.encode()).hexdigest()[:8]
+
+    result = forge.create_from_description(prompt, name=name)
+
+    if result and os.path.isdir(result):
+        from terminal.assistant.character import discover_characters
+        discover_characters()
+
+    return result
+
+
+def generate_from_parts(parts: dict, name: str = "", description: str = "", resolution: int = 256) -> str:
+    """Generate a character from modular parts using CharForge.
+
+    Args:
+        parts: Parts manifest dict (head, eyes, mouth, body, accessory)
+        name: Character name
+        description: Text description
+        resolution: Pixels per frame (64-512)
+
+    Returns:
+        Path to the generated character directory
+    """
+    from terminal.assistant.charforge import CharForge
+    forge = CharForge()
+
+    result = forge.create_from_parts(parts, name=name, description=description, resolution=resolution)
+
+    if result and os.path.isdir(result):
+        from terminal.assistant.character import discover_characters
+        discover_characters()
+
+    return result
 
 
 def generate_ascii_from_image(image_path: str, name: str) -> dict:
     """Convert an image to ASCII art character frames.
-    
+
     Uses chafa or similar to convert image to block-art ASCII,
     then defines mouth regions on the resulting art.
     Returns a character template dict ready for CHARACTERS registry.
     """
-    raise NotImplementedError("ASCII conversion from image: coming soon")
+    import shutil
+    import subprocess
+    import tempfile
+
+    if not os.path.isfile(image_path):
+        raise FileNotFoundError(f"Image not found: {image_path}")
+
+    if not shutil.which("chafa"):
+        raise RuntimeError("chafa not installed — cannot convert to ASCII")
+
+    with tempfile.NamedTemporaryFile(suffix=".txt", delete=False) as tmp:
+        subprocess.run(
+            ["chafa", "--size=40x15", "--format=symbols", image_path],
+            stdout=tmp, stderr=subprocess.DEVNULL, timeout=30
+        )
+        ascii_art = open(tmp.name).read()
+    os.unlink(tmp.name)
+
+    lines = [line for line in ascii_art.strip().split("\n") if line.strip()]
+
+    return {
+        "type": "ascii",
+        "name": name,
+        "states": {
+            "idle": [lines],
+            "thinking": [lines],
+            "listening": [lines],
+            "speaking": [lines],
+            "error": [lines],
+        },
+        "frame_ms": {
+            "idle": 1000,
+            "thinking": 500,
+            "listening": 600,
+            "speaking": 350,
+            "error": 1500
+        }
+    }
 
 
 def validate_spritesheet(path: str, metadata: dict) -> list:
@@ -107,39 +193,3 @@ def validate_spritesheet(path: str, metadata: dict) -> list:
     if not os.path.isfile(path):
         issues.append(f"File not found: {path}")
     return issues
-
-# ── CODER NOTES (for Alpine Linux session) ────────────────────
-# 
-# What needs implementing:
-#
-# 1. generate_from_photo():
-#    - Accept photo path → use imagegen to create front-facing portrait
-#    - Define mouth region coordinates on the portrait
-#    - Generate 6 mouth-shape variants: closed, half-open, open (×2 for animation)
-#    - Arrange into 5-row × 6-column spritesheet PNG
-#    - Output metadata JSON matching spritesheet template above
-#    - Register into CHARACTERS dict dynamically
-#
-# 2. generate_from_prompt():
-#    - Same pipeline but start from text prompt instead of photo
-#    - Prompt should describe character style (e.g. "pixel art", "semi-realistic")
-#
-# 3. Terminal detection:
-#    - Make `detect_best_renderer()` probe terminal capabilities at runtime
-#    - Kitty protocol: check KITTY_WINDOW_ID env var
-#    - Sixel: try writing escape sequence, read response
-#    - Fall back gracefully through chain: kitty → sixel → chafa → ascii
-#
-# 4. Sprite sheet loader:
-#    - Write load_spritesheet(path, metadata) that slices PNG by grid coords
-#    - Cache individual frame images for fast render switching
-#    - Feed frames into KittyRenderer/SixelRenderer
-#
-# 5. Testing:
-#    - Create a test character PNG (simple colored squares as frames)
-#    - Verify frame cycling in all render backends
-#    - Test terminal detection on different terminal types
-#
-# For imagegen integration reference, see:
-#   /root/.shared-skills/.system/imagegen/SKILL.md
-#   /root/.shared-skills/generate2dsprite/SKILL.md
