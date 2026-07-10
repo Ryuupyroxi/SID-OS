@@ -31,3 +31,24 @@ models/
 TEAM_COMMS.md
 /etc/sid/team/
 TEAM_COMMS.md
+
+# Team infrastructure (private, not for public repo)
+.manager-heartbeat.sh
+.coder-heartbeat.sh
+.debugger-heartbeat.sh
+.developer-heartbeat.sh
+.accountant-heartbeat.sh
+.startup-wake.sh
+.compress-all.sh
+.backup-all.sh
+.retry-wrapper.sh
+.retry.sh
+.heartbeat-wrapper.sh
+.export-agent.sh
+.session-restore.sh
+TEAM_COMMS.md
+AUTO_TESTER_LOG.md
+XANDER_TESTING_GUIDE.txt
+AGENT_HANDOFF.md
+CLAUDE.md
+AGENTS.md
