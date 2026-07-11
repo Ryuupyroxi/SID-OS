@@ -28,15 +28,7 @@ class SIDShell(cmd.Cmd):
     The shell intercepts all input, routes through AI, and provides
     intelligent responses. Users can type natural language or commands."""
 
-    intro = f"""
-{C['G']}╔══════════════════════════════════════════════════╗
-║       SID v1.6.1 - SUPER INTELLIGENT DISTRO        ║
-║       ═══════════════════════════════════════     ║
-║       Type anything - AI will understand          ║
-║       Try: "what can you do?" or "show system"   ║
-║       Say "help" for commands                     ║
-╚══════════════════════════════════════════════════╝{C['RESET']}
-"""
+    intro = ""  # main.py handles boot screen via ThemeManager
 
     prompt = f"{C['G']}sid⏣{C['RESET']} "
 
@@ -927,7 +919,7 @@ class SIDShell(cmd.Cmd):
             print(f"  RAM:    {mem}")
             print(f"  Kernel: {kernel}")
             print(f"  Uptime: {uptime}")
-            print(f"  Shell:  SID v1.6.1 | AI-First Mode")
+            print(f"  Shell:  SID v1.6.2 | AI-First Mode")
             asst = "ON" if self._assistant_enabled else "OFF"
             print(f"  Mascot: {asst} (config set assistant on|off)")
             if ai_stats:

@@ -5,7 +5,7 @@
 
 set -e
 
-VERSION="1.6.1"
+VERSION="1.6.2"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 

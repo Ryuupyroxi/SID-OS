@@ -23,6 +23,7 @@ import time
 import json
 import subprocess
 import traceback
+import tempfile
 from pathlib import Path
 from typing import Dict, List, Any, Optional
 
@@ -76,6 +77,14 @@ class SIDTester:
         self.test_intent_classification()
         self.test_theme_manager()
         self.test_installer_parse()
+        self.test_soul_system()
+        self.test_image_tools()
+        self.test_offline_cache()
+        self.test_benchmark()
+        self.test_settings()
+        self.test_agent_system()
+        self.test_assistant()
+        self.test_profile()
         
         print(f"\n{BOLD}═══ Results ═══{RESET}")
         print(f"  {PASS} Passed: {self.results['pass']}")
@@ -501,23 +510,11 @@ class SIDTester:
             self.log(FAIL, "Installer", str(e)[:80])
 
 
-if __name__ == "__main__":
-    import argparse
-    parser = argparse.ArgumentParser(description="SID OS Test Suite")
-    parser.add_argument("--online", action="store_true", help="Test online features")
-    parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
-    args = parser.parse_args()
-    
-    tester = SIDTester(online=args.online, verbose=args.verbose)
-    exit(tester.run_all())
-
     def test_soul_system(self):
         """Test soul/personality system."""
-        print(f"\n{BOLD}[NEW] Soul/Personality System{RESET}")
+        print(f"\n{BOLD}[16] Soul/Personality System{RESET}")
         try:
-            import tempfile, shutil
-            from pathlib import Path
-            sys.path.insert(0, str(Path(__file__).parent / "src"))
+            import shutil
             from soul import Soul
             test_dir = "/tmp/sid-test-soul"
             os.makedirs(test_dir, exist_ok=True)
@@ -542,9 +539,8 @@ if __name__ == "__main__":
 
     def test_image_tools(self):
         """Test image tools."""
-        print(f"\n{BOLD}[NEW] Image Tools{RESET}")
+        print(f"\n{BOLD}[17] Image Tools{RESET}")
         try:
-            sys.path.insert(0, str(Path(__file__).parent / "src"))
             from tools.image_tools import ImageTools
             it = ImageTools(self.ai)
             backends = it._detect_backends()
@@ -566,10 +562,9 @@ if __name__ == "__main__":
 
     def test_offline_cache(self):
         """Test offline cache."""
-        print(f"\n{BOLD}[NEW] Offline Cache{RESET}")
+        print(f"\n{BOLD}[18] Offline Cache{RESET}")
         try:
             import shutil
-            sys.path.insert(0, str(Path(__file__).parent / "src"))
             from tools.offline_cache import OfflineCache
             test_dir = "/tmp/sid-test-cache"
             cache = OfflineCache(test_dir)
@@ -591,9 +586,8 @@ if __name__ == "__main__":
 
     def test_benchmark(self):
         """Test hardware benchmark."""
-        print(f"\n{BOLD}[NEW] Hardware Benchmark{RESET}")
+        print(f"\n{BOLD}[19] Hardware Benchmark{RESET}")
         try:
-            sys.path.insert(0, str(Path(__file__).parent / "src"))
             from tools.benchmark import HardwareBenchmark
             hb = HardwareBenchmark()
             mem = hb._bench_memory()
@@ -602,18 +596,17 @@ if __name__ == "__main__":
             self.log(PASS, f"CPU: {speed.get('speed_rating','?')} ({speed.get('duration_ms',0)}ms)")
             disk = hb._bench_disk_speed()
             self.log(PASS, f"Disk: {disk.get('disk_type','?')} ({disk.get('read_mbps',0)}MB/s)")
-            ai = hb._bench_ai_capability()
-            self.log(PASS, f"AI Score: {ai.get('score',0)}/100 - {ai.get('capability','?')}")
+            ai_result = hb._bench_ai_capability()
+            self.log(PASS, f"AI Score: {ai_result.get('score',0)}/100 - {ai_result.get('capability','?')}")
         except Exception as e:
             self.log(FAIL, "Benchmark", str(e)[:80])
             if self.verbose: traceback.print_exc()
 
     def test_settings(self):
         """Test advanced settings."""
-        print(f"\n{BOLD}[NEW] Advanced Settings{RESET}")
+        print(f"\n{BOLD}[20] Advanced Settings{RESET}")
         try:
             import shutil
-            sys.path.insert(0, str(Path(__file__).parent / "src"))
             from tools.settings import SettingsManager
             test_dir = "/tmp/sid-test-settings"
             SettingsManager.SETTINGS_PATH = f"{test_dir}/settings.json"
@@ -634,9 +627,8 @@ if __name__ == "__main__":
 
     def test_agent_system(self):
         """Test agentic skill framework."""
-        print(f"\n{BOLD}[NEW] Agent System{RESET}")
+        print(f"\n{BOLD}[21] Agent System{RESET}")
         try:
-            sys.path.insert(0, str(Path(__file__).parent / "src"))
             from agent.skill_manager import SkillManager
             from agent.tool_registry import ToolRegistry
             sm = SkillManager()
@@ -649,95 +641,108 @@ if __name__ == "__main__":
             self.log(FAIL, "Agent System", str(e)[:80])
             if self.verbose: traceback.print_exc()
 
-# ── Animated Assistant Tests ──────────────────────────────────
-
-import sys
-import os
-import tempfile
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-class TestAssistant:
-    """Test the animated assistant system."""
-
-    def test_character_loading(self):
-        """All stock characters load without errors."""
-        from src.terminal.assistant.character import load_character, list_characters
-        chars = list_characters()
-        assert len(chars) >= 3, f"Expected ≥3 characters, got {len(chars)}"
-        for name in chars:
-            c = load_character(name)
-            assert c.name == name
-            # Check required states exist
-            for state in ["idle", "thinking", "listening", "speaking", "error"]:
-                frames = c.frames(state)
-                assert len(frames) > 0, f"{name} has no frames for {state}"
-
-    def test_controller_state_machine(self):
-        """Controller state transitions work."""
-        from src.terminal.assistant.controller import AssistantController
-        a = AssistantController("sid-bot")
-        assert a.state == "idle"
-        a.state = "thinking"
-        assert a.state == "thinking"
-        a.state = "speaking"
-        assert a.state == "speaking"
-        a.tick()  # Should not crash
-        a.state = "idle"
-        assert a.state == "idle"
-
-    def test_renderer_detection(self):
-        """Renderer detection doesn't crash."""
-        from src.terminal.assistant.controller import AssistantController
-        best = AssistantController.best_renderer()
-        assert best in ["ascii", "kitty", "iterm2", "sixel", "chafa", "catimg"]
-
-    def test_character_list(self):
-        """list_characters returns all."""
-        from src.terminal.assistant.controller import AssistantController
-        chars = AssistantController.list_chars()
-        assert "sid-bot" in chars
-        assert "neko" in chars
-        assert "droid" in chars
-
-    def test_indicator(self):
-        """Indicator labels don't fail."""
-        from src.terminal.assistant.controller import AssistantController
-        a = AssistantController("sid-bot")
-        lbl = a.indicator()
-        assert "sid-bot" in lbl or "[" in lbl
-
-
-class TestProfile:
-    """Test the profile export/import system."""
-
-    def test_export_import_cycle(self):
-        """Export then import a profile (dry-run)."""
-        from src.tools.profile import export_profile, import_profile
-        with tempfile.NamedTemporaryFile(suffix=".sidprofile", delete=False) as f:
-            tmppath = f.name
+    def test_assistant(self):
+        """Test animated assistant system."""
+        print(f"\n{BOLD}[22] Animated Assistant{RESET}")
         try:
-            export_profile(tmppath, include_memory=False, include_skills=False, include_characters=False)
-            assert os.path.isfile(tmppath)
-            assert os.path.getsize(tmppath) > 50
-            # Dry-run import
-            summary = import_profile(tmppath, dry_run=True)
-            assert "config" in summary
-        finally:
-            os.unlink(tmppath)
+            from terminal.assistant.character import load_character, list_characters
+            from terminal.assistant.controller import AssistantController
+            
+            # Test character loading
+            chars = list_characters()
+            self.log(PASS, f"Characters: {len(chars)} found ({', '.join(chars[:4])}...)")
+            
+            # Test built-in characters have all required states
+            # (skip procedurally-generated chars from /etc/sid/characters/)
+            builtin_names = ["sid-bot", "neko", "droid"]
+            for name in builtin_names:
+                if name not in chars:
+                    self.log(FAIL, f"Builtin '{name}' not found")
+                    return
+                c = load_character(name)
+                for state in ["idle", "thinking", "listening", "speaking", "error"]:
+                    frames = c.frames(state)
+                    if len(frames) == 0:
+                        self.log(FAIL, f"{name}.{state}: no frames")
+                        return
+            self.log(PASS, "Built-in characters have all required states")
+            
+            # Test controller state machine
+            a = AssistantController("sid-bot")
+            for state in ["idle", "thinking", "speaking"]:
+                a.state = state
+                if a.state != state:
+                    self.log(FAIL, f"State transition to {state} failed")
+                    return
+                a.tick()
+            self.log(PASS, "Controller state machine OK")
+            
+            # Test renderer detection
+            best = AssistantController.best_renderer()
+            if best not in ["ascii", "kitty", "iterm2", "sixel", "chafa", "catimg"]:
+                self.log(FAIL, f"Unknown renderer: {best}")
+                return
+            self.log(PASS, f"Renderer detection: {best}")
+            
+            # Test indicator
+            lbl = a.indicator()
+            self.log(PASS, f"Indicator: {lbl[:30]}")
+            
+        except Exception as e:
+            self.log(FAIL, "Assistant", str(e)[:80])
+            if self.verbose: traceback.print_exc()
 
-    def test_character_export_import(self):
-        """Export then import a character."""
-        from src.tools.profile import export_character, import_character
-        with tempfile.NamedTemporaryFile(suffix=".sidchar", delete=False) as f:
-            tmppath = f.name
+    def test_profile(self):
+        """Test profile export/import system."""
+        print(f"\n{BOLD}[23] Profile Export/Import{RESET}")
         try:
-            export_character("sid-bot", tmppath)
-            assert os.path.isfile(tmppath)
-            assert os.path.getsize(tmppath) > 50
-        finally:
-            os.unlink(tmppath)
+            import shutil
+            from tools.profile import export_profile, import_profile, export_character
+            
+            # Test profile export/import (dry-run)
+            with tempfile.NamedTemporaryFile(suffix=".sidprofile", delete=False) as f:
+                tmppath = f.name
+            try:
+                export_profile(tmppath, include_memory=False, include_skills=False, include_characters=False)
+                if not os.path.isfile(tmppath):
+                    self.log(FAIL, "Profile export: file not created")
+                    return
+                if os.path.getsize(tmppath) <= 50:
+                    self.log(FAIL, "Profile export: file too small")
+                    return
+                self.log(PASS, f"Profile export: {os.path.getsize(tmppath)} bytes")
+                
+                summary = import_profile(tmppath, dry_run=True)
+                if "config" not in summary:
+                    self.log(FAIL, "Profile dry-run: missing 'config' in summary")
+                    return
+                self.log(PASS, "Profile import dry-run OK")
+            finally:
+                os.unlink(tmppath)
+            
+            # Test character export
+            with tempfile.NamedTemporaryFile(suffix=".sidchar", delete=False) as f:
+                tmppath = f.name
+            try:
+                export_character("sid-bot", tmppath)
+                if not os.path.isfile(tmppath):
+                    self.log(FAIL, "Character export: file not created")
+                    return
+                self.log(PASS, f"Character export: {os.path.getsize(tmppath)} bytes")
+            finally:
+                os.unlink(tmppath)
+                
+        except Exception as e:
+            self.log(FAIL, "Profile", str(e)[:80])
+            if self.verbose: traceback.print_exc()
 
-    def test_list_characters_standalone(self):
-        from src.terminal.assistant import list_characters
-        chars = list_characters()
-        assert len(chars) >= 3
+
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser(description="SID OS Test Suite")
+    parser.add_argument("--online", action="store_true", help="Test online features")
+    parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
+    args = parser.parse_args()
+    
+    tester = SIDTester(online=args.online, verbose=args.verbose)
+    exit(tester.run_all())

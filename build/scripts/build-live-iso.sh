@@ -3,7 +3,7 @@ set -eo pipefail
 
 # Auto-detect version from env, git tag, or fallback
 [ -z "${VERSION}" ] && [ -n "${GITHUB_REF_NAME}" ] && VERSION="${GITHUB_REF_NAME#v}"
-VERSION="${VERSION:-1.6.1}"
+VERSION="${VERSION:-1.6.2}"
 ALPINE_VERSION="3.24.1"
 ARCH="x86_64"
 ALPINE_MIRROR="https://dl-cdn.alpinelinux.org/alpine/v3.24"

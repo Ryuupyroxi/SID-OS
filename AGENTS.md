@@ -1,4 +1,4 @@
-# SID OS - Super Intelligent Distro (v1.6.1)
+# SID OS - Super Intelligent Distro (v1.6.2)
 
 ## Architecture Overview
 
@@ -32,7 +32,7 @@ sid/
 └── test_sid.py             # 84-test validation suite
 ```
 
-## Key Features (v1.6.1)
+## Key Features (v1.6.2)
 
 - **Base**: Fork of **Alpine Linux 3.24.1**
 - **Boot**: BIOS (ISOLINUX) + UEFI (GRUB) hybrid ISO
@@ -87,7 +87,7 @@ sid/
  IBM PC-DOS, Amiga Workbench, TeleType ASR-33, Dragon 32,
  ZX Spectrum, BBC Micro, Macintosh 128K, CP/M Osborne 1
 
-- `v1.6.1` — Boot initramfs rewrite: rootdelay, emergency shell, 4 boot modes
+- `v1.6.2` — Boot initramfs rewrite: rootdelay, emergency shell, 4 boot modes
 - `v1.6.0` — Smoke test, forge wizard, strict mode, agent handoff doc
 ## Quick Start
 
@@ -179,18 +179,18 @@ This triggers `.github/workflows/build-iso.yml` which:
 ### Manual (build portable tarball locally)
 ```bash
 ./build/scripts/make-portable.sh
-# Output: build/output/sid-1.6.1-portable.tar.gz
+# Output: build/output/sid-1.6.2-portable.tar.gz
 ```
 
 ### Manual (build full ISO — requires x86_64 + build tools)
 ```bash
 ./build/scripts/build-sid.sh
-# Output: build/output/sid-1.6.1-x86_64.iso
+# Output: build/output/sid-1.6.2-x86_64.iso
 ```
 
 ### Portable tarball contents
 ```
-sid-1.6.1-portable/
+sid-1.6.2-portable/
 ├── sid              # Launcher: ./sid --theme vt100
 ├── sid-install      # Installer: sudo ./sid-install
 ├── sid-test         # Test suite: ./sid-test --verbose
@@ -209,11 +209,11 @@ sid-1.6.1-portable/
 ```bash
 # Dev: build locally (run from repo root)
 bash build/scripts/build-live-iso.sh
-# Output: build/output/sid-1.6.1-live-x86_64.iso
+# Output: build/output/sid-1.6.2-live-x86_64.iso
 
 # Release: tag + push triggers CI
-git tag -a v1.6.1 -m "description"
-git push origin v1.6.1
+git tag -a v1.6.2 -m "description"
+git push origin v1.6.2
 # CI builds, uploads artifact, publishes Release
 ```
 

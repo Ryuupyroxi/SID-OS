@@ -21,7 +21,7 @@ import tempfile
 import textwrap
 from pathlib import Path
 
-SID_VERSION = "1.6.1"
+SID_VERSION = "1.6.2"
 GITHUB_REPO = "Ryuupyroxi/SID-OS"
 RELEASE_URL = f"https://github.com/{GITHUB_REPO}/releases/download/v{SID_VERSION}/sid-{SID_VERSION}-portable.tar.gz"
 LATEST_URL = f"https://github.com/{GITHUB_REPO}/releases/latest/download/sid-portable.tar.gz"
